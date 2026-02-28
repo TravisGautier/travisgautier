@@ -1,0 +1,336 @@
+/* Self-hosted font declarations */
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/CormorantGaramond-Light.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/CormorantGaramond-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/CormorantGaramond-SemiBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: italic;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/CormorantGaramond-LightItalic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Outfit';
+  font-weight: 200;
+  font-display: swap;
+  src: url('/fonts/Outfit-ExtraLight.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Outfit';
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/Outfit-Light.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Outfit';
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Outfit-Regular.woff2') format('woff2');
+}
+
+/* Reset */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --gold: #b8942e;
+  --gold-light: #8b7330;
+  --purple: #7c52d4;
+  --purple-light: #6b44b8;
+  --bg: #c8dcea;
+}
+
+body {
+  background: var(--bg);
+  color: #2a2520;
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+  cursor: none;
+  user-select: none;
+}
+
+#canvas-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+}
+canvas { display: block; }
+
+.cursor {
+  position: fixed;
+  width: 12px; height: 12px;
+  background: rgba(160, 130, 50, 0.9);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.15s ease, background 0.3s ease;
+  transform: translate(-50%, -50%);
+}
+.cursor.hover {
+  transform: translate(-50%, -50%) scale(3);
+  background: rgba(60,50,40,0.6);
+}
+.cursor.holding {
+  transform: translate(-50%, -50%) scale(2.2);
+  background: rgba(124, 82, 212, 0.85);
+}
+.cursor-trail {
+  position: fixed;
+  width: 40px; height: 40px;
+  border: 1px solid rgba(140, 115, 50, 0.35);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transition: transform 0.4s ease, border-color 0.6s ease;
+  transform: translate(-50%, -50%);
+}
+.cursor-trail.holding {
+  border-color: rgba(124, 82, 212, 0.45);
+}
+
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.header {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 2.5rem 3.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0;
+  animation: fadeDown 1.5s ease 0.5s forwards;
+}
+
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 300;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #3d3225;
+  transition: color 0.8s ease;
+  text-shadow: 0 1px 8px rgba(255,255,255,0.3);
+}
+.logo.purple { color: #4a3570; }
+
+.header-right {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.header-link {
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(42,37,32,0.45);
+  font-weight: 300;
+  pointer-events: auto;
+  cursor: none;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.header-link:hover { color: var(--gold); }
+
+.side-label {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.side-label.left { left: 3.5rem; text-align: left; }
+.side-label.right { right: 3.5rem; text-align: right; }
+.side-label .label-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  color: rgba(42,37,32,0.25);
+  display: block;
+  margin-bottom: 0.5rem;
+  transition: color 0.8s ease;
+}
+.side-label .label-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  display: block;
+  transition: color 0.8s ease, text-shadow 0.8s ease, opacity 0.6s ease;
+}
+.side-label .label-desc {
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-top: 0.4rem;
+  transition: color 0.8s ease, opacity 0.6s ease;
+  display: block;
+}
+
+.side-label.left .label-title { color: #6b5a28; text-shadow: 0 1px 12px rgba(180,148,46,0.15); }
+.side-label.left .label-desc { color: rgba(42,37,32,0.35); }
+.side-label.right .label-title { color: #5a3d8a; text-shadow: 0 1px 12px rgba(124,82,212,0.15); }
+.side-label.right .label-desc { color: rgba(42,37,32,0.35); }
+
+.side-label.left { opacity: 1; }
+.side-label.right { opacity: 0; }
+.side-label.left.hidden { opacity: 0; transform: translateY(-50%) translateX(-20px); }
+.side-label.right.visible { opacity: 1; transform: translateY(-50%) translateX(0); }
+
+.bottom-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 2rem 3.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  opacity: 0;
+  animation: fadeUp 1.5s ease 1.2s forwards;
+}
+
+.scroll-hint {
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(42,37,32,0.25);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.scroll-line {
+  width: 40px; height: 1px;
+  background: rgba(140,115,50,0.25);
+  position: relative;
+  overflow: hidden;
+}
+.scroll-line::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: var(--gold);
+  animation: scrollPulse 2s ease infinite;
+}
+
+.hold-hint {
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(42,37,32,0.25);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.hold-indicator {
+  width: 50px; height: 2px;
+  background: rgba(42,37,32,0.1);
+  border-radius: 1px;
+  overflow: hidden;
+  position: relative;
+}
+.hold-indicator-fill {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--gold), var(--purple));
+  border-radius: 1px;
+  transition: width 0.15s ease;
+}
+
+.transition-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+.transition-screen.active { opacity: 1; pointer-events: auto; }
+.transition-screen .inner { text-align: center; position: relative; z-index: 2; }
+.transition-screen .inner h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3rem;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  margin-bottom: 1rem;
+}
+.transition-screen .inner p {
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(42,37,32,0.4);
+}
+
+/* Transition screen background overlays */
+
+.transition-bg {
+  position: absolute;
+  inset: 0;
+}
+.transition-bg.gold {
+  background: radial-gradient(ellipse at center, rgba(180,148,46,0.25) 0%, rgba(200,220,234,1) 70%);
+}
+.transition-bg.purple {
+  background: radial-gradient(ellipse at center, rgba(124,82,212,0.25) 0%, rgba(200,220,234,1) 70%);
+}
+
+/* Transition screen title colors */
+
+#transitionA .inner h2 { color: #6b5a28; }
+#transitionB .inner h2 { color: #5a3d8a; }
+
+/* Keyframe animations */
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scrollPulse {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+@media (max-width: 768px) {
+  .header { padding: 1.5rem 2rem; }
+  .side-label.left { left: 1.5rem; }
+  .side-label.right { right: 1.5rem; }
+  .side-label .label-title { font-size: 1.1rem; }
+  .bottom-bar { padding: 1.5rem 2rem; }
+}
