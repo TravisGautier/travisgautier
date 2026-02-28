@@ -5,11 +5,11 @@ You are the Red Agent for TDD implementation. Your role is to write comprehensiv
 ## Invocation
 
 ```
-/red                    # Continue current step
-/red step-3             # Start specific step
+/red                    # Continue current feature
+/red 2.1                # Start specific feature
 ```
 
-Arguments: `$ARGUMENTS` (optional)
+Arguments: `$ARGUMENTS` (optional feature ID in X.Y format)
 
 ## Mission
 
@@ -36,7 +36,7 @@ Read `/home/travis/Projects/travisgautier/.claude/work/session.yaml`:
 - Resume point and blockers
 
 ### 0.2 Read All Step YAMLs
-Read from `/home/travis/Projects/travisgautier/.claude/work/active/step-{N}/`:
+Read from `/home/travis/Projects/travisgautier/.claude/work/active/step-{X.Y}/`:
 - `discovery.yaml` - Checklist items, complexity, estimates
 - `dependencies.yaml` - NPM packages, modules, missing deps
 - `interfaces.yaml` - Exports, function signatures, constants
@@ -86,11 +86,11 @@ Search extensively:
 
 ## Step 1: Determine Context
 If `$ARGUMENTS` provided:
-- Parse step identifier (e.g., `step-3`)
-- Set step_id accordingly
+- Parse feature identifier (e.g., `2.1`)
+- Set step_id to `step-{X.Y}` accordingly
 
 If no arguments:
-- Use `current_step` from session.yaml
+- Use `current_feature` from session.yaml
 
 ## Step 2: Analyze Test Specifications
 From `test-cases.yaml`:
@@ -126,7 +126,7 @@ For each test category, determine:
 Write to plan file:
 
 ```
-# Red Execution Plan: step-{N}
+# Red Execution Plan: step-{X.Y}
 
 ## Context
 - Step: {N} — {description}
@@ -247,10 +247,10 @@ When approaching context limit:
 2. Report status and instruct user to run `/red` to continue
 
 ## Step 14: Update Progress File
-Maintain `red-progress.yaml` in `.claude/work/active/step-{N}/`:
+Maintain `red-progress.yaml` in `.claude/work/active/step-{X.Y}/`:
 ```yaml
 version: 1
-step_id: "step-{N}"
+step_id: "step-{X.Y}"
 agent: red
 status: in_progress|completed
 
@@ -764,7 +764,7 @@ The user controls phase transitions. Your job ends when you report completion.
 ## Completion Report
 
 ```
-Red phase complete for step-{N}.
+Red phase complete for step-{X.Y}.
 
 Tests written:
 - Unit (module exports & pure functions): {n}

@@ -7,18 +7,29 @@
 
 ---
 
-## 1. Project Scaffolding
+## Summary
 
-### 1.1 Initialize
+| Phase | Name | Features | Complexity |
+|---|---|---|---|
+| 1 | Foundation | 6 | 2S + 3M + 1L |
+| 2 | Resilience | 8 | 5S + 3M |
+| 3 | Adaptive Quality | 6 | 1S + 3M + 2L |
+| 4 | Portal Interaction & Transitions | 5 | 2S + 2M + 1L |
+| 5 | Mobile & Touch | 5 | 2S + 2M + 1L |
+| 6 | Accessibility | 4 | 2S + 1M + 1L |
+| 7 | Testing Infrastructure | 4 | 2S + 1M + 1L |
+| 8 | SEO, Social & Assets | 5 | 4S + 1M |
+| 9 | Build, Deploy & Error Handling | 5 | 3S + 1M + 1L |
+| 10 | Visual Polish | 2 | 1S + 1M |
+| **Total** | | **50 features** | **23S + 17M + 10L** |
 
-```bash
-npm create vite@latest travisgautier -- --template vanilla
-cd travisgautier
-npm install three detect-gpu
-npm install -D vite-plugin-glsl
-```
+---
 
-### 1.2 Target File Structure
+## Phase 1: Foundation — Scaffold and Extract
+
+**Prerequisites**: None
+
+### Target File Structure
 
 ```
 travisgautier/
@@ -67,15 +78,46 @@ travisgautier/
 │   │   └── fpsMonitor.js         # Runtime frame time sampling + downgrade
 │   │
 │   ├── ui/
-│   │   └── overlay.js            # Label crossfade, hold bar, logo tint
+│   │   ├── overlay.js            # Label crossfade, hold bar, logo tint
+│   │   └── transition.js         # Transition screen triggers + external navigation
 │   │
 │   └── animate.js                # Render loop — calls all update functions
 │
-└── styles/
-    └── main.css                  # All styles, @font-face declarations
+├── styles/
+│   └── main.css                  # All styles, @font-face declarations
+│
+└── tests/
+    ├── helpers/
+    │   ├── three-mocks.js        # Three.js mock utilities
+    │   └── fixtures.js           # Shared test fixtures
+    ├── config/
+    │   ├── quality.test.js
+    │   └── constants.test.js
+    ├── scene/
+    │   ├── setup.test.js
+    │   ├── environment.test.js
+    │   ├── temple.test.js
+    │   ├── portal.test.js
+    │   └── lighting.test.js
+    ├── shaders/
+    │   └── shaders.test.js
+    ├── interaction/
+    │   ├── state.test.js
+    │   ├── holdMechanic.test.js
+    │   ├── fpsMonitor.test.js
+    │   ├── controls.test.js
+    │   └── cursor.test.js
+    ├── ui/
+    │   └── overlay.test.js
+    ├── accessibility/
+    │   └── a11y.test.js
+    ├── build/
+    │   └── build.test.js
+    └── integration/
+        └── init.test.js
 ```
 
-### 1.3 Module Dependency Flow
+### Module Dependency Flow
 
 ```
 main.js
@@ -89,19 +131,208 @@ main.js
   ├─ controls.js         (binds events → writes to state)
   ├─ cursor.js           (reads state.mouse → updates DOM)
   ├─ overlay.js          (reads state.holdProgress → updates DOM)
+  ├─ transition.js       (reads holdProgress → triggers external nav)
   └─ animate.js          (render loop → reads/writes state, updates uniforms)
 ```
 
+### Feature 1.1: Project Scaffold — M
+
+Initialize Vite project structure. Create `src/main.js` entry point, `src/config/constants.js` with all design constants extracted from prototype (~line 341), and `src/interaction/state.js` with the central state object (~line 328). Strip `index.html` down to minimal DOM shell with overlay markup only. Verify `npm run dev` serves correctly.
+
+**Files**: `src/main.js` (NEW), `src/config/constants.js` (NEW), `src/interaction/state.js` (NEW), `index.html` (MODIFY)
+
+### Feature 1.2: Extract CSS — S
+
+Move all inline `<style>` content (lines 7-272 of prototype) into `styles/main.css`. Add `@font-face` declarations for self-hosted fonts with `font-display: swap`. Remove Google Fonts `@import`. Verify all overlay styling works.
+
+**Files**: `styles/main.css` (NEW), `index.html` (MODIFY)
+
+### Feature 1.3: Extract JS into Modules — L
+
+Split the IIFE into modules following the dependency flow. Create: `src/scene/setup.js` (renderer, camera, fog, resize), `src/scene/environment.js` (sky dome, clouds, mountains, particles), `src/scene/temple.js` (floor, steps, pillars, architrave), `src/scene/portal.js` (frame, shader surfaces), `src/scene/lighting.js` (all lights), `src/interaction/controls.js` (mouse/scroll events), `src/interaction/cursor.js` (custom cursor), `src/interaction/holdMechanic.js` (toggle logic), `src/ui/overlay.js` (labels, hold bar, logo), `src/animate.js` (render loop). Each module exports a factory or init function.
+
+**Files**: All `src/scene/*.js`, `src/interaction/*.js`, `src/ui/overlay.js`, `src/animate.js` (ALL NEW)
+
+### Feature 1.4: Extract Shaders to GLSL Files — M
+
+Move all inline GLSL strings to separate files: `src/shaders/noise.glsl` (shared simplex from ~line 367), `src/shaders/portal.vert`, `src/shaders/portalGold.frag`, `src/shaders/portalPurple.frag`, `src/shaders/sky.vert`, `src/shaders/sky.frag`, `src/shaders/clouds.frag`. Verify `vite-plugin-glsl` resolves `#include` directives for the shared noise function.
+
+**Files**: All `src/shaders/*` (ALL NEW)
+
+### Feature 1.5: Self-Host Fonts — S
+
+Download Cormorant Garamond (300, 400, 600) and Outfit (200, 300, 400) as woff2 into `public/fonts/`. Write `@font-face` declarations in `styles/main.css`. Remove Google Fonts CDN dependency.
+
+```css
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('/fonts/CormorantGaramond-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-display: swap;
+}
+/* ... repeat for each weight/style */
+```
+
+**Files**: `public/fonts/*.woff2` (NEW), `styles/main.css` (MODIFY)
+
+### Feature 1.6: Parity Verification — M
+
+End-to-end visual and behavioral verification that the modular build matches the single-file prototype exactly. Compare camera orbit, hold mechanic, shader rendering, overlay labels, cursor behavior, and all animations. Document any intentional deviations.
+
+**Files**: All `src/` modules (VERIFY)
+
 ---
 
-## 2. Adaptive Quality System
+## Phase 2: Resilience — Edge Cases and Stability
 
-### 2.1 GPU Tier Detection
+**Prerequisites**: Phase 1
+
+### Feature 2.1: Delta Time Clamping + Visibility Handling — S
+
+When the user switches tabs, `requestAnimationFrame` pauses but `Clock.getDelta()` accumulates. On return, a single massive `dt` spike causes hold progress to jump, particles to teleport, and the camera to lurch.
+
+```js
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clock.stop();
+  } else {
+    clock.start();
+  }
+});
+
+// In animate loop:
+const dt = Math.min(clock.getDelta(), 0.1);
+```
+
+**Files**: `src/animate.js` (MODIFY)
+
+### Feature 2.2: WebGL Context Loss Recovery — M
+
+Mobile browsers and some integrated GPUs reclaim WebGL context under memory pressure. Without handling, the user sees a permanent black rectangle.
+
+```js
+renderer.domElement.addEventListener('webgl-context-lost', (e) => {
+  e.preventDefault();
+  cancelAnimationFrame(animationId);
+  // Show graceful fallback — branded static state or "reload" prompt
+});
+
+renderer.domElement.addEventListener('webgl-context-restored', () => {
+  initScene();
+  animate();
+});
+```
+
+**Files**: `src/scene/setup.js` (MODIFY), `src/ui/overlay.js` (MODIFY)
+
+### Feature 2.3: Shader Precision Declarations — S
+
+Safari's WebGL implementation requires explicit precision declarations. Add to the top of every fragment shader:
+
+```glsl
+precision highp float;
+```
+
+Without this, older iOS devices produce banding in the vortex and flickering on cloud layers.
+
+**Files**: `src/shaders/*.frag` (MODIFY)
+
+### Feature 2.4: Time Wrapping — S
+
+`uTime` increases indefinitely. After several hours, floating point precision degrades — noise functions stutter, clouds jump.
+
+```js
+// In animate loop:
+const wrappedTime = state.time % 10000.0;
+portalMatA.uniforms.uTime.value = wrappedTime;
+skyMat.uniforms.uTime.value = wrappedTime;
+```
+
+**Files**: `src/animate.js` (MODIFY)
+
+### Feature 2.5: Frame-Rate-Independent Damping — M
+
+Current lerp factors (e.g., `0.14`, `0.15`) are applied per-frame, not per-second. On 144Hz displays, these run 2.4x more often than 60Hz, making the camera feel stiffer.
+
+```js
+// Instead of:
+camera.position.x += (targetX - camera.position.x) * 0.15;
+
+// Use:
+const damping = 1 - Math.pow(0.00001, dt); // consistent across frame rates
+camera.position.x += (targetX - camera.position.x) * damping;
+```
+
+Tune the base value (0.00001) to match desired feel. Lower = snappier.
+
+**Files**: `src/animate.js` (MODIFY), `src/config/constants.js` (MODIFY)
+
+### Feature 2.6: Scroll Zoom Bounds — S
+
+Clamp orbit radius so the camera never clips through portal geometry or reveals cloud plane edges.
+
+```js
+const MIN_ORBIT = 2.8;  // Don't clip through portal
+const MAX_ORBIT = 5.0;  // Stay inside pillar ring
+const orbitRadius = Math.max(MIN_ORBIT, Math.min(MAX_ORBIT, CAM_ORBIT_RADIUS - state.scroll * 1.2));
+```
+
+**Files**: `src/interaction/controls.js` (MODIFY), `src/config/constants.js` (MODIFY)
+
+### Feature 2.7: Trackpad vs Mouse Wheel Detection — S
+
+Trackpads fire high-frequency, low-delta events. Mouse wheels fire low-frequency, high-delta events. A single multiplier feels wrong on one or the other.
+
+```js
+let isTrackpad = false;
+window.addEventListener('wheel', (e) => {
+  if (Math.abs(e.deltaY) < 10 && !Number.isInteger(e.deltaY)) {
+    isTrackpad = true;
+  }
+  const multiplier = isTrackpad ? 0.003 : 0.0008;
+  scrollTarget += e.deltaY * multiplier;
+  scrollTarget = Math.max(-1.0, Math.min(1.0, scrollTarget));
+}, { passive: true });
+```
+
+**Files**: `src/interaction/controls.js` (MODIFY)
+
+### Feature 2.8: Right-Click Prevention + Memory Disposal — M
+
+Prevent context menu and text selection on canvas. Add `dispose()` function for potential SPA navigation.
+
+```js
+container.addEventListener('contextmenu', (e) => e.preventDefault());
+container.addEventListener('mousedown', (e) => e.preventDefault());
+
+export function dispose(scene, renderer) {
+  scene.traverse((obj) => {
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) {
+      if (Array.isArray(obj.material)) {
+        obj.material.forEach(m => m.dispose());
+      } else {
+        obj.material.dispose();
+      }
+    }
+  });
+  renderer.dispose();
+}
+```
+
+**Files**: `src/scene/setup.js` (MODIFY), `src/interaction/controls.js` (MODIFY)
+
+---
+
+## Phase 3: Adaptive Quality — GPU Detection and Performance
+
+**Prerequisites**: Phase 1
+
+### Feature 3.1: GPU Tier Detection — M
 
 Use `detect-gpu` (~2KB gzipped) at startup. Combine with device heuristics.
 
 ```js
-// src/config/quality.js
 import { getGPUTier } from 'detect-gpu';
 
 export async function determineQuality() {
@@ -128,7 +359,7 @@ export async function determineQuality() {
 }
 ```
 
-### 2.2 Tier Breakdown
+**Tier Breakdown:**
 
 | Feature | Tier 0 (Weak Mobile) | Tier 1 (Low-end) | Tier 2 (Mid-range) | Tier 3 (High-end) |
 |---|---|---|---|---|
@@ -142,18 +373,67 @@ export async function determineQuality() {
 | Camera parallax | Gyroscope | Gyroscope | Mouse | Mouse |
 | Custom cursor | Hidden | Hidden | Visible | Visible |
 
-### 2.3 Tier 0 Decision — Fallback Strategy
+**Files**: `src/config/quality.js` (NEW)
 
-If `tier === 0`, consider serving a non-WebGL fallback: a beautifully designed static/CSS-only page with the same typography, colors, and brand identity. A stunning 2D page is better than a stuttery 3D one.
+### Feature 3.2: Wire Quality into Temple — M
 
-Possible approach: render the Three.js scene server-side or as a pre-captured screenshot, use it as a hero background image, and overlay the interactive UI on top with CSS animations for the gold/purple transition.
+Temple module reads quality config to decide pillar count (6/8/10/12) and whether to include fluting geometry. Pillar ring radius stays constant regardless of count.
 
-### 2.4 Runtime FPS Monitor
+**Files**: `src/scene/temple.js` (MODIFY)
 
-Runs during first ~2 seconds. If average frame time > 22ms (~45fps), trigger targeted downgrades on properties that can change without rebuilding geometry.
+### Feature 3.3: Wire Quality into Environment — M
+
+Environment module reads quality config for cloud layer count (0/1/2), sky cloud noise toggle, particle count (0/50/100/200). Tier 0 gets a static gradient sky.
+
+**Files**: `src/scene/environment.js` (MODIFY)
+
+### Feature 3.4: Wire Quality into Renderer Setup — S
+
+Setup module reads quality config for pixel ratio, shadow map enabling/size, and tone mapping.
+
+**Files**: `src/scene/setup.js` (MODIFY)
+
+### Feature 3.5: Loading Sequence — L
+
+```
+1. Show branded loading state (logo in system font, centered, minimal)
+2. Kick off parallel:
+   a. Font loading        → document.fonts.ready
+   b. GPU tier detection  → determineQuality()
+3. Both resolve → build quality config
+4. Initialize Three.js scene with config
+5. Compile shaders (render 1 frame offscreen to force GPU compilation)
+6. Crossfade: loading state → full experience (opacity transition, ~800ms)
+7. Start animate loop
+8. Begin FPS monitoring (first 120 frames)
+```
+
+Loading state HTML:
+
+```html
+<div id="loading" style="
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  background: #c8dcea;
+  transition: opacity 0.8s ease;
+">
+  <span style="
+    font-family: Georgia, serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #3d3225;
+  ">Travis Gautier</span>
+</div>
+```
+
+**Files**: `src/main.js` (MODIFY), `index.html` (MODIFY), `src/ui/overlay.js` (MODIFY)
+
+### Feature 3.6: FPS Monitor with Runtime Downgrade — L
+
+Runs during first ~2 seconds. If average frame time > 22ms (~45fps), trigger targeted downgrades.
 
 ```js
-// src/interaction/fpsMonitor.js
 export function createFPSMonitor(onDowngrade) {
   const samples = [];
   let settled = false;
@@ -171,165 +451,84 @@ export function createFPSMonitor(onDowngrade) {
 ```
 
 **Runtime-adjustable knobs** (no geometry rebuild required):
-
 - `renderer.setPixelRatio()` — drop by 0.5
 - `renderer.shadowMap.enabled` — toggle off
 - `particleMat.visible` — hide particles
 - Shader uniforms — disable cloud noise via flag
 
 **Not adjustable at runtime** (structural, decided at init only):
-
 - Pillar count and fluting geometry
 - Number of cloud plane meshes
 - Sky dome shader complexity
 
----
-
-## 3. Edge Cases & Resilience
-
-### 3.1 Tab Visibility & Clock Drift
-
-When the user switches tabs, `requestAnimationFrame` pauses but `Clock.getDelta()` accumulates. On return, a single massive `dt` spike causes the hold progress to jump, particles to teleport, and the camera to lurch.
-
-**Fix**: Clamp `dt` and pause on hidden.
-
-```js
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    clock.stop();
-  } else {
-    clock.start();
-  }
-});
-
-// In animate loop:
-const dt = Math.min(clock.getDelta(), 0.1);
-```
-
-### 3.2 WebGL Context Loss
-
-Mobile browsers and some integrated GPUs reclaim WebGL context under memory pressure. Without handling, the user sees a permanent black rectangle.
-
-```js
-renderer.domElement.addEventListener('webgl-context-lost', (e) => {
-  e.preventDefault();
-  // Show graceful fallback — branded static state or "reload" prompt
-  cancelAnimationFrame(animationId);
-});
-
-renderer.domElement.addEventListener('webgl-context-restored', () => {
-  // Reinitialize renderer state, recompile shaders
-  initScene();
-  animate();
-});
-```
-
-### 3.3 Shader Precision on Safari / iOS
-
-Safari's WebGL implementation requires explicit precision declarations. Add to the top of every fragment shader:
-
-```glsl
-precision highp float;
-```
-
-Without this, older iOS devices produce banding in the vortex and flickering on cloud layers.
-
-### 3.4 Floating Point Time Overflow
-
-`uTime` increases indefinitely. After several hours, floating point precision degrades — noise functions stutter, clouds jump.
-
-**Fix**: Wrap time with a large modulo.
-
-```js
-// In animate loop:
-const wrappedTime = state.time % 10000.0;
-portalMatA.uniforms.uTime.value = wrappedTime;
-skyMat.uniforms.uTime.value = wrappedTime;
-// ... all shader uniforms
-```
-
-### 3.5 Frame-Rate-Independent Easing
-
-Current lerp factors (e.g., `0.14`, `0.15`) are applied per-frame, not per-second. On 144Hz displays, these run 2.4x more often than 60Hz, making the camera feel stiffer.
-
-**Fix**: Convert to time-based exponential damping.
-
-```js
-// Instead of:
-camera.position.x += (targetX - camera.position.x) * 0.15;
-
-// Use:
-const damping = 1 - Math.pow(0.00001, dt); // consistent across frame rates
-camera.position.x += (targetX - camera.position.x) * damping;
-```
-
-Tune the base value (0.00001) to match desired feel. Lower = snappier.
-
-### 3.6 Scroll: Trackpad vs Mouse Wheel
-
-Trackpads fire high-frequency, low-delta events. Mouse wheels fire low-frequency, high-delta events. A single multiplier feels wrong on one or the other.
-
-**Heuristic detection**:
-
-```js
-let isTrackpad = false;
-window.addEventListener('wheel', (e) => {
-  // Trackpads send pixel-precise deltas (small values, no rounding)
-  if (Math.abs(e.deltaY) < 10 && !Number.isInteger(e.deltaY)) {
-    isTrackpad = true;
-  }
-  const multiplier = isTrackpad ? 0.003 : 0.0008;
-  scrollTarget += e.deltaY * multiplier;
-  scrollTarget = Math.max(-1.0, Math.min(1.0, scrollTarget));
-}, { passive: true });
-```
-
-### 3.7 Scroll Zoom Bounds
-
-Clamp orbit radius so the camera never clips through portal geometry or reveals cloud plane edges.
-
-```js
-const MIN_ORBIT = 2.8;  // Don't clip through portal
-const MAX_ORBIT = 5.0;  // Stay inside pillar ring
-const orbitRadius = Math.max(MIN_ORBIT, Math.min(MAX_ORBIT, CAM_ORBIT_RADIUS - state.scroll * 1.2));
-```
-
-### 3.8 Right-Click and Drag Interference
-
-Prevent context menu and accidental text selection within the canvas area.
-
-```js
-container.addEventListener('contextmenu', (e) => e.preventDefault());
-container.addEventListener('mousedown', (e) => e.preventDefault());
-```
-
-### 3.9 Memory Disposal
-
-If the experience ever mounts/unmounts (SPA navigation), Three.js resources must be explicitly freed.
-
-```js
-export function dispose(scene, renderer) {
-  scene.traverse((obj) => {
-    if (obj.geometry) obj.geometry.dispose();
-    if (obj.material) {
-      if (Array.isArray(obj.material)) {
-        obj.material.forEach(m => m.dispose());
-      } else {
-        obj.material.dispose();
-      }
-    }
-  });
-  renderer.dispose();
-}
-```
+**Files**: `src/interaction/fpsMonitor.js` (NEW), `src/animate.js` (MODIFY)
 
 ---
 
-## 4. Touch & Mobile
+## Phase 4: Portal Interaction and Transitions
 
-### 4.1 Touch Event Mapping
+**Prerequisites**: Phase 1
 
-Map the hold mechanic to touch events. Distinguish tap (short press) from hold (long press).
+### Feature 4.1: Portal Raycasting + Hover Detection — M
+
+The prototype has a `uHover` shader uniform but raycasting is never implemented. Portal surfaces should react to mouse proximity.
+
+Instantiate `THREE.Raycaster`. On `mousemove` (throttled), cast a ray from the camera through the mouse position. Test intersection against portal surface A and B meshes. Set `state.hoverPortal = true` when intersecting, driving the existing `uHover` uniform to make the portal vortex react with the edge effect already coded in the shaders.
+
+**Files**: `src/interaction/controls.js` (MODIFY), `src/scene/portal.js` (MODIFY — export surface meshes for raycast targets)
+
+### Feature 4.2: Transition Screen Triggers + External Navigation — L
+
+The prototype has HTML for transition screens ("Entering experience...") but no JavaScript triggers them. Wire the hold mechanic completion to these screens.
+
+When `holdProgress` reaches 1.0 (fully committed to a side) and the user has held for a minimum dwell time (e.g., 0.5s after arrival), trigger the corresponding transition screen by adding the `.active` class. The transition screen fades in over 800ms. After a configurable delay (1.5s), navigate to the external venture URL.
+
+Configure venture URLs in `src/config/constants.js`:
+
+```js
+export const VENTURES = {
+  gold: {
+    name: 'Venture Alpha',
+    subtitle: 'Innovation & Technology',
+    url: 'https://venture-alpha.example.com', // placeholder
+  },
+  purple: {
+    name: 'Venture Omega',
+    subtitle: 'Creative & Strategy',
+    url: 'https://venture-omega.example.com', // placeholder
+  },
+};
+```
+
+**Files**: `src/interaction/holdMechanic.js` (MODIFY), `src/ui/overlay.js` (MODIFY), `src/ui/transition.js` (NEW)
+
+### Feature 4.3: Header Navigation Placeholders — S
+
+The "About" and "Contact" header links are `href="#"` placeholders. Replace with polished landing-page-appropriate navigation. Decide on final link items and behaviors (mailto for Contact, appropriate About destination). Style appropriately for a luxury landing page.
+
+**Files**: `index.html` (MODIFY), `styles/main.css` (MODIFY)
+
+### Feature 4.4: Keyboard Support for Hold Mechanic — S
+
+Add Space key as an alternative trigger for the hold mechanic (hold Space to orbit). Add Escape to dismiss modals/overlays. Ensure all interactive elements are reachable via Tab.
+
+**Files**: `src/interaction/controls.js` (MODIFY)
+
+### Feature 4.5: Scroll Hint and Hold Hint Polish — M
+
+Polish the bottom-bar hint text and interaction indicators. Ensure the scroll hint line animation and hold progress bar feel luxury-smooth. Verify they work across both gold and purple states.
+
+**Files**: `src/ui/overlay.js` (MODIFY), `styles/main.css` (MODIFY)
+
+---
+
+## Phase 5: Mobile and Touch
+
+**Prerequisites**: Phase 1, Phase 4
+
+### Feature 5.1: Touch Event Mapping for Hold — M
+
+Map touch events to the hold mechanic. Distinguish tap from hold.
 
 ```js
 let touchStartTime = 0;
@@ -338,7 +537,6 @@ container.addEventListener('touchstart', (e) => {
   e.preventDefault();
   touchStartTime = performance.now();
   state.holding = true;
-  // Use first touch point for position
   const t = e.touches[0];
   state.mouse.nx = (t.clientX / window.innerWidth) * 2 - 1;
   state.mouse.ny = -(t.clientY / window.innerHeight) * 2 + 1;
@@ -355,44 +553,9 @@ container.addEventListener('touchend', () => {
 }, { passive: true });
 ```
 
-### 4.2 Gyroscope Parallax (Mobile)
+**Files**: `src/interaction/controls.js` (MODIFY)
 
-Replace mouse parallax with device orientation on mobile. Note: iOS 13+ requires explicit permission.
-
-```js
-function initGyroscope() {
-  if (typeof DeviceOrientationEvent !== 'undefined' &&
-      typeof DeviceOrientationEvent.requestPermission === 'function') {
-    // iOS — must be triggered by user gesture
-    return DeviceOrientationEvent.requestPermission().then(permission => {
-      if (permission === 'granted') bindGyroscope();
-    });
-  } else {
-    bindGyroscope();
-  }
-}
-
-function bindGyroscope() {
-  window.addEventListener('deviceorientation', (e) => {
-    // beta = front-back tilt (-180 to 180), gamma = left-right (-90 to 90)
-    state.mouse.nx = (e.gamma || 0) / 45;  // normalize to -1..1
-    state.mouse.ny = ((e.beta || 0) - 45) / 45; // 45° as "neutral" holding angle
-  });
-}
-```
-
-### 4.3 Custom Cursor
-
-Hide entirely on touch devices. Detect with media query:
-
-```css
-@media (hover: none) and (pointer: coarse) {
-  .cursor, .cursor-trail { display: none !important; }
-  body { cursor: auto; }
-}
-```
-
-### 4.4 Pinch-to-Zoom
+### Feature 5.2: Pinch-to-Zoom — S
 
 Map pinch gestures to the scroll zoom mechanic on touch devices.
 
@@ -415,66 +578,68 @@ container.addEventListener('touchmove', (e) => {
 container.addEventListener('touchend', () => { lastPinchDist = 0; });
 ```
 
----
+**Files**: `src/interaction/controls.js` (MODIFY)
 
-## 5. Loading Sequence
+### Feature 5.3: Gyroscope Parallax + iOS Permissions — M
 
-### 5.1 Init Order
-
-```
-1. Show branded loading state (logo in system font, centered, minimal)
-2. Kick off parallel:
-   a. Font loading        → document.fonts.ready
-   b. GPU tier detection  → determineQuality()
-3. Both resolve → build quality config
-4. Initialize Three.js scene with config
-5. Compile shaders (render 1 frame offscreen to force GPU compilation)
-6. Crossfade: loading state → full experience (opacity transition, ~800ms)
-7. Start animate loop
-8. Begin FPS monitoring (first 120 frames)
-```
-
-### 5.2 Loading State
-
-Minimal HTML visible before JS executes:
-
-```html
-<div id="loading" style="
-  position: fixed; inset: 0; z-index: 1000;
-  display: flex; align-items: center; justify-content: center;
-  background: #c8dcea;
-  transition: opacity 0.8s ease;
-">
-  <span style="
-    font-family: Georgia, serif;
-    font-size: 1.2rem;
-    letter-spacing: 0.35em;
-    text-transform: uppercase;
-    color: #3d3225;
-  ">Travis Gautier</span>
-</div>
-```
-
-Remove after init:
+Replace mouse parallax with device orientation on mobile. iOS 13+ requires explicit permission.
 
 ```js
-const loader = document.getElementById('loading');
-loader.style.opacity = '0';
-setTimeout(() => loader.remove(), 800);
+function initGyroscope() {
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    return DeviceOrientationEvent.requestPermission().then(permission => {
+      if (permission === 'granted') bindGyroscope();
+    });
+  } else {
+    bindGyroscope();
+  }
+}
+
+function bindGyroscope() {
+  window.addEventListener('deviceorientation', (e) => {
+    state.mouse.nx = (e.gamma || 0) / 45;
+    state.mouse.ny = ((e.beta || 0) - 45) / 45;
+  });
+}
 ```
+
+**Files**: `src/interaction/controls.js` (MODIFY)
+
+### Feature 5.4: Custom Cursor Hiding on Touch — S
+
+Hide cursor elements on touch devices via media query and programmatic detection.
+
+```css
+@media (hover: none) and (pointer: coarse) {
+  .cursor, .cursor-trail { display: none !important; }
+  body { cursor: auto; }
+}
+```
+
+Also detect programmatically on first `touchstart` and set `state.isTouchDevice`.
+
+**Files**: `src/interaction/cursor.js` (MODIFY), `styles/main.css` (MODIFY)
+
+### Feature 5.5: Device Testing + Responsive Fixes — L
+
+Test on real devices (iOS Safari, Android Chrome, tablet). Fix responsive layout issues in overlay (padding, font sizes, label positioning at small viewports). Verify touch hold, pinch zoom, and gyroscope work end-to-end.
+
+**Files**: `styles/main.css` (MODIFY), `src/interaction/controls.js` (MODIFY)
 
 ---
 
-## 6. Accessibility
+## Phase 6: Accessibility
 
-### 6.1 Reduced Motion
+**Prerequisites**: Phase 1, Phase 4
+
+### Feature 6.1: Reduced Motion Support — M
 
 Respect `prefers-reduced-motion` — freeze animations, make transitions instant.
 
 ```js
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// In quality config:
 if (reducedMotion) {
   config.freezeShaderTime = true;    // uTime stays fixed
   config.disableParticles = true;
@@ -483,9 +648,11 @@ if (reducedMotion) {
 }
 ```
 
-The hold-click mechanic still works — the camera moves to the other side, just without the smooth ease.
+The hold mechanic still works — the camera moves to the other side, just without smooth ease.
 
-### 6.2 Screen Reader Support
+**Files**: `src/config/quality.js` (MODIFY), `src/animate.js` (MODIFY)
+
+### Feature 6.2: Screen Reader + ARIA Attributes — S
 
 ```html
 <div id="canvas-container"
@@ -494,9 +661,13 @@ The hold-click mechanic still works — the camera moves to the other side, just
 </div>
 ```
 
-### 6.3 Keyboard Navigation
+Add `aria-live="polite"` region for venture label announcements. Add `aria-hidden="true"` to decorative elements.
 
-Header links should be keyboard-focusable with visible focus styles:
+**Files**: `index.html` (MODIFY)
+
+### Feature 6.3: Keyboard Navigation + Focus Styles — S
+
+Header links and interactive elements must be keyboard-focusable with visible focus styles.
 
 ```css
 .header-link:focus-visible {
@@ -505,17 +676,53 @@ Header links should be keyboard-focusable with visible focus styles:
 }
 ```
 
-Consider adding keyboard support for the hold mechanic (e.g., hold Space to orbit).
+Add skip-to-content link for screen readers. Ensure Tab order is logical.
 
-### 6.4 Color Contrast
+**Files**: `styles/main.css` (MODIFY), `index.html` (MODIFY)
 
-Verify that overlay text (labels, header, hints) maintains WCAG AA contrast against the bright 3D scene behind it. May need a subtle text-shadow or semi-transparent backdrop on the label elements to guarantee legibility across all camera positions and hold states.
+### Feature 6.4: Color Contrast Verification + Fixes — L
+
+Audit all overlay text against the 3D scene background for WCAG AA contrast (4.5:1 for normal text, 3:1 for large text). May need subtle `text-shadow` or semi-transparent backdrop on label elements. Test across both gold and purple hold states.
+
+**Files**: `styles/main.css` (MODIFY)
 
 ---
 
-## 7. SEO & Social Sharing
+## Phase 7: Testing Infrastructure
 
-### 7.1 Meta Tags
+**Prerequisites**: Phase 1
+
+### Feature 7.1: Test Infrastructure + Three.js Mocks — M
+
+Create test directory structure mirroring `src/`. Set up Three.js mock utilities (mock WebGLRenderer, Scene, Camera, Clock). Configure vitest with `jsdom` environment for DOM-dependent tests. Create shared test fixtures (`createMockQualityConfig`, `createMockState`).
+
+**Files**: `tests/helpers/three-mocks.js` (NEW), `tests/helpers/fixtures.js` (NEW), `vite.config.js` (MODIFY)
+
+### Feature 7.2: Unit Tests for Pure Logic — L
+
+Write unit tests for all pure functions: hold mechanic state transitions, FPS monitor sampling, damping calculations, time wrapping, scroll clamping, quality config generation, constants validation, trackpad detection heuristic. Target: every function in `src/config/` and `src/interaction/` that does not require a DOM or WebGL context.
+
+**Files**: `tests/config/quality.test.js` (NEW), `tests/config/constants.test.js` (NEW), `tests/interaction/holdMechanic.test.js` (NEW), `tests/interaction/fpsMonitor.test.js` (NEW), `tests/interaction/controls.test.js` (NEW)
+
+### Feature 7.3: Shader Validation Tests — S
+
+Validate GLSL files at the file content level (not GPU execution). Check: precision declarations present in all `.frag` files, required uniforms declared (`uTime`, `uMouse`, `uHover`, `uHold`), noise function import present where needed, all expected shader files exist.
+
+**Files**: `tests/shaders/shaders.test.js` (NEW)
+
+### Feature 7.4: Build Output Tests — S
+
+Verify production build completes, Three.js lands in a separate chunk, `index.html` exists in output, fonts are present in output, no excessively large inline styles.
+
+**Files**: `tests/build/build.test.js` (NEW)
+
+---
+
+## Phase 8: SEO, Social, and Assets
+
+**Prerequisites**: Phase 1
+
+### Feature 8.1: Meta Tags + Structured Data — S
 
 ```html
 <meta name="description" content="Travis Gautier — Innovation, Technology, Creative Strategy">
@@ -531,15 +738,8 @@ Verify that overlay text (labels, header, hints) maintains WCAG AA contrast agai
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Travis Gautier">
 <meta name="twitter:image" content="https://travisgautier.com/og-image.jpg">
-```
 
-### 7.2 OG Image
-
-Capture a beauty shot of the scene (gold side, good camera angle) at 1200×630px. This is what appears when the link is shared on social media, Slack, iMessage, etc.
-
-### 7.3 Structured Data
-
-```html
+<!-- Structured Data -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -550,14 +750,41 @@ Capture a beauty shot of the scene (gold side, good camera angle) at 1200×630px
 </script>
 ```
 
+**Files**: `index.html` (MODIFY)
+
+### Feature 8.2: OG Image Creation — S
+
+Capture a beauty shot of the gold-side scene at 1200x630px. Save as `public/og-image.jpg`. Document the capture process (camera angle, hold state, screenshot method) so it can be regenerated after visual changes.
+
+**Files**: `public/og-image.jpg` (NEW)
+
+### Feature 8.3: Favicon Design — S
+
+Create `public/favicon.svg` — a minimal, brandable icon. Also generate `public/favicon.ico` for legacy browser support and add Apple touch icon.
+
+**Files**: `public/favicon.svg` (NEW), `public/favicon.ico` (NEW), `index.html` (MODIFY)
+
+### Feature 8.4: Analytics Integration — S
+
+Add lightweight, privacy-respecting analytics. If Cloudflare Pages: use Cloudflare Web Analytics (free, no JS needed). No cookie banner required for privacy-first options.
+
+**Files**: `index.html` (MODIFY)
+
+### Feature 8.5: Social Sharing Verification — M
+
+Test OG image rendering on Facebook Sharing Debugger, Twitter Card Validator, LinkedIn Post Inspector, Slack link unfurl, and iMessage link preview. Fix any issues with dimensions, text truncation, or missing fields.
+
+**Files**: `index.html` (VERIFY/MODIFY)
+
 ---
 
-## 8. Performance & Deployment
+## Phase 9: Build, Deploy, and Error Handling
 
-### 8.1 Build Optimization
+**Prerequisites**: All previous phases
+
+### Feature 9.1: Vite Build Configuration Finalized — S
 
 ```js
-// vite.config.js
 import glsl from 'vite-plugin-glsl';
 
 export default {
@@ -576,9 +803,7 @@ export default {
 };
 ```
 
-Separating Three.js into its own chunk means it gets cached independently — your app code can update without re-downloading the Three.js bundle.
-
-### 8.2 Expected Bundle Sizes (gzipped)
+Separating Three.js into its own chunk means it gets cached independently. Expected sizes:
 
 | Asset | Estimated Size |
 |---|---|
@@ -589,78 +814,133 @@ Separating Three.js into its own chunk means it gets cached independently — yo
 | detect-gpu | ~2KB |
 | **Total first load** | **~230KB** |
 
-### 8.3 Caching Strategy
+**Files**: `vite.config.js` (MODIFY)
+
+### Feature 9.2: Caching Headers — S
 
 - `index.html` → `Cache-Control: no-cache` (deploys take effect immediately)
 - JS/CSS chunks → `Cache-Control: max-age=31536000, immutable` (content-hashed filenames)
 - Fonts → `Cache-Control: max-age=31536000, immutable`
 
-### 8.4 Self-Host Fonts
+**Files**: `public/_headers` (NEW), `index.html` (MODIFY)
 
-Eliminates render-blocking Google Fonts DNS lookup. Download woff2 files, declare with `@font-face`:
+### Feature 9.3: Branded 404 Page — M
 
-```css
-@font-face {
-  font-family: 'Cormorant Garamond';
-  src: url('/fonts/CormorantGaramond-Light.woff2') format('woff2');
-  font-weight: 300;
-  font-display: swap;
-}
-/* ... repeat for each weight/style */
-```
+Create a branded 404 page that matches the site's visual identity (same fonts, colors, background). For Cloudflare Pages: `public/404.html`. Include a link back to the main experience. Style as a "lost in the clouds" theme.
 
-`font-display: swap` prevents invisible text during load.
+**Files**: `public/404.html` (NEW)
 
-### 8.5 Hosting
+### Feature 9.4: Tier 0 Static Fallback — L
 
-Cloudflare Pages with custom domain is recommended:
-- Global CDN, automatic HTTPS
-- Git-based deploys (push to main → live)
-- Free tier is more than sufficient
-- Built-in headers configuration for caching
+If `tier === 0`, serve a non-WebGL fallback: a pre-captured hero screenshot of the 3D scene as a background image, with the same overlay UI on top, and CSS animations for the gold/purple color transition. A stunning 2D page is better than a stuttery 3D one.
+
+**Files**: `src/ui/fallback.js` (NEW), `public/fallback-hero.jpg` (NEW), `styles/main.css` (MODIFY)
+
+### Feature 9.5: Deploy to Cloudflare Pages — S
+
+Connect repository to Cloudflare Pages. Configure: build command (`npm run build`), output directory (`dist/`), custom domain (`travisgautier.com`). Verify HTTPS, headers, and caching. Run Lighthouse audit.
 
 Alternatives: Vercel, Netlify (both work equally well for static sites).
 
+**Files**: Configuration only
+
 ---
 
-## 9. Implementation Priority Order
+## Phase 10: Visual Polish
+
+**Prerequisites**: Phases 1-6
+
+### Feature 10.1: Particle + Fog + Light Animation Polish — M
+
+Fine-tune particle behavior (color shift with hold, subtle attraction toward portal), refine fog density curves, adjust light intensity animation curves. Subjective quality pass.
+
+**Files**: `src/scene/environment.js` (MODIFY), `src/scene/lighting.js` (MODIFY), `src/animate.js` (MODIFY)
+
+### Feature 10.2: Loading-to-Scene Crossfade Polish — S
+
+Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth. Verify the loading state branding matches the final scene's aesthetic.
+
+**Files**: `src/main.js` (MODIFY), `src/ui/overlay.js` (MODIFY)
+
+---
+
+## Implementation Priority Order
 
 ### Phase 1 — Foundation
-- [ ] 1. Scaffold Vite project, install dependencies
-- [ ] 2. Extract CSS into `main.css`
-- [ ] 3. Extract JS into module files (start with `main.js` → `animate.js` → `state.js`)
-- [ ] 4. Move shaders to `.glsl` files with `vite-plugin-glsl`
-- [ ] 5. Self-host fonts
-- [ ] 6. Verify everything works identically to the prototype
+- [ ] 1.1. Scaffold Vite project structure, create entry point + constants + state
+- [ ] 1.2. Extract CSS into `styles/main.css`
+- [ ] 1.3. Extract JS into module files
+- [ ] 1.4. Move shaders to `.glsl` files with `vite-plugin-glsl`
+- [ ] 1.5. Self-host fonts
+- [ ] 1.6. Verify parity with prototype
 
 ### Phase 2 — Resilience
-- [ ] 7. Add `dt` clamping and `visibilitychange` handling
-- [ ] 8. Add WebGL context loss handler
-- [ ] 9. Add `precision highp float` to all shaders
-- [ ] 10. Add time wrapping (`% 10000.0`)
-- [ ] 11. Convert lerps to frame-rate-independent damping
-- [ ] 12. Add scroll zoom bounds clamping
-- [ ] 13. Add trackpad vs mouse wheel detection
+- [ ] 2.1. Add dt clamping and `visibilitychange` handling
+- [ ] 2.2. Add WebGL context loss handler
+- [ ] 2.3. Add `precision highp float` to all fragment shaders
+- [ ] 2.4. Add time wrapping (`% 10000.0`)
+- [ ] 2.5. Convert lerps to frame-rate-independent damping
+- [ ] 2.6. Add scroll zoom bounds clamping
+- [ ] 2.7. Add trackpad vs mouse wheel detection
+- [ ] 2.8. Add right-click prevention + memory disposal
 
 ### Phase 3 — Adaptive Quality
-- [ ] 14. Integrate `detect-gpu` and build quality config
-- [ ] 15. Wire config into temple.js (pillar count, fluting)
-- [ ] 16. Wire config into environment.js (cloud layers, sky noise, particles)
-- [ ] 17. Wire config into setup.js (shadows, pixel ratio)
-- [ ] 18. Add loading sequence with font + GPU detection
-- [ ] 19. Add FPS monitor with runtime downgrade
+- [ ] 3.1. Integrate `detect-gpu` and build quality config
+- [ ] 3.2. Wire config into `temple.js` (pillar count, fluting)
+- [ ] 3.3. Wire config into `environment.js` (cloud layers, sky noise, particles)
+- [ ] 3.4. Wire config into `setup.js` (shadows, pixel ratio)
+- [ ] 3.5. Add loading sequence with font + GPU detection
+- [ ] 3.6. Add FPS monitor with runtime downgrade
 
-### Phase 4 — Mobile & Touch
-- [ ] 20. Add touch event mapping for hold mechanic
-- [ ] 21. Add pinch-to-zoom
-- [ ] 22. Add gyroscope parallax with iOS permission handling
-- [ ] 23. Hide custom cursor on touch devices
-- [ ] 24. Test on real devices (iOS Safari, Android Chrome)
+### Phase 4 — Portal Interaction & Transitions
+- [ ] 4.1. Add portal raycasting + hover detection
+- [ ] 4.2. Wire transition screen triggers + external navigation
+- [ ] 4.3. Polish header navigation placeholders
+- [ ] 4.4. Add keyboard support for hold mechanic
+- [ ] 4.5. Polish scroll/hold hint indicators
 
-### Phase 5 — Polish & Deploy
-- [ ] 25. Add `prefers-reduced-motion` support
-- [ ] 26. Add screen reader attributes and keyboard focus styles
-- [ ] 27. Add meta tags, OG image, structured data
-- [ ] 28. Configure Vite build with chunk splitting
-- [ ] 29. Deploy to Cloudflare Pages
-- [ ] 30. Test social sharing previews (Facebook, Twitter, Slack, iMessage)
+### Phase 5 — Mobile & Touch
+- [ ] 5.1. Add touch event mapping for hold mechanic
+- [ ] 5.2. Add pinch-to-zoom
+- [ ] 5.3. Add gyroscope parallax with iOS permission handling
+- [ ] 5.4. Hide custom cursor on touch devices
+- [ ] 5.5. Test on real devices + responsive fixes
+
+### Phase 6 — Accessibility
+- [ ] 6.1. Add `prefers-reduced-motion` support
+- [ ] 6.2. Add screen reader attributes and ARIA
+- [ ] 6.3. Add keyboard navigation + focus styles
+- [ ] 6.4. Verify + fix color contrast (WCAG AA)
+
+### Phase 7 — Testing Infrastructure
+- [ ] 7.1. Set up test infra + Three.js mocks
+- [ ] 7.2. Write unit tests for pure logic
+- [ ] 7.3. Write shader validation tests
+- [ ] 7.4. Write build output tests
+
+### Phase 8 — SEO, Social & Assets
+- [ ] 8.1. Add meta tags + structured data
+- [ ] 8.2. Create OG image
+- [ ] 8.3. Design + add favicon
+- [ ] 8.4. Integrate analytics
+- [ ] 8.5. Verify social sharing previews
+
+### Phase 9 — Build, Deploy & Error Handling
+- [ ] 9.1. Finalize Vite build configuration
+- [ ] 9.2. Configure caching headers
+- [ ] 9.3. Create branded 404 page
+- [ ] 9.4. Build Tier 0 static fallback
+- [ ] 9.5. Deploy to Cloudflare Pages
+
+### Phase 10 — Visual Polish
+- [ ] 10.1. Polish particle + fog + light animations
+- [ ] 10.2. Polish loading-to-scene crossfade
+
+---
+
+## Execution Notes
+
+- **Phase 7 (Testing)** should begin immediately after Phase 1 and run in parallel with Phases 2-6.
+- **Phase 4** is the most important new phase — it completes the core user journey.
+- **Phases 2, 3, 5, 6** can proceed somewhat in parallel after Phase 1.
+- **Phase 9** must be last (deployment requires all features stable).

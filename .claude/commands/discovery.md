@@ -10,10 +10,10 @@ You are the Discovery Agent for TDD implementation of the travisgautier.com Thre
 ## Invocation
 
 ```
-/discovery {step}
+/discovery {feature}
 ```
 
-Arguments: `$ARGUMENTS` format: `{step}` where step is 1-30 (e.g., `/discovery 7`)
+Arguments: `$ARGUMENTS` format: `{feature}` where feature is X.Y (e.g., `/discovery 2.1`)
 
 ## Mission
 
@@ -23,52 +23,77 @@ Analyze the specified step from `IMPLEMENTATION_PLAN.md` and produce:
 
 ---
 
-## Step-to-Phase Mapping
+## Feature-to-Phase Mapping
 
-| Phase | Name | Steps |
-|-------|------|-------|
-| Phase 1 | Foundation | 1-6 |
-| Phase 2 | Resilience | 7-13 |
-| Phase 3 | Adaptive Quality | 14-19 |
-| Phase 4 | Mobile & Touch | 20-24 |
-| Phase 5 | Polish & Deploy | 25-30 |
+| Phase | Name | Features |
+|-------|------|----------|
+| Phase 1 | Foundation | 1.1–1.6 |
+| Phase 2 | Resilience | 2.1–2.8 |
+| Phase 3 | Adaptive Quality | 3.1–3.6 |
+| Phase 4 | Portal Interaction & Transitions | 4.1–4.5 |
+| Phase 5 | Mobile & Touch | 5.1–5.5 |
+| Phase 6 | Accessibility | 6.1–6.4 |
+| Phase 7 | Testing Infrastructure | 7.1–7.4 |
+| Phase 8 | SEO, Social & Assets | 8.1–8.5 |
+| Phase 9 | Build, Deploy & Error Handling | 9.1–9.5 |
+| Phase 10 | Visual Polish | 10.1–10.2 |
 
-## Step-to-Plan Section Mapping
+## Feature-to-Plan Section Mapping
 
-Steps correspond to numbered checkboxes in `IMPLEMENTATION_PLAN.md` Section 9 ("Implementation Priority Order"):
+Features correspond to numbered checkboxes in `IMPLEMENTATION_PLAN.md` under "Implementation Priority Order". Each feature X.Y has a detailed section under "Phase X" in the plan.
 
-| Step | Checkbox | Plan Sections |
-|------|----------|---------------|
-| 1 | `- [ ] 1. Scaffold Vite project, install dependencies` | 1.1, 1.2, 1.3 |
-| 2 | `- [ ] 2. Extract CSS into main.css` | 1.2 (styles/) |
-| 3 | `- [ ] 3. Extract JS into module files` | 1.2, 1.3 |
-| 4 | `- [ ] 4. Move shaders to .glsl files` | 1.2 (src/shaders/) |
-| 5 | `- [ ] 5. Self-host fonts` | 8.4 |
-| 6 | `- [ ] 6. Verify everything works identically to the prototype` | -- |
-| 7 | `- [ ] 7. Add dt clamping and visibilitychange handling` | 3.1 |
-| 8 | `- [ ] 8. Add WebGL context loss handler` | 3.2 |
-| 9 | `- [ ] 9. Add precision highp float to all shaders` | 3.3 |
-| 10 | `- [ ] 10. Add time wrapping` | 3.4 |
-| 11 | `- [ ] 11. Convert lerps to frame-rate-independent damping` | 3.5 |
-| 12 | `- [ ] 12. Add scroll zoom bounds clamping` | 3.7 |
-| 13 | `- [ ] 13. Add trackpad vs mouse wheel detection` | 3.6 |
-| 14 | `- [ ] 14. Integrate detect-gpu and build quality config` | 2.1, 2.2 |
-| 15 | `- [ ] 15. Wire config into temple.js` | 2.2 (pillar count, fluting) |
-| 16 | `- [ ] 16. Wire config into environment.js` | 2.2 (cloud layers, sky noise, particles) |
-| 17 | `- [ ] 17. Wire config into setup.js` | 2.2 (shadows, pixel ratio) |
-| 18 | `- [ ] 18. Add loading sequence with font + GPU detection` | 5.1, 5.2 |
-| 19 | `- [ ] 19. Add FPS monitor with runtime downgrade` | 2.4 |
-| 20 | `- [ ] 20. Add touch event mapping for hold mechanic` | 4.1 |
-| 21 | `- [ ] 21. Add pinch-to-zoom` | 4.4 |
-| 22 | `- [ ] 22. Add gyroscope parallax with iOS permission handling` | 4.2 |
-| 23 | `- [ ] 23. Hide custom cursor on touch devices` | 4.3 |
-| 24 | `- [ ] 24. Test on real devices` | 4.1-4.4 |
-| 25 | `- [ ] 25. Add prefers-reduced-motion support` | 6.1 |
-| 26 | `- [ ] 26. Add screen reader attributes and keyboard focus styles` | 6.2, 6.3 |
-| 27 | `- [ ] 27. Add meta tags, OG image, structured data` | 7.1, 7.2, 7.3 |
-| 28 | `- [ ] 28. Configure Vite build with chunk splitting` | 8.1, 8.2 |
-| 29 | `- [ ] 29. Deploy to Cloudflare Pages` | 8.5 |
-| 30 | `- [ ] 30. Test social sharing previews` | 7.1, 7.2 |
+| Feature | Checkbox | Key Files |
+|---------|----------|-----------|
+| 1.1 | `- [ ] 1.1. Scaffold Vite project structure` | `src/main.js`, `src/config/constants.js`, `src/interaction/state.js` |
+| 1.2 | `- [ ] 1.2. Extract CSS into styles/main.css` | `styles/main.css` |
+| 1.3 | `- [ ] 1.3. Extract JS into module files` | `src/scene/*.js`, `src/interaction/*.js`, `src/ui/*.js`, `src/animate.js` |
+| 1.4 | `- [ ] 1.4. Move shaders to .glsl files` | `src/shaders/*` |
+| 1.5 | `- [ ] 1.5. Self-host fonts` | `public/fonts/*.woff2`, `styles/main.css` |
+| 1.6 | `- [ ] 1.6. Verify parity with prototype` | All `src/` modules |
+| 2.1 | `- [ ] 2.1. Add dt clamping and visibilitychange handling` | `src/animate.js` |
+| 2.2 | `- [ ] 2.2. Add WebGL context loss handler` | `src/scene/setup.js`, `src/ui/overlay.js` |
+| 2.3 | `- [ ] 2.3. Add precision highp float to all fragment shaders` | `src/shaders/*.frag` |
+| 2.4 | `- [ ] 2.4. Add time wrapping` | `src/animate.js` |
+| 2.5 | `- [ ] 2.5. Convert lerps to frame-rate-independent damping` | `src/animate.js`, `src/config/constants.js` |
+| 2.6 | `- [ ] 2.6. Add scroll zoom bounds clamping` | `src/interaction/controls.js`, `src/config/constants.js` |
+| 2.7 | `- [ ] 2.7. Add trackpad vs mouse wheel detection` | `src/interaction/controls.js` |
+| 2.8 | `- [ ] 2.8. Add right-click prevention + memory disposal` | `src/scene/setup.js`, `src/interaction/controls.js` |
+| 3.1 | `- [ ] 3.1. Integrate detect-gpu and build quality config` | `src/config/quality.js` |
+| 3.2 | `- [ ] 3.2. Wire config into temple.js` | `src/scene/temple.js` |
+| 3.3 | `- [ ] 3.3. Wire config into environment.js` | `src/scene/environment.js` |
+| 3.4 | `- [ ] 3.4. Wire config into setup.js` | `src/scene/setup.js` |
+| 3.5 | `- [ ] 3.5. Add loading sequence` | `src/main.js`, `index.html`, `src/ui/overlay.js` |
+| 3.6 | `- [ ] 3.6. Add FPS monitor with runtime downgrade` | `src/interaction/fpsMonitor.js`, `src/animate.js` |
+| 4.1 | `- [ ] 4.1. Add portal raycasting + hover detection` | `src/interaction/controls.js`, `src/scene/portal.js` |
+| 4.2 | `- [ ] 4.2. Wire transition screen triggers + external navigation` | `src/interaction/holdMechanic.js`, `src/ui/transition.js` |
+| 4.3 | `- [ ] 4.3. Polish header navigation placeholders` | `index.html`, `styles/main.css` |
+| 4.4 | `- [ ] 4.4. Add keyboard support for hold mechanic` | `src/interaction/controls.js` |
+| 4.5 | `- [ ] 4.5. Polish scroll/hold hint indicators` | `src/ui/overlay.js`, `styles/main.css` |
+| 5.1 | `- [ ] 5.1. Add touch event mapping for hold mechanic` | `src/interaction/controls.js` |
+| 5.2 | `- [ ] 5.2. Add pinch-to-zoom` | `src/interaction/controls.js` |
+| 5.3 | `- [ ] 5.3. Add gyroscope parallax with iOS permission handling` | `src/interaction/controls.js` |
+| 5.4 | `- [ ] 5.4. Hide custom cursor on touch devices` | `src/interaction/cursor.js`, `styles/main.css` |
+| 5.5 | `- [ ] 5.5. Test on real devices + responsive fixes` | `styles/main.css`, `src/interaction/controls.js` |
+| 6.1 | `- [ ] 6.1. Add prefers-reduced-motion support` | `src/config/quality.js`, `src/animate.js` |
+| 6.2 | `- [ ] 6.2. Add screen reader attributes and ARIA` | `index.html` |
+| 6.3 | `- [ ] 6.3. Add keyboard navigation + focus styles` | `styles/main.css`, `index.html` |
+| 6.4 | `- [ ] 6.4. Verify + fix color contrast` | `styles/main.css` |
+| 7.1 | `- [ ] 7.1. Set up test infra + Three.js mocks` | `tests/helpers/*`, `vite.config.js` |
+| 7.2 | `- [ ] 7.2. Write unit tests for pure logic` | `tests/config/*`, `tests/interaction/*` |
+| 7.3 | `- [ ] 7.3. Write shader validation tests` | `tests/shaders/shaders.test.js` |
+| 7.4 | `- [ ] 7.4. Write build output tests` | `tests/build/build.test.js` |
+| 8.1 | `- [ ] 8.1. Add meta tags + structured data` | `index.html` |
+| 8.2 | `- [ ] 8.2. Create OG image` | `public/og-image.jpg` |
+| 8.3 | `- [ ] 8.3. Design + add favicon` | `public/favicon.svg`, `index.html` |
+| 8.4 | `- [ ] 8.4. Integrate analytics` | `index.html` |
+| 8.5 | `- [ ] 8.5. Verify social sharing previews` | `index.html` |
+| 9.1 | `- [ ] 9.1. Finalize Vite build configuration` | `vite.config.js` |
+| 9.2 | `- [ ] 9.2. Configure caching headers` | `public/_headers`, `index.html` |
+| 9.3 | `- [ ] 9.3. Create branded 404 page` | `public/404.html` |
+| 9.4 | `- [ ] 9.4. Build Tier 0 static fallback` | `src/ui/fallback.js`, `public/fallback-hero.jpg` |
+| 9.5 | `- [ ] 9.5. Deploy to Cloudflare Pages` | Configuration only |
+| 10.1 | `- [ ] 10.1. Polish particle + fog + light animations` | `src/scene/environment.js`, `src/scene/lighting.js` |
+| 10.2 | `- [ ] 10.2. Polish loading-to-scene crossfade` | `src/main.js`, `src/ui/overlay.js` |
 
 ---
 
@@ -88,7 +113,7 @@ Read `/home/travis/Projects/travisgautier/.claude/work/session.yaml`:
 If the file does not exist, note this -- it will be created in Phase 2.
 
 ### 0.2 Read Existing Step YAMLs
-If step directory exists (`/home/travis/Projects/travisgautier/.claude/work/active/step-{N}/`):
+If step directory exists (`/home/travis/Projects/travisgautier/.claude/work/active/step-{X.Y}/`):
 - `discovery.yaml` -- Checklist items, complexity, estimates, patterns
 - `test-cases.yaml` -- All test specifications
 - `*-progress.yaml` -- Any progress files (red, green, refactor, etc.)
@@ -165,44 +190,44 @@ Use Grep/Glob extensively:
 - GLSL patterns: precision declarations, uniform usage, noise function calls
 
 ### 0.6 Verify Prerequisites
-- The step number must be valid (1-30)
-- The corresponding plan section must exist in `IMPLEMENTATION_PLAN.md`
-- For steps > 1: check if prerequisite steps have been completed (prior step directories exist with progress files)
+- The feature ID must be valid (X.Y format, e.g., 1.1 through 10.2)
+- The corresponding feature section must exist in `IMPLEMENTATION_PLAN.md`
+- Check if prerequisite features have been completed (prior step directories exist with progress files)
 
 ---
 
 ## Step 1: Parse Arguments
-1. Parse `$ARGUMENTS` to extract step number (1-30)
-2. Determine the phase from the Step-to-Phase Mapping
-3. Look up the plan sections from the Step-to-Plan Section Mapping
-4. Construct step ID: `step-{N}` (e.g., `step-7`)
-5. Working directory will be: `/home/travis/Projects/travisgautier/.claude/work/active/step-{N}/`
+1. Parse `$ARGUMENTS` to extract feature ID (X.Y format, e.g., `2.1`)
+2. Determine the phase from the Feature-to-Phase Mapping
+3. Look up the plan sections from the Feature-to-Plan Section Mapping
+4. Construct step ID: `step-{X.Y}` (e.g., `step-2.1`)
+5. Working directory will be: `/home/travis/Projects/travisgautier/.claude/work/active/step-{X.Y}/`
 
-## Step 2: Extract Step Details
+## Step 2: Extract Feature Details
 1. Read `/home/travis/Projects/travisgautier/IMPLEMENTATION_PLAN.md`
-2. Find the checkbox for this step in Section 9 (e.g., `- [ ] 7. Add dt clamping...`)
-3. Navigate to the full plan section(s) that describe this step (use the mapping table)
+2. Find the checkbox for this feature under "Implementation Priority Order" (e.g., `- [ ] 2.1. Add dt clamping...`)
+3. Navigate to the full Feature X.Y section under the corresponding Phase heading
 4. Extract:
-   - Step description (the checkbox text)
-   - Detailed explanation from the plan section(s)
+   - Feature description (the checkbox text)
+   - Detailed explanation from the feature section
    - Code examples provided in the plan
    - Design constants and values
    - Related concerns mentioned in the plan
-5. Break the step into concrete checklist items (sub-tasks)
+5. Break the feature into concrete checklist items (sub-tasks)
 
 ## Step 3: Analyze Dependencies
-1. Check `package.json` for existing NPM packages relevant to this step
-2. Search `src/` for internal module dependencies that this step touches
-3. Identify which existing modules must exist before this step can proceed
-4. Identify which files this step will create or modify
+1. Check `package.json` for existing NPM packages relevant to this feature
+2. Search `src/` for internal module dependencies that this feature touches
+3. Identify which existing modules must exist before this feature can proceed
+4. Identify which files this feature will create or modify
 5. Flag any missing dependencies that will need to be added
 
 ## Step 4: Find Existing Patterns
-1. Search `index.html` (the prototype) for the exact implementation of this step's behavior
+1. Search `index.html` (the prototype) for the exact implementation of this feature's behavior
 2. Note the line range and extract the relevant code
-3. Search existing `src/` modules for patterns this step should follow
+3. Search existing `src/` modules for patterns this feature should follow
 4. Document patterns with file paths and line numbers
-5. For shader steps: examine existing GLSL code for structure, uniforms, precision
+5. For shader features: examine existing GLSL code for structure, uniforms, precision
 
 ## Step 5: Specify Test Cases
 Create test specifications across these five categories:
@@ -254,16 +279,16 @@ Each test must specify: id, description, file path, priority, and which checklis
 Write to plan file (the only file you can edit in plan mode):
 
 ```
-# Discovery Execution Plan: step-{N}
+# Discovery Execution Plan: step-{X.Y}
 
-## Step Overview
-- Step: {N}
-- Name: {step name from checkbox}
+## Feature Overview
+- Feature: {X.Y}
+- Name: {feature name from checkbox}
 - Phase: {phase number} -- {phase name}
-- Plan sections: {section numbers from mapping}
+- Plan section: Feature {X.Y} under Phase {X}
 - Planning file: /home/travis/Projects/travisgautier/IMPLEMENTATION_PLAN.md
 - Checklist items: {count}
-- Complexity: low|medium|high
+- Complexity: S|M|L
 
 ## Checklist Items
 1. [ ] {sub-task text}
@@ -273,7 +298,7 @@ Write to plan file (the only file you can edit in plan mode):
 ## Prototype Reference
 - File: /home/travis/Projects/travisgautier/index.html
 - Relevant lines: {range}
-- Key behavior: {description of what the prototype does for this step}
+- Key behavior: {description of what the prototype does for this feature}
 
 ## Dependencies Analysis
 
@@ -344,7 +369,7 @@ Call ExitPlanMode tool to request user approval.
 
 ## Step 8: Create Working Directory
 ```bash
-mkdir -p /home/travis/Projects/travisgautier/.claude/work/active/step-{N}/
+mkdir -p /home/travis/Projects/travisgautier/.claude/work/active/step-{X.Y}/
 ```
 
 ## Step 9: Write YAML Files
@@ -354,13 +379,13 @@ Create both YAML files with full content based on research.
 **discovery.yaml:**
 ```yaml
 version: 1
-step:
-  number: {N}
-  name: "{step name from checkbox}"
+feature:
+  id: "{X.Y}"
+  name: "{feature name from checkbox}"
   phase: {phase_number}
   phase_name: "{phase name}"
+  complexity: "S|M|L"
   planning_file: "/home/travis/Projects/travisgautier/IMPLEMENTATION_PLAN.md"
-  plan_sections: ["{section numbers}"]
   prototype_reference:
     file: "/home/travis/Projects/travisgautier/index.html"
     line_range: [{start}, {end}]
@@ -412,7 +437,7 @@ patterns:
 
 analysis:
   total_items: {N}
-  complexity: low|medium|high
+  complexity: "S|M|L"
   estimated_tests: {M}
   risk_areas:
     - "{risk description}"
@@ -423,8 +448,8 @@ analysis:
 **test-cases.yaml:**
 ```yaml
 version: 1
-step_number: {N}
-step_name: "{step name}"
+feature_id: "{X.Y}"
+feature_name: "{feature name}"
 test_framework: vitest
 
 unit_tests:
@@ -495,7 +520,7 @@ session:
   id: "{YYYY-MM-DD-sequence}"
   started_at: "{ISO timestamp}"
   project: travisgautier
-  current_step: {N}
+  current_feature: "{X.Y}"
   current_phase: {phase_number}
   current_phase_name: "{phase name}"
   current_agent: discovery
@@ -503,7 +528,7 @@ context_window:
   iteration: 1
   total_items: {from discovery.yaml}
   completed_items: 0
-completed_steps: [{list of previously completed step numbers}]
+completed_features: [{list of previously completed feature IDs}]
 ```
 
 ---
@@ -529,11 +554,11 @@ The user controls phase transitions. Your job ends when you report completion.
 Report to user:
 
 ```
-## Discovery Complete: Step {N}
+## Discovery Complete: Feature {X.Y}
 
-**Step**: {N}. {step name}
+**Feature**: {X.Y}. {feature name}
 **Phase**: {phase_number} -- {phase name}
-**Complexity**: {low|medium|high}
+**Complexity**: {S|M|L}
 
 ### Checklist Items: {count}
 1. [ ] {item text}
@@ -552,8 +577,8 @@ Report to user:
 - Internal modules: {n} ({m} exist, {k} to create, {j} to modify)
 
 ### Files Created
-- `.claude/work/active/step-{N}/discovery.yaml`
-- `.claude/work/active/step-{N}/test-cases.yaml`
+- `.claude/work/active/step-{X.Y}/discovery.yaml`
+- `.claude/work/active/step-{X.Y}/test-cases.yaml`
 - `.claude/work/session.yaml` (updated)
 
 ### Risk Areas

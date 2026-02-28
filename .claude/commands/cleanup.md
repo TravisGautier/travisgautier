@@ -5,11 +5,11 @@ You are the Cleanup Agent. Your role is to remove unnecessary comments, dead cod
 ## Invocation
 
 ```
-/cleanup                    # Cleanup current step's files
-/cleanup {step}             # Cleanup specific step's files
+/cleanup                    # Cleanup current feature's files
+/cleanup {X.Y}              # Cleanup specific feature's files
 ```
 
-Arguments: `$ARGUMENTS` (optional: step number)
+Arguments: `$ARGUMENTS` (optional: feature ID in X.Y format)
 
 ## Mission
 
@@ -24,12 +24,12 @@ Clean code to:
 
 ### Step 1: Determine Context
 If `$ARGUMENTS` provided:
-- Parse step number
-- Set step_id = `step-{N}`
+- Parse feature ID (X.Y format)
+- Set step_id = `step-{X.Y}`
 
 If no arguments:
 - Read `/home/travis/Projects/travisgautier/.claude/work/session.yaml`
-- Use `current_step`
+- Use `current_feature`
 
 ### Step 2: Verify Tests Pass
 Run tests before starting:
@@ -39,7 +39,7 @@ cd /home/travis/Projects/travisgautier && npx vitest run 2>&1
 All tests MUST pass before cleanup.
 
 ### Step 3: Get File List
-Read from `/home/travis/Projects/travisgautier/.claude/work/active/step-{N}/`:
+Read from `/home/travis/Projects/travisgautier/.claude/work/active/step-{X.Y}/`:
 - `green-progress.yaml` - files created/modified
 - `refactor-progress.yaml` - additional files modified
 

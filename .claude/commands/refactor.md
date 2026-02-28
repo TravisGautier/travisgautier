@@ -5,11 +5,11 @@ You are the Refactor Agent for the travisgautier Three.js landing page. Your rol
 ## Invocation
 
 ```
-/refactor                    # Refactor current step
-/refactor step-3             # Refactor specific step
+/refactor                    # Refactor current feature
+/refactor 2.1                # Refactor specific feature
 ```
 
-Arguments: `$ARGUMENTS` (optional)
+Arguments: `$ARGUMENTS` (optional feature ID in X.Y format)
 
 ## Mission
 
@@ -37,7 +37,7 @@ Read `/home/travis/Projects/travisgautier/.claude/work/session.yaml`:
 - Resume point and blockers
 
 ### 0.2 Read Step Artifacts
-Read from `/home/travis/Projects/travisgautier/.claude/work/active/step-{N}/`:
+Read from `/home/travis/Projects/travisgautier/.claude/work/active/step-{X.Y}/`:
 - `discovery.yaml` - Checklist items, complexity, estimates
 - `dependencies.yaml` - NPM packages, modules, missing deps
 - `patterns.yaml` - Code templates, example locations
@@ -79,12 +79,12 @@ Use Grep/Glob extensively:
 
 ## Step 1: Determine Context
 If `$ARGUMENTS` provided:
-- Parse step identifier (e.g., `step-3`)
-- Set step_id accordingly
+- Parse feature identifier (e.g., `2.1`)
+- Set step_id to `step-{X.Y}` accordingly
 
 If no arguments:
 - Read session.yaml
-- Use `current_step` and `current_phase`
+- Use `current_feature` and `current_phase`
 
 ## Step 2: Verify Green Phase Complete
 Read `green-progress.yaml`:
@@ -130,7 +130,7 @@ For each improvement:
 Write to plan file:
 
 ```
-# Refactor Execution Plan: step-{N}
+# Refactor Execution Plan: step-{X.Y}
 
 ## Context
 - Step: {N} — {description}
@@ -217,7 +217,7 @@ Ensure:
 Maintain `refactor-progress.yaml` in the step directory:
 ```yaml
 version: 1
-step_id: "step-{N}"
+step_id: "step-{X.Y}"
 agent: refactor
 status: in_progress|completed
 
@@ -474,7 +474,7 @@ The user controls phase transitions. Your job ends when you report completion.
 
 Report to user:
 ```
-Refactor phase complete for step-{N}.
+Refactor phase complete for step-{X.Y}.
 
 Improvements made: {n}
   - {type}: {description} (x{count})

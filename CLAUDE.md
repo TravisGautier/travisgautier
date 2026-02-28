@@ -46,14 +46,15 @@ The camera orbits to show one face or the other based on hold progress.
 
 ### Planned Module Structure
 
-Per `IMPLEMENTATION_PLAN.md`, the target architecture splits into:
+Per `IMPLEMENTATION_PLAN.md` (10 phases, 50 features with X.Y numbering), the target architecture splits into:
 - `src/config/` — GPU quality tiers (`detect-gpu`), constants
 - `src/scene/` — setup, environment, temple, portal, lighting
 - `src/shaders/` — `.glsl` files with `vite-plugin-glsl`
 - `src/interaction/` — state, cursor, controls, hold mechanic, FPS monitor
-- `src/ui/` — overlay management
+- `src/ui/` — overlay management, transition screens, fallback
 - `src/animate.js` — render loop
 - `src/main.js` — entry point orchestrating init
+- `tests/` — mirroring `src/` structure (config, scene, shaders, interaction, ui, build, a11y)
 
 ### Key Design Constants
 

@@ -5,17 +5,17 @@ You are the Finish Agent. Your role is to execute the final phases of a complete
 ## Invocation
 
 ```
-/finish                    # Finish current step
-/finish 7                  # Finish specific step
+/finish                    # Finish current feature
+/finish 2.1                # Finish specific feature
 ```
 
-Arguments: `$ARGUMENTS` (optional step number)
+Arguments: `$ARGUMENTS` (optional feature ID in X.Y format)
 
 ## Mission
 
-Execute the finish sequence for a completed implementation step:
+Execute the finish sequence for a completed implementation feature:
 1. **Cleanup** - Remove unnecessary comments, dead code, console.log statements
-2. **Documentation** - Mark the step complete in IMPLEMENTATION_PLAN.md, update session.yaml
+2. **Documentation** - Mark the feature complete in IMPLEMENTATION_PLAN.md, update session.yaml
 3. **Git** - Stage, commit, and push changes
 
 Each phase must complete successfully before proceeding to the next.
@@ -36,55 +36,60 @@ Read `/home/travis/Projects/travisgautier/.claude/work/session.yaml`:
 - Completed steps
 - Resume point and blockers
 
-### 0.2 Read Step Working Files
-Read from `/home/travis/Projects/travisgautier/.claude/work/active/step-{N}/`:
+### 0.2 Read Feature Working Files
+Read from `/home/travis/Projects/travisgautier/.claude/work/active/step-{X.Y}/`:
 - Any progress YAML files tracking work done
 - Any notes or context files created during implementation
 
 ### 0.3 Read Planning Document
 Read `/home/travis/Projects/travisgautier/IMPLEMENTATION_PLAN.md`:
-- Find the checkbox line for the current step: `- [ ] N. Step description`
-- Confirm the step text matches what was implemented
+- Find the checkbox line for the current feature: `- [ ] X.Y. Feature description`
+- Confirm the description matches what was implemented
 
 ### 0.4 Deep Codebase Research
-- Identify all files modified or created during this step
+- Identify all files modified or created during this feature
 - Current `git status` and `git diff --stat`
-- Verify the implementation matches the step description
+- Verify the implementation matches the feature description
 
 ### 0.5 Verify Prerequisites
-- The step's implementation must be complete (all intended changes made)
-- Tests must pass: `npx vitest run` (if tests exist for this step)
+- The feature's implementation must be complete (all intended changes made)
+- Tests must pass: `npx vitest run` (if tests exist for this feature)
 - Build must succeed: `npx vite build` (if build system is set up)
 
 ---
 
 ## Step 1: Determine Context
 If `$ARGUMENTS` provided:
-- Parse step number from arguments
-- Derive phase from step-to-phase mapping (see below)
+- Parse feature ID from arguments (X.Y format, e.g., `2.1`)
+- Derive phase from feature-to-phase mapping (see below)
 
 If no arguments:
 - Read session.yaml
-- Use `current_step` and `current_phase`
+- Use `current_feature` and `current_phase`
 
-### Step-to-Phase Mapping
-| Phase | Steps | Description |
-|-------|-------|-------------|
-| Foundation | 1-6 | Scaffold, extract CSS/JS/shaders, fonts, verify |
-| Resilience | 7-13 | dt clamping, context loss, precision, time wrap, damping, scroll, trackpad |
-| Adaptive Quality | 14-19 | detect-gpu, temple config, environment config, setup config, loading, FPS monitor |
-| Mobile & Touch | 20-24 | Touch events, pinch zoom, gyroscope, cursor hiding, device testing |
-| Polish & Deploy | 25-30 | Reduced motion, a11y, meta tags, build config, deploy, social testing |
+### Feature-to-Phase Mapping
+| Phase | Features | Description |
+|-------|----------|-------------|
+| 1 Foundation | 1.1–1.6 | Scaffold, extract CSS/JS/shaders, fonts, verify |
+| 2 Resilience | 2.1–2.8 | dt clamping, context loss, precision, time wrap, damping, scroll, trackpad |
+| 3 Adaptive Quality | 3.1–3.6 | detect-gpu, temple config, environment config, setup config, loading, FPS monitor |
+| 4 Portal Interaction | 4.1–4.5 | Raycasting, transitions, header nav, keyboard, hint polish |
+| 5 Mobile & Touch | 5.1–5.5 | Touch events, pinch zoom, gyroscope, cursor hiding, device testing |
+| 6 Accessibility | 6.1–6.4 | Reduced motion, screen reader, keyboard nav, color contrast |
+| 7 Testing | 7.1–7.4 | Test infra, unit tests, shader tests, build tests |
+| 8 SEO & Assets | 8.1–8.5 | Meta tags, OG image, favicon, analytics, social verification |
+| 9 Build & Deploy | 9.1–9.5 | Vite config, caching, 404, Tier 0 fallback, deploy |
+| 10 Visual Polish | 10.1–10.2 | Animation polish, loading crossfade |
 
 ## Step 2: Verify Prerequisites
 1. Run `npx vitest run` (if test files exist) -- must pass
 2. Run `npx vite build` (if vite.config.js exists) -- must succeed
-3. Check that implementation work for this step is complete
+3. Check that implementation work for this feature is complete
 
 If prerequisites not met, abort and report what needs to be done.
 
 ## Step 3: Identify Cleanup Targets
-Scan all files modified in this step for:
+Scan all files modified in this feature for:
 - Obvious/redundant comments (e.g., `// set x to 5` above `x = 5`)
 - Commented-out code blocks
 - Done TODOs (e.g., `// TODO: implement this` above working code)
@@ -100,7 +105,7 @@ Scan all files modified in this step for:
 
 ## Step 4: Map Checklist Items
 Identify which line in `IMPLEMENTATION_PLAN.md` to mark complete:
-- Find the line matching `- [ ] {N}.` where N is the current step number
+- Find the line matching `- [ ] {X.Y}.` where X.Y is the current feature ID
 - Confirm the description matches the work done
 
 ## Step 5: Plan Git Strategy
@@ -126,10 +131,10 @@ Identify which line in `IMPLEMENTATION_PLAN.md` to mark complete:
 Present to user before executing:
 
 ```
-# Finish Execution Plan: Step {N}
+# Finish Execution Plan: Feature {X.Y}
 
 ## Context
-- Step: {N}. {description}
+- Feature: {X.Y}. {description}
 - Phase: {phase}
 - Tests passing: {yes/no/no tests yet}
 - Build passing: {yes/no/no build yet}
@@ -140,8 +145,8 @@ Present to user before executing:
 | {path} | {lines} | {reason} |
 
 ## Checklist Item to Mark Complete
-- Line: `- [ ] {N}. {description}`
-- Change to: `- [x] {N}. {description}`
+- Line: `- [ ] {X.Y}. {description}`
+- Change to: `- [x] {X.Y}. {description}`
 
 ## Git Plan
 
@@ -161,8 +166,8 @@ Present to user before executing:
 
 ## Section Cleanup
 After commit:
-- Delete: /home/travis/Projects/travisgautier/.claude/work/active/step-{N}/
-- Update session.yaml: advance to step {N+1}
+- Delete: /home/travis/Projects/travisgautier/.claude/work/active/step-{X.Y}/
+- Update session.yaml: advance to next feature
 
 ## Ready for Approval
 Call ExitPlanMode to proceed with finish sequence.
@@ -189,13 +194,13 @@ If cleanup breaks tests or build, revert that specific cleanup and continue with
 ## Step 9: Execute Documentation Phase
 
 1. **Update IMPLEMENTATION_PLAN.md**:
-   - Find the line `- [ ] {N}.` for the current step
-   - Change it to `- [x] {N}.`
+   - Find the line `- [ ] {X.Y}.` for the current feature
+   - Change it to `- [x] {X.Y}.`
    - Do NOT touch any other checklist items
 
 2. **Update session.yaml**:
    - Set `current_agent: finish`
-   - Update `resume_point.last_action` to `step_{N}_finishing`
+   - Update `resume_point.last_action` to `feature_{X.Y}_finishing`
 
 ## Step 10: Execute Git Phase
 
@@ -235,7 +240,7 @@ Always make a separate final commit for documentation updates:
 
 ```bash
 git add IMPLEMENTATION_PLAN.md .claude/work/
-git commit -m "Mark step {N} complete"
+git commit -m "Mark feature {X.Y} complete"
 ```
 
 ### 10.4 Push
@@ -251,30 +256,34 @@ After all phases complete successfully:
 
 1. **Delete step working directory**:
    ```bash
-   rm -rf /home/travis/Projects/travisgautier/.claude/work/active/step-{N}/
+   rm -rf /home/travis/Projects/travisgautier/.claude/work/active/step-{X.Y}/
    ```
 
-2. **Update session.yaml** for next step:
-   - Increment `current_step` to N+1
-   - Update `current_phase` if crossing a phase boundary (see step-to-phase mapping)
+2. **Update session.yaml** for next feature:
+   - Advance `current_feature` to the next feature ID (e.g., `2.1` → `2.2`, or `2.8` → `3.1` at phase boundary)
+   - Update `current_phase` and `current_phase_name` if crossing a phase boundary
    - Set `current_agent: pending`
    - Reset `context_window.iteration` to 0
-   - Add completed step to `steps_completed` list with today's date
-   - Remove from `steps_in_progress` if present
-   - Set `resume_point.last_action` to `step_{N}_completed`
-   - Set `resume_point.next_action` to `/discovery {N+1}`
+   - Add completed feature to `completed_features` list with today's date
+   - Remove from `features_in_progress` if present
+   - Set `resume_point.last_action` to `feature_{X.Y}_completed`
+   - Set `resume_point.next_action` to `/discovery {next X.Y}`
 
-   Phase boundaries:
-   - Steps 1-6: `foundation`
-   - Steps 7-13: `resilience`
-   - Steps 14-19: `adaptive_quality`
-   - Steps 20-24: `mobile_touch`
-   - Steps 25-30: `polish_deploy`
+   Phase boundaries (last feature in each phase):
+   - 1.6 → 2.1: `foundation` → `resilience`
+   - 2.8 → 3.1: `resilience` → `adaptive_quality`
+   - 3.6 → 4.1: `adaptive_quality` → `portal_interaction`
+   - 4.5 → 5.1: `portal_interaction` → `mobile_touch`
+   - 5.5 → 6.1: `mobile_touch` → `accessibility`
+   - 6.4 → 7.1: `accessibility` → `testing`
+   - 7.4 → 8.1: `testing` → `seo_assets`
+   - 8.5 → 9.1: `seo_assets` → `build_deploy`
+   - 9.5 → 10.1: `build_deploy` → `visual_polish`
 
 3. **Verify deletion**:
    ```bash
    ls /home/travis/Projects/travisgautier/.claude/work/active/
-   # Should not contain step-{N}/
+   # Should not contain step-{X.Y}/
    ```
 
 **BLOCKING**: Do NOT report completion until step directory is deleted and session.yaml is updated. This is not optional.
@@ -311,7 +320,7 @@ The user controls step transitions. Your job ends when you report completion.
 
 Report to user:
 ```
-Step {N} complete: {step description}
+Feature {X.Y} complete: {feature description}
 
 Phase: {phase}
 
@@ -320,19 +329,19 @@ Cleanup:
 - Items removed: {m} (comments: {x}, console.logs: {y}, dead code: {z})
 
 Documentation:
-- IMPLEMENTATION_PLAN.md: step {N} marked [x]
-- session.yaml: advanced to step {N+1}
+- IMPLEMENTATION_PLAN.md: feature {X.Y} marked [x]
+- session.yaml: advanced to feature {next X.Y}
 
 Git:
 - Commits: {n}
 - Pushed: {yes/no/failed}
 - Branch: {branch}
 
-Step directory deleted: yes
-Next step: {N+1}. {next step description}
+Feature directory deleted: yes
+Next feature: {next X.Y}. {next feature description}
 Next phase: {phase} (same/new: {phase name})
 
-Run `/discovery {N+1}` to continue.
+Run `/discovery {next X.Y}` to continue.
 ```
 
 ## Error Report
@@ -341,7 +350,7 @@ If any phase fails:
 ```
 Finish sequence stopped at {phase}.
 
-Step: {N}. {description}
+Feature: {X.Y}. {description}
 
 Cleanup: {completed|failed|skipped}
 Docs: {completed|failed|skipped}

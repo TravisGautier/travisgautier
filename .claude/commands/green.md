@@ -3,8 +3,8 @@
 ## Invocation
 
 ```
-/green          Resume current step from session state
-/green {step}   Execute a specific step number
+/green          Resume current feature from session state
+/green {X.Y}    Execute a specific feature (e.g., /green 2.1)
 ```
 
 ## Mission
@@ -18,11 +18,11 @@ You do NOT invent features. You do NOT refactor beyond what the step requires. Y
 ## Session State
 
 - **Session file**: `/home/travis/Projects/travisgautier/.claude/work/session.yaml`
-- **Step artifacts**: `/home/travis/Projects/travisgautier/.claude/work/active/step-{N}/`
-- **Progress file**: `/home/travis/Projects/travisgautier/.claude/work/active/step-{N}/green-progress.yaml`
+- **Step artifacts**: `/home/travis/Projects/travisgautier/.claude/work/active/step-{X.Y}/`
+- **Progress file**: `/home/travis/Projects/travisgautier/.claude/work/active/step-{X.Y}/green-progress.yaml`
 - **Working directory**: `/home/travis/Projects/travisgautier/`
 
-On start, read `session.yaml` to determine `current_step`. If invoked with `/green {step}`, use that step number instead.
+On start, read `session.yaml` to determine `current_feature`. If invoked with `/green {X.Y}`, use that feature ID instead.
 
 Read the step directory for:
 - `plan.md` — what to implement
@@ -199,7 +199,7 @@ export const state = {
 
 **Time budget**: ~20% of your effort. Do not over-research.
 
-1. **Read the step plan**: `/home/travis/Projects/travisgautier/.claude/work/active/step-{N}/plan.md`
+1. **Read the step plan**: `/home/travis/Projects/travisgautier/.claude/work/active/step-{X.Y}/plan.md`
 2. **Read ALL test files** for this step (in the step's `tests/` directory)
 3. **Read existing source files** that are relevant (imports, dependencies)
 4. **Check the prototype**: `index.html` is the source of truth for behavior. If a test expects specific values (angles, colors, dimensions), verify against the prototype.
@@ -209,7 +209,7 @@ export const state = {
 Write your plan to the progress file:
 
 ```yaml
-# /home/travis/Projects/travisgautier/.claude/work/active/step-{N}/green-progress.yaml
+# /home/travis/Projects/travisgautier/.claude/work/active/step-{X.Y}/green-progress.yaml
 step: N
 started_at: "YYYY-MM-DD HH:MM"
 phase: planning
@@ -250,7 +250,7 @@ Record how many tests pass BEFORE you start. This is your floor — you must nev
 
 ### 2.2 Copy step test files into the test directory
 
-If the step has test files in `.claude/work/active/step-{N}/tests/`, copy them to the project's `tests/` directory, preserving subdirectory structure.
+If the step has test files in `.claude/work/active/step-{X.Y}/tests/`, copy them to the project's `tests/` directory, preserving subdirectory structure.
 
 ### 2.3 Run the new tests (they should fail)
 
