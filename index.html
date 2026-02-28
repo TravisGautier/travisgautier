@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travis Gautier</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Outfit:wght@200;300;400&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gold: #b8942e;
+    --gold-light: #8b7330;
+    --purple: #7c52d4;
+    --purple-light: #6b44b8;
+    --bg: #c8dcea;
+  }
+
+  body {
+    background: var(--bg);
+    color: #2a2520;
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+    user-select: none;
+  }
+
+  #canvas-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+  }
+  canvas { display: block; }
+
+  .cursor {
+    position: fixed;
+    width: 12px; height: 12px;
+    background: rgba(160, 130, 50, 0.9);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease, background 0.3s ease;
+    transform: translate(-50%, -50%);
+  }
+  .cursor.hover {
+    transform: translate(-50%, -50%) scale(3);
+    background: rgba(60,50,40,0.6);
+  }
+  .cursor.holding {
+    transform: translate(-50%, -50%) scale(2.2);
+    background: rgba(124, 82, 212, 0.85);
+  }
+  .cursor-trail {
+    position: fixed;
+    width: 40px; height: 40px;
+    border: 1px solid rgba(140, 115, 50, 0.35);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.4s ease, border-color 0.6s ease;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-trail.holding {
+    border-color: rgba(124, 82, 212, 0.45);
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 2.5rem 3.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    opacity: 0;
+    animation: fadeDown 1.5s ease 0.5s forwards;
+  }
+
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 300;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #3d3225;
+    transition: color 0.8s ease;
+    text-shadow: 0 1px 8px rgba(255,255,255,0.3);
+  }
+  .logo.purple { color: #4a3570; }
+
+  .header-right {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .header-link {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(42,37,32,0.45);
+    font-weight: 300;
+    pointer-events: auto;
+    cursor: none;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  .header-link:hover { color: var(--gold); }
+
+  .side-label {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .side-label.left { left: 3.5rem; text-align: left; }
+  .side-label.right { right: 3.5rem; text-align: right; }
+  .side-label .label-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    color: rgba(42,37,32,0.25);
+    display: block;
+    margin-bottom: 0.5rem;
+    transition: color 0.8s ease;
+  }
+  .side-label .label-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    display: block;
+    transition: color 0.8s ease, text-shadow 0.8s ease, opacity 0.6s ease;
+  }
+  .side-label .label-desc {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-top: 0.4rem;
+    transition: color 0.8s ease, opacity 0.6s ease;
+    display: block;
+  }
+
+  .side-label.left .label-title { color: #6b5a28; text-shadow: 0 1px 12px rgba(180,148,46,0.15); }
+  .side-label.left .label-desc { color: rgba(42,37,32,0.35); }
+  .side-label.right .label-title { color: #5a3d8a; text-shadow: 0 1px 12px rgba(124,82,212,0.15); }
+  .side-label.right .label-desc { color: rgba(42,37,32,0.35); }
+
+  .side-label.left { opacity: 1; }
+  .side-label.right { opacity: 0; }
+  .side-label.left.hidden { opacity: 0; transform: translateY(-50%) translateX(-20px); }
+  .side-label.right.visible { opacity: 1; transform: translateY(-50%) translateX(0); }
+
+  .bottom-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 2rem 3.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    opacity: 0;
+    animation: fadeUp 1.5s ease 1.2s forwards;
+  }
+
+  .scroll-hint {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(42,37,32,0.25);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .scroll-line {
+    width: 40px; height: 1px;
+    background: rgba(140,115,50,0.25);
+    position: relative;
+    overflow: hidden;
+  }
+  .scroll-line::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: var(--gold);
+    animation: scrollPulse 2s ease infinite;
+  }
+
+  .hold-hint {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(42,37,32,0.25);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .hold-indicator {
+    width: 50px; height: 2px;
+    background: rgba(42,37,32,0.1);
+    border-radius: 1px;
+    overflow: hidden;
+    position: relative;
+  }
+  .hold-indicator-fill {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--gold), var(--purple));
+    border-radius: 1px;
+    transition: width 0.15s ease;
+  }
+
+  .transition-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+  }
+  .transition-screen.active { opacity: 1; pointer-events: auto; }
+  .transition-screen .inner { text-align: center; position: relative; z-index: 2; }
+  .transition-screen .inner h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+  }
+  .transition-screen .inner p {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(42,37,32,0.4);
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scrollPulse {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+  }
+
+  @media (max-width: 768px) {
+    .header { padding: 1.5rem 2rem; }
+    .side-label.left { left: 1.5rem; }
+    .side-label.right { right: 1.5rem; }
+    .side-label .label-title { font-size: 1.1rem; }
+    .bottom-bar { padding: 1.5rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-trail" id="cursorTrail"></div>
+
+<div id="canvas-container"></div>
+
+<div class="overlay">
+  <div class="header">
+    <div class="logo" id="logo">Travis Gautier</div>
+    <div class="header-right">
+      <a href="#" class="header-link" data-hover>About</a>
+      <a href="#" class="header-link" data-hover>Contact</a>
+    </div>
+  </div>
+
+  <div class="side-label left" id="labelLeft">
+    <span class="label-num">01</span>
+    <span class="label-title">Venture Alpha</span>
+    <span class="label-desc">Innovation & Technology</span>
+  </div>
+
+  <div class="side-label right" id="labelRight">
+    <span class="label-num">02</span>
+    <span class="label-title">Venture Omega</span>
+    <span class="label-desc">Creative & Strategy</span>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="scroll-hint">
+      <div class="scroll-line"></div>
+      Scroll to explore
+    </div>
+    <div class="hold-hint">
+      Hold click to reveal
+      <div class="hold-indicator">
+        <div class="hold-indicator-fill" id="holdFill"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="transition-screen" id="transitionA">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center, rgba(180,148,46,0.25) 0%, rgba(200,220,234,1) 70%);"></div>
+  <div class="inner"><h2 style="color:#6b5a28;">Venture Alpha</h2><p>Entering experience&hellip;</p></div>
+</div>
+<div class="transition-screen" id="transitionB">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center, rgba(124,82,212,0.25) 0%, rgba(200,220,234,1) 70%);"></div>
+  <div class="inner"><h2 style="color:#5a3d8a;">Venture Omega</h2><p>Entering experience&hellip;</p></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+  const state = {
+    mouse: { x: 0, y: 0, nx: 0, ny: 0 },
+    scroll: 0,
+    hoverPortal: false,
+    time: 0,
+    holding: false,
+    holdProgress: 0,
+    reversing: false,
+    currentAngle: 0.25,
+    targetAngle: 0.25,
+  };
+
+  // Camera orbit angles (camera orbits around portal)
+  const GOLD_ANGLE = 0.25;        // slightly off-center front — sees gold face
+  const PURPLE_ANGLE = Math.PI + 0.25; // opposite side — sees purple face
+  const CAM_ORBIT_RADIUS = 4.2;   // inside the pillar ring (pillars at 5.2)
+  const CAM_HEIGHT = 2.0;         // eye level relative to portal center
+  const LOOK_TARGET = new THREE.Vector3(0, 1.2, 0); // portal center
+
+  const container = document.getElementById('canvas-container');
+  const scene = new THREE.Scene();
+  scene.background = null;
+
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
+  // Start at the gold-side orbit position
+  camera.position.set(Math.sin(GOLD_ANGLE) * CAM_ORBIT_RADIUS, CAM_HEIGHT, Math.cos(GOLD_ANGLE) * CAM_ORBIT_RADIUS);
+  camera.lookAt(LOOK_TARGET);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0x87BADB);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.4;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.appendChild(renderer.domElement);
+
+  // ─── Shared GLSL ───
+  const noiseGLSL = `
+    vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
+    vec2 mod289(vec2 x){return x-floor(x*(1.0/289.0))*289.0;}
+    vec3 permute(vec3 x){return mod289(((x*34.0)+1.0)*x);}
+    float snoise(vec2 v){
+      const vec4 C=vec4(0.211324865405187,0.366025403784439,-0.577350269189626,0.024390243902439);
+      vec2 i=floor(v+dot(v,C.yy));vec2 x0=v-i+dot(i,C.xx);
+      vec2 i1=(x0.x>x0.y)?vec2(1.0,0.0):vec2(0.0,1.0);
+      vec4 x12=x0.xyxy+C.xxzz;x12.xy-=i1;i=mod289(i);
+      vec3 p=permute(permute(i.y+vec3(0.0,i1.y,1.0))+i.x+vec3(0.0,i1.x,1.0));
+      vec3 m=max(0.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.0);
+      m=m*m;m=m*m;
+      vec3 x=2.0*fract(p*C.www)-1.0;vec3 h=abs(x)-0.5;
+      vec3 ox=floor(x+0.5);vec3 a0=x-ox;
+      m*=1.79284291400159-0.85373472095314*(a0*a0+h*h);
+      vec3 g;g.x=a0.x*x0.x+h.x*x0.y;g.yz=a0.yz*x12.xz+h.yz*x12.yw;
+      return 130.0*dot(m,g);
+    }
+  `;
+  const portalVert = `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`;
+
+  // ─── Materials ───
+  // White / warm marble for pillars
+  const marbleWhite = new THREE.MeshStandardMaterial({
+    color: 0xE8E0D4,
+    metalness: 0.02,
+    roughness: 0.45,
+  });
+  const marbleCream = new THREE.MeshStandardMaterial({
+    color: 0xF0E8DC,
+    metalness: 0.02,
+    roughness: 0.55,
+  });
+  const marbleWarm = new THREE.MeshStandardMaterial({
+    color: 0xD8CCBC,
+    metalness: 0.05,
+    roughness: 0.5,
+  });
+  // Stone floor
+  const stoneFloor = new THREE.MeshStandardMaterial({
+    color: 0xCCC4B4,
+    metalness: 0.02,
+    roughness: 0.7,
+  });
+  const stoneStep = new THREE.MeshStandardMaterial({
+    color: 0xBEB6A6,
+    metalness: 0.02,
+    roughness: 0.75,
+  });
+  // Dark obsidian portal frame — contrast against bright scene
+  const frameMat = new THREE.MeshStandardMaterial({
+    color: 0x1a1a1e, metalness: 0.85, roughness: 0.2,
+    emissive: 0x080808, emissiveIntensity: 0.1,
+  });
+  const edgeMat = new THREE.MeshStandardMaterial({
+    color: 0xc9a84c, metalness: 0.95, roughness: 0.12,
+    emissive: 0xc9a84c, emissiveIntensity: 0.1,
+  });
+  // Floor ring inlays — gold-tinted stone
+  const ringMat = new THREE.MeshStandardMaterial({
+    color: 0xB8A888, metalness: 0.15, roughness: 0.45, side: THREE.DoubleSide,
+  });
+
+  // ─── Sky Dome (bright daytime) ───
+  const skyGeo = new THREE.SphereGeometry(200, 64, 32);
+  const skyMat = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    depthWrite: false,
+    uniforms: { uHold: { value: 0 }, uTime: { value: 0 } },
+    vertexShader: `varying vec3 vPos; varying vec2 vUv; void main(){ vPos=position; vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+    fragmentShader: `
+      uniform float uHold;
+      uniform float uTime;
+      varying vec3 vPos;
+      varying vec2 vUv;
+      ${noiseGLSL}
+      void main(){
+        float h = normalize(vPos).y;
+
+        // Daytime sky — warm blue
+        vec3 zenith = vec3(0.30, 0.52, 0.85);
+        vec3 horizon = vec3(0.72, 0.82, 0.92);
+        vec3 sunHorizon = vec3(0.92, 0.85, 0.70);
+
+        // Purple sky shift on hold
+        vec3 zenithP = vec3(0.28, 0.25, 0.65);
+        vec3 horizonP = vec3(0.60, 0.55, 0.78);
+        vec3 sunHorizonP = vec3(0.75, 0.60, 0.80);
+
+        vec3 z = mix(zenith, zenithP, uHold);
+        vec3 hr = mix(horizon, horizonP, uHold);
+        vec3 sh = mix(sunHorizon, sunHorizonP, uHold);
+
+        vec3 col = mix(sh, hr, smoothstep(-0.05, 0.15, h));
+        col = mix(col, z, smoothstep(0.15, 0.65, h));
+
+        // Sun glow (upper right area)
+        vec3 sunDir = normalize(vec3(0.6, 0.45, -0.5));
+        float sunDot = max(dot(normalize(vPos), sunDir), 0.0);
+        float sunGlow = pow(sunDot, 48.0) * 2.0;
+        float sunHalo = pow(sunDot, 6.0) * 0.35;
+        vec3 sunCol = mix(vec3(1.0, 0.95, 0.80), vec3(0.85, 0.70, 0.95), uHold);
+        col += sunCol * (sunGlow + sunHalo);
+
+        // Wispy high-altitude clouds
+        float cloudH = smoothstep(0.08, 0.45, h) * smoothstep(0.8, 0.4, h);
+        vec2 cloudUV = vPos.xz * 0.008;
+        float c1 = snoise(cloudUV + uTime * 0.005) * 0.5 + 0.5;
+        float c2 = snoise(cloudUV * 2.3 - uTime * 0.008) * 0.5 + 0.5;
+        float cloud = smoothstep(0.38, 0.72, c1 * c2) * cloudH * 0.35;
+        col = mix(col, vec3(1.0, 0.98, 0.96), cloud);
+
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `
+  });
+  const sky = new THREE.Mesh(skyGeo, skyMat);
+  scene.add(sky);
+
+  // ─── Cloud Sea Below (volumetric feeling) ───
+  const cloudSeaGeo = new THREE.PlaneGeometry(300, 300, 1, 1);
+  const cloudSeaMat = new THREE.ShaderMaterial({
+    transparent: true, side: THREE.DoubleSide, depthWrite: false,
+    uniforms: { uTime: { value: 0 }, uHold: { value: 0 } },
+    vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+    fragmentShader: `
+      uniform float uTime; uniform float uHold; varying vec2 vUv;
+      ${noiseGLSL}
+      void main(){
+        vec2 uv = vUv * 6.0;
+        float n1 = snoise(uv + uTime * 0.015) * 0.5 + 0.5;
+        float n2 = snoise(uv * 2.2 - uTime * 0.02) * 0.5 + 0.5;
+        float n3 = snoise(uv * 0.7 + uTime * 0.01 + 3.0) * 0.5 + 0.5;
+        float n = n1 * 0.5 + n2 * 0.3 + n3 * 0.2;
+
+        // Cloud density
+        float density = smoothstep(0.28, 0.65, n);
+
+        // Fade out at edges
+        float dist = length(vUv - 0.5) * 2.0;
+        float edgeFade = smoothstep(1.0, 0.3, dist);
+
+        // Cloud color — sunlit white with subtle warmth
+        vec3 cloudBright = mix(vec3(0.98, 0.96, 0.94), vec3(0.90, 0.86, 0.95), uHold);
+        vec3 cloudShadow = mix(vec3(0.70, 0.74, 0.82), vec3(0.65, 0.58, 0.78), uHold);
+        vec3 col = mix(cloudShadow, cloudBright, smoothstep(0.3, 0.7, n));
+
+        // Warm light from above
+        col += vec3(0.06, 0.04, 0.02) * smoothstep(0.5, 0.8, n);
+
+        float alpha = density * edgeFade * 0.92;
+        gl_FragColor = vec4(col, alpha);
+      }
+    `
+  });
+  const cloudSea = new THREE.Mesh(cloudSeaGeo, cloudSeaMat);
+  cloudSea.rotation.x = -Math.PI / 2;
+  cloudSea.position.y = -3.5;
+  scene.add(cloudSea);
+
+  // Second cloud layer (slightly lower, adds depth)
+  const cloudSea2 = new THREE.Mesh(cloudSeaGeo.clone(), new THREE.ShaderMaterial({
+    transparent: true, side: THREE.DoubleSide, depthWrite: false,
+    uniforms: { uTime: { value: 0 }, uHold: { value: 0 } },
+    vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+    fragmentShader: `
+      uniform float uTime; uniform float uHold; varying vec2 vUv;
+      ${noiseGLSL}
+      void main(){
+        vec2 uv = vUv * 4.0 + 10.0;
+        float n1 = snoise(uv + uTime * 0.01) * 0.5 + 0.5;
+        float n2 = snoise(uv * 1.8 - uTime * 0.015 + 5.0) * 0.5 + 0.5;
+        float n = n1 * 0.6 + n2 * 0.4;
+        float density = smoothstep(0.32, 0.7, n);
+        float dist = length(vUv - 0.5) * 2.0;
+        float edgeFade = smoothstep(1.0, 0.4, dist);
+        vec3 col = mix(
+          mix(vec3(0.65, 0.70, 0.80), vec3(0.58, 0.52, 0.72), uHold),
+          mix(vec3(0.90, 0.88, 0.86), vec3(0.82, 0.78, 0.88), uHold),
+          smoothstep(0.3, 0.7, n)
+        );
+        float alpha = density * edgeFade * 0.7;
+        gl_FragColor = vec4(col, alpha);
+      }
+    `
+  }));
+  cloudSea2.rotation.x = -Math.PI / 2;
+  cloudSea2.position.y = -5.5;
+  scene.add(cloudSea2);
+
+  // ─── Distant Mountains (below clouds, peeking through) ───
+  const mtMat = new THREE.MeshStandardMaterial({ color: 0x8090A4, roughness: 0.85, metalness: 0.0 });
+  const mtGeo = new THREE.ConeGeometry(18, 14, 6);
+  [
+    { p: [-35, -12, -50], s: [1.2, 0.8, 1.4] },
+    { p: [40, -14, -55], s: [1.5, 0.9, 1.2] },
+    { p: [8, -15, -65], s: [2.0, 1.1, 1.5] },
+    { p: [-20, -13, -60], s: [1.1, 0.7, 1.3] },
+    { p: [55, -16, -70], s: [1.8, 1.0, 1.6] },
+  ].forEach(m => {
+    const mt = new THREE.Mesh(mtGeo, mtMat);
+    mt.position.set(...m.p); mt.scale.set(...m.s);
+    scene.add(mt);
+  });
+
+  // Snow-capped peaks
+  const snowMat = new THREE.MeshStandardMaterial({ color: 0xE8E4E0, roughness: 0.6, metalness: 0.0 });
+  const snowGeo = new THREE.ConeGeometry(6, 3, 6);
+  [
+    { p: [-35, -3.8, -50], s: [1.2, 0.8, 1.4] },
+    { p: [40, -5, -55], s: [1.5, 0.9, 1.2] },
+    { p: [8, -5.5, -65], s: [2.0, 1.1, 1.5] },
+  ].forEach(m => {
+    const s = new THREE.Mesh(snowGeo, snowMat);
+    s.position.set(...m.p); s.scale.set(...m.s);
+    scene.add(s);
+  });
+
+  // ─── Temple Floor ───
+  const floorGeo = new THREE.CylinderGeometry(6, 6.2, 0.3, 64);
+  const floor = new THREE.Mesh(floorGeo, stoneFloor);
+  floor.position.y = -0.15;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  // Stepped base
+  const step1 = new THREE.Mesh(new THREE.CylinderGeometry(6.8, 7.0, 0.2, 64), stoneStep);
+  step1.position.y = -0.4; step1.receiveShadow = true; scene.add(step1);
+
+  const step2 = new THREE.Mesh(new THREE.CylinderGeometry(7.4, 7.6, 0.2, 64), stoneFloor);
+  step2.position.y = -0.6; step2.receiveShadow = true; scene.add(step2);
+
+  const step3 = new THREE.Mesh(new THREE.CylinderGeometry(8.0, 8.3, 0.25, 64), stoneStep);
+  step3.position.y = -0.85; step3.receiveShadow = true; scene.add(step3);
+
+  // Inner decorative rings on floor
+  const floorRing = new THREE.Mesh(new THREE.RingGeometry(2.8, 3.0, 64), ringMat);
+  floorRing.rotation.x = -Math.PI / 2; floorRing.position.y = 0.01; scene.add(floorRing);
+
+  const ring2 = new THREE.Mesh(new THREE.RingGeometry(1.5, 1.55, 64), ringMat);
+  ring2.rotation.x = -Math.PI / 2; ring2.position.y = 0.01; scene.add(ring2);
+
+  // ─── Temple Pillars (Greek Doric-style, white marble) ───
+  const pillarCount = 12;
+  const pillarRadius = 5.2;
+  const pillars = [];
+
+  for (let i = 0; i < pillarCount; i++) {
+    const angle = (i / pillarCount) * Math.PI * 2;
+    const px = Math.cos(angle) * pillarRadius;
+    const pz = Math.sin(angle) * pillarRadius;
+
+    const pillarGroup = new THREE.Group();
+    pillarGroup.position.set(px, 0, pz);
+
+    // Base plinth
+    const base = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.3, 0.6), marbleCream);
+    base.position.y = 0.15; base.castShadow = true; base.receiveShadow = true;
+    pillarGroup.add(base);
+
+    // Column shaft — tapered, marble white
+    const shaft = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.17, 0.22, 3.8, 20),
+      marbleWhite
+    );
+    shaft.position.y = 2.2; shaft.castShadow = true; shaft.receiveShadow = true;
+    pillarGroup.add(shaft);
+
+    // Fluting detail — thin vertical ridges
+    for (let f = 0; f < 8; f++) {
+      const flAngle = (f / 8) * Math.PI * 2;
+      const flute = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.018, 0.024, 3.7, 4),
+        marbleWarm
+      );
+      flute.position.set(
+        Math.cos(flAngle) * 0.19,
+        2.2,
+        Math.sin(flAngle) * 0.19
+      );
+      pillarGroup.add(flute);
+    }
+
+    // Capital (echinus + abacus)
+    const echinus = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.17, 0.15, 16), marbleCream);
+    echinus.position.y = 4.15; pillarGroup.add(echinus);
+
+    const abacus = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.1, 0.6), marbleWhite);
+    abacus.position.y = 4.28; pillarGroup.add(abacus);
+
+    scene.add(pillarGroup);
+    pillars.push(pillarGroup);
+  }
+
+  // ─── Architrave (ring beam) ───
+  const archGeo = new THREE.TorusGeometry(pillarRadius, 0.14, 8, 64);
+  const architrave = new THREE.Mesh(archGeo, marbleCream);
+  architrave.rotation.x = Math.PI / 2;
+  architrave.position.y = 4.38;
+  scene.add(architrave);
+
+  // ─── Portal Group ───
+  const portalGroup = new THREE.Group();
+  portalGroup.position.y = 1.0;
+  scene.add(portalGroup);
+
+  const W = 1.1, H = 1.5, D = 0.12, T = 0.10;
+
+  function makeGatePillar(xPos) {
+    const g = new THREE.Mesh(new THREE.BoxGeometry(T, H * 2 + T, D), frameMat);
+    g.position.set(xPos, 0, 0); g.castShadow = true; portalGroup.add(g);
+    const b = new THREE.Mesh(new THREE.BoxGeometry(T * 1.6, T * 0.5, D * 1.4), frameMat);
+    b.position.set(xPos, -H - T * 0.5, 0); portalGroup.add(b);
+  }
+  makeGatePillar(-W - T / 2);
+  makeGatePillar(W + T / 2);
+
+  const kasagiW = W * 2 + T * 2 + 0.4;
+  const kasagi = new THREE.Mesh(new THREE.BoxGeometry(kasagiW, T * 1.3, D + 0.06), frameMat);
+  kasagi.position.set(0, H + T * 0.65, 0); kasagi.castShadow = true; portalGroup.add(kasagi);
+
+  const capM = new THREE.Mesh(new THREE.BoxGeometry(kasagiW + 0.12, T * 0.35, D + 0.1), frameMat);
+  capM.position.set(0, H + T * 1.3, 0); portalGroup.add(capM);
+
+  const nukiM = new THREE.Mesh(new THREE.BoxGeometry(W * 2 + T * 2 + 0.1, T * 0.45, D * 0.6), frameMat);
+  nukiM.position.set(0, H - T * 0.6, 0); portalGroup.add(nukiM);
+
+  const botBar = new THREE.Mesh(new THREE.BoxGeometry(kasagiW, T * 0.4, D + 0.06), frameMat);
+  botBar.position.set(0, -H - T * 0.2, 0); portalGroup.add(botBar);
+
+  // Gold trim
+  const tw = 0.006;
+  const tvG = new THREE.BoxGeometry(tw, H * 2, D + 0.01);
+  const tL = new THREE.Mesh(tvG, edgeMat); tL.position.set(-W, 0, 0); portalGroup.add(tL);
+  const tR = new THREE.Mesh(tvG, edgeMat); tR.position.set(W, 0, 0); portalGroup.add(tR);
+  const thG = new THREE.BoxGeometry(W * 2, tw, D + 0.01);
+  const tTp = new THREE.Mesh(thG, edgeMat); tTp.position.set(0, H, 0); portalGroup.add(tTp);
+  const tBt = new THREE.Mesh(thG, edgeMat); tBt.position.set(0, -H, 0); portalGroup.add(tBt);
+  const otG = new THREE.BoxGeometry(kasagiW + 0.14, tw * 2, D + 0.12);
+  const oTr = new THREE.Mesh(otG, edgeMat); oTr.position.set(0, H + T * 1.48, 0); portalGroup.add(oTr);
+
+  // ─── Portal Surface A (Gold) ───
+  const surfGeo = new THREE.PlaneGeometry(W * 2, H * 2);
+  const portalMatA = new THREE.ShaderMaterial({
+    transparent: true, side: THREE.FrontSide, depthWrite: false,
+    uniforms: { uTime:{value:0}, uMouse:{value:new THREE.Vector2()}, uHover:{value:0} },
+    vertexShader: portalVert,
+    fragmentShader: `
+      uniform float uTime; uniform vec2 uMouse; uniform float uHover; varying vec2 vUv;
+      ${noiseGLSL}
+      void main(){
+        vec2 uv=vUv; vec2 c=uv-0.5;
+        float f1=snoise(vec2(uv.x*3.0,uv.y*2.0-uTime*0.4))*0.6;
+        float f2=snoise(vec2(uv.x*5.0+1.0,uv.y*3.0-uTime*0.55))*0.35;
+        float f3=snoise(vec2(uv.x*1.5,uv.y*1.2-uTime*0.25+3.0))*0.4;
+        vec2 mOff=c-uMouse*0.25;float mD=length(mOff);
+        float mE=smoothstep(0.5,0.0,mD)*uHover*0.35;
+        float n=f1+f2+f3+mE;
+        vec3 deep=vec3(0.12,0.08,0.02);vec3 mid=vec3(0.65,0.45,0.12);
+        vec3 bright=vec3(0.92,0.78,0.42);vec3 hot=vec3(1.0,0.95,0.75);
+        vec3 col=mix(deep,mid,smoothstep(-0.4,0.2,n));
+        col=mix(col,bright,smoothstep(0.1,0.6,n));
+        col+=hot*smoothstep(0.55,0.9,n)*0.45;
+        float eX=smoothstep(0.0,0.06,uv.x)*smoothstep(1.0,0.94,uv.x);
+        float eY=smoothstep(0.0,0.06,uv.y)*smoothstep(1.0,0.94,uv.y);
+        float edge=eX*eY;
+        col+=vec3(0.78,0.55,0.15)*(1.0-edge)*0.5;
+        float pulse=0.75+0.25*sin(uTime*0.6);
+        float alpha=edge*(0.55+0.35*abs(n))*pulse+uHover*0.15*edge;
+        gl_FragColor=vec4(col,alpha);
+      }
+    `
+  });
+  const surfA = new THREE.Mesh(surfGeo, portalMatA);
+  surfA.position.z = 0.001; portalGroup.add(surfA);
+
+  // ─── Portal Surface B (Purple) ───
+  const portalMatB = new THREE.ShaderMaterial({
+    transparent: true, side: THREE.FrontSide, depthWrite: false,
+    uniforms: { uTime:{value:0}, uMouse:{value:new THREE.Vector2()}, uHover:{value:0} },
+    vertexShader: portalVert,
+    fragmentShader: `
+      uniform float uTime; uniform vec2 uMouse; uniform float uHover; varying vec2 vUv;
+      ${noiseGLSL}
+      void main(){
+        vec2 uv=vUv; vec2 c=uv-0.5;
+        float f1=snoise(vec2(uv.x*2.5+uTime*0.18,uv.y*3.0-uTime*0.35));
+        float f2=snoise(vec2(uv.x*4.0-uTime*0.22,uv.y*2.5+uTime*0.4))*0.5;
+        float f3=snoise(vec2(uv.x*1.3+5.0,uv.y*1.8+uTime*0.2))*0.4;
+        vec2 mOff=c-uMouse*0.25;float mD=length(mOff);
+        float mE=smoothstep(0.5,0.0,mD)*uHover*0.35;
+        float n=(f1+f2+f3)*0.55+mE;
+        vec3 deep=vec3(0.06,0.02,0.14);vec3 mid=vec3(0.38,0.18,0.65);
+        vec3 bright=vec3(0.62,0.42,0.95);vec3 hot=vec3(0.82,0.68,1.0);
+        vec3 col=mix(deep,mid,smoothstep(-0.4,0.2,n));
+        col=mix(col,bright,smoothstep(0.15,0.6,n));
+        col+=hot*smoothstep(0.5,0.85,n)*0.45;
+        float eX=smoothstep(0.0,0.06,uv.x)*smoothstep(1.0,0.94,uv.x);
+        float eY=smoothstep(0.0,0.06,uv.y)*smoothstep(1.0,0.94,uv.y);
+        float edge=eX*eY;
+        col+=vec3(0.35,0.15,0.6)*(1.0-edge)*0.5;
+        float pulse=0.75+0.25*sin(uTime*0.5+1.5);
+        float alpha=edge*(0.55+0.35*abs(n))*pulse+uHover*0.15*edge;
+        gl_FragColor=vec4(col,alpha);
+      }
+    `
+  });
+  const surfB = new THREE.Mesh(surfGeo, portalMatB);
+  surfB.rotation.y = Math.PI; surfB.position.z = -0.001; portalGroup.add(surfB);
+
+  // ─── Ambient Dust / Pollen Particles ───
+  const particleCount = 200;
+  const particleGeo = new THREE.BufferGeometry();
+  const particlePos = new Float32Array(particleCount * 3);
+  const particleSpeeds = [];
+  for (let i = 0; i < particleCount; i++) {
+    particlePos[i * 3] = (Math.random() - 0.5) * 16;
+    particlePos[i * 3 + 1] = Math.random() * 8 - 1;
+    particlePos[i * 3 + 2] = (Math.random() - 0.5) * 16;
+    particleSpeeds.push(0.002 + Math.random() * 0.006);
+  }
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+  const particleMat = new THREE.PointsMaterial({
+    color: 0xFFF8E0,
+    size: 0.035,
+    transparent: true,
+    opacity: 0.5,
+    depthWrite: false,
+  });
+  const particles = new THREE.Points(particleGeo, particleMat);
+  scene.add(particles);
+
+  // ─── Lights (Bright Daytime) ───
+  // Strong warm ambient
+  const ambient = new THREE.AmbientLight(0xFFF5E6, 0.7);
+  scene.add(ambient);
+
+  // Hemisphere light — sky blue + ground warm
+  const hemiLight = new THREE.HemisphereLight(0x87BADB, 0xD4C4A8, 0.6);
+  scene.add(hemiLight);
+
+  // Main sunlight
+  const sunLight = new THREE.DirectionalLight(0xFFF0D4, 1.8);
+  sunLight.position.set(12, 20, -10);
+  sunLight.castShadow = true;
+  sunLight.shadow.mapSize.width = 2048;
+  sunLight.shadow.mapSize.height = 2048;
+  sunLight.shadow.camera.near = 0.5;
+  sunLight.shadow.camera.far = 50;
+  sunLight.shadow.camera.left = -12;
+  sunLight.shadow.camera.right = 12;
+  sunLight.shadow.camera.top = 12;
+  sunLight.shadow.camera.bottom = -6;
+  sunLight.shadow.bias = -0.001;
+  scene.add(sunLight);
+
+  // Fill light (opposite side, softer)
+  const fillLight = new THREE.DirectionalLight(0xC8D8F0, 0.4);
+  fillLight.position.set(-8, 10, 8);
+  scene.add(fillLight);
+
+  // Portal lights — gold front, purple back
+  const goldLight = new THREE.PointLight(0xc9a84c, 2.5, 12);
+  goldLight.position.set(0, 2.5, 3);
+  goldLight.castShadow = true;
+  scene.add(goldLight);
+
+  const purpleLight = new THREE.PointLight(0x9b6dff, 1.5, 12);
+  purpleLight.position.set(0, 2.5, -3);
+  scene.add(purpleLight);
+
+  // Subtle warm accent lights on pillars
+  const pillarLight1 = new THREE.PointLight(0xFFE8C4, 0.5, 8);
+  pillarLight1.position.set(5, 3, 0);
+  scene.add(pillarLight1);
+
+  const pillarLight2 = new THREE.PointLight(0xFFE8C4, 0.5, 8);
+  pillarLight2.position.set(-5, 3, 0);
+  scene.add(pillarLight2);
+
+  const groundGlow = new THREE.PointLight(0xc9a84c, 0.8, 4);
+  groundGlow.position.set(0, 0.1, 0);
+  scene.add(groundGlow);
+
+  // ─── Atmospheric fog (light, airy) ───
+  scene.fog = new THREE.FogExp2(0xC0D4E4, 0.008);
+
+  // ─── Events ───
+  const cursorEl = document.getElementById('cursor');
+  const cursorTrail = document.getElementById('cursorTrail');
+  const labelLeft = document.getElementById('labelLeft');
+  const labelRight = document.getElementById('labelRight');
+  const holdFill = document.getElementById('holdFill');
+  const logo = document.getElementById('logo');
+
+  document.addEventListener('mousemove', (e) => {
+    state.mouse.x = e.clientX; state.mouse.y = e.clientY;
+    state.mouse.nx = (e.clientX / window.innerWidth) * 2 - 1;
+    state.mouse.ny = -(e.clientY / window.innerHeight) * 2 + 1;
+    cursorEl.style.left = e.clientX + 'px'; cursorEl.style.top = e.clientY + 'px';
+    cursorTrail.style.left = e.clientX + 'px'; cursorTrail.style.top = e.clientY + 'px';
+  });
+
+  document.querySelectorAll('[data-hover]').forEach(el => {
+    el.addEventListener('mouseenter', () => cursorEl.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursorEl.classList.remove('hover'));
+  });
+
+  window.addEventListener('mousedown', (e) => {
+    if (e.button === 0) { state.holding = true; cursorEl.classList.add('holding'); cursorTrail.classList.add('holding'); }
+  });
+  window.addEventListener('mouseup', () => { state.holding = false; cursorEl.classList.remove('holding'); cursorTrail.classList.remove('holding'); });
+  window.addEventListener('mouseleave', () => { state.holding = false; cursorEl.classList.remove('holding'); cursorTrail.classList.remove('holding'); });
+
+  let scrollTarget = 0;
+  window.addEventListener('wheel', (e) => {
+    scrollTarget += e.deltaY * 0.0008;
+    scrollTarget = Math.max(-1.0, Math.min(1.0, scrollTarget));
+  });
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // ─── Animate ───
+  const clock = new THREE.Clock();
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const dt = clock.getDelta();
+    state.time += dt;
+
+    // Hold progress — commits to opposite side if released past halfway
+    if (state.holding) {
+      if (state.reversing) {
+        // Holding from purple side — drive back to gold
+        state.holdProgress = Math.max(0, state.holdProgress - dt * 1.2);
+      } else {
+        // Holding from gold side — drive toward purple
+        state.holdProgress = Math.min(1, state.holdProgress + dt * 1.2);
+      }
+    } else {
+      // Released — snap to whichever side we're closer to
+      if (state.holdProgress > 0.5) {
+        state.holdProgress = Math.min(1, state.holdProgress + dt * 2.5);
+      } else {
+        state.holdProgress = Math.max(0, state.holdProgress - dt * 2.5);
+      }
+    }
+
+    const p = state.holdProgress;
+
+    // Determine which side we've committed to
+    const onPurpleSide = (p > 0.99);
+    const onGoldSide = (p < 0.01);
+
+    // Toggle direction: if fully on purple and user holds, start reversing
+    if (state.holding && onPurpleSide && !state.reversing) {
+      state.reversing = true;
+    }
+    // Reset reversing once we've arrived back at gold
+    if (onGoldSide) {
+      state.reversing = false;
+    }
+
+    state.targetAngle = GOLD_ANGLE + p * (PURPLE_ANGLE - GOLD_ANGLE);
+    state.currentAngle += (state.targetAngle - state.currentAngle) * 0.14;
+
+    state.scroll += (scrollTarget - state.scroll) * 0.1;
+
+    // Portal stays fixed — only gentle floating bob
+    portalGroup.position.y = 1.0 + Math.sin(state.time * 0.4) * 0.015;
+
+    // Camera orbits around the portal
+    const orbitAngle = state.currentAngle + state.mouse.nx * 0.12;
+    const orbitRadius = CAM_ORBIT_RADIUS - state.scroll * 1.2;
+    const camY = CAM_HEIGHT + state.scroll * 0.4 + state.mouse.ny * 0.25;
+
+    const targetX = Math.sin(orbitAngle) * orbitRadius;
+    const targetZ = Math.cos(orbitAngle) * orbitRadius;
+
+    camera.position.x += (targetX - camera.position.x) * 0.15;
+    camera.position.z += (targetZ - camera.position.z) * 0.15;
+    camera.position.y += (camY - camera.position.y) * 0.12;
+    camera.lookAt(LOOK_TARGET);
+
+    // Shader uniforms
+    const hv = state.hoverPortal ? 1.0 : 0.0;
+    portalMatA.uniforms.uTime.value = state.time;
+    portalMatA.uniforms.uMouse.value.set(state.mouse.nx, state.mouse.ny);
+    portalMatA.uniforms.uHover.value += (hv - portalMatA.uniforms.uHover.value) * 0.05;
+    portalMatB.uniforms.uTime.value = state.time;
+    portalMatB.uniforms.uMouse.value.set(state.mouse.nx, state.mouse.ny);
+    portalMatB.uniforms.uHover.value += (hv - portalMatB.uniforms.uHover.value) * 0.05;
+
+    // Edge trim color blend (gold → purple)
+    const tRed = 0.78 + p * (0.61 - 0.78);
+    const tGrn = 0.66 + p * (0.43 - 0.66);
+    const tBlu = 0.30 + p * (1.0 - 0.30);
+    edgeMat.color.setRGB(tRed, tGrn, tBlu);
+    edgeMat.emissive.setRGB(tRed * 0.5, tGrn * 0.5, tBlu * 0.5);
+    edgeMat.emissiveIntensity = 0.08 + Math.sin(state.time * 0.8) * 0.04;
+
+    // Portal light blending
+    goldLight.intensity = (2.5 + Math.sin(state.time * 0.5) * 0.4) * (1 - p);
+    purpleLight.intensity = (2.5 + Math.cos(state.time * 0.4) * 0.4) * p;
+
+    groundGlow.color.setRGB(
+      0.78 * (1 - p) + 0.61 * p,
+      0.66 * (1 - p) + 0.43 * p,
+      0.30 * (1 - p) + 1.0 * p
+    );
+    groundGlow.intensity = 0.8 + Math.sin(state.time * 0.6) * 0.3;
+
+    pillarLight1.color.setRGB(
+      1.0 * (1-p) + 0.75*p,
+      0.91*(1-p) + 0.60*p,
+      0.77*(1-p) + 1.0*p
+    );
+    pillarLight2.color.setRGB(
+      1.0 * (1-p) + 0.75*p,
+      0.91*(1-p) + 0.60*p,
+      0.77*(1-p) + 1.0*p
+    );
+
+    // Sky blend
+    skyMat.uniforms.uHold.value = p;
+    skyMat.uniforms.uTime.value = state.time;
+
+    // Cloud layers
+    cloudSeaMat.uniforms.uTime.value = state.time;
+    cloudSeaMat.uniforms.uHold.value = p;
+    cloudSea2.material.uniforms.uTime.value = state.time;
+    cloudSea2.material.uniforms.uHold.value = p;
+
+    // Fog color blend (bright blue → muted purple)
+    const fogR = 0.75 * (1-p) + 0.68 * p;
+    const fogG = 0.83 * (1-p) + 0.72 * p;
+    const fogB = 0.89 * (1-p) + 0.88 * p;
+    scene.fog.color.setRGB(fogR, fogG, fogB);
+    renderer.setClearColor(scene.fog.color);
+
+    // Hemisphere light shift
+    hemiLight.color.setRGB(
+      0.53*(1-p) + 0.45*p,
+      0.73*(1-p) + 0.55*p,
+      0.86*(1-p) + 0.78*p
+    );
+
+    // Animate particles (floating pollen/dust)
+    const positions = particles.geometry.attributes.position.array;
+    for (let i = 0; i < particleCount; i++) {
+      positions[i * 3 + 1] += particleSpeeds[i];
+      positions[i * 3] += Math.sin(state.time * 0.3 + i) * 0.001;
+      if (positions[i * 3 + 1] > 8) {
+        positions[i * 3 + 1] = -1;
+        positions[i * 3] = (Math.random() - 0.5) * 16;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 16;
+      }
+    }
+    particles.geometry.attributes.position.needsUpdate = true;
+    particleMat.opacity = 0.3 + 0.2 * Math.sin(state.time * 0.4);
+
+    // UI
+    holdFill.style.width = (p * 100) + '%';
+    if (p > 0.5) {
+      labelLeft.classList.add('hidden');
+      labelRight.classList.add('visible');
+      logo.classList.add('purple');
+    } else {
+      labelLeft.classList.remove('hidden');
+      labelRight.classList.remove('visible');
+      logo.classList.remove('purple');
+    }
+
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+</script>
+</body>
+</html>
