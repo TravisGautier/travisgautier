@@ -868,7 +868,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 
 ### Phase 1 — Foundation
 - [x] 1.1. Scaffold Vite project structure, create entry point + constants + state
-- [ ] 1.2. Extract CSS into `styles/main.css`
+- [x] 1.2. Extract CSS into `styles/main.css`
 - [ ] 1.3. Extract JS into module files
 - [ ] 1.4. Move shaders to `.glsl` files with `vite-plugin-glsl`
 - [ ] 1.5. Self-host fonts
