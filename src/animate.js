@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GOLD_ANGLE, PURPLE_ANGLE, CAM_ORBIT_RADIUS, CAM_HEIGHT, LOOK_TARGET, DT_CLAMP_MAX, TIME_WRAP_PERIOD } from './config/constants.js';
+import { GOLD_ANGLE, PURPLE_ANGLE, CAM_ORBIT_RADIUS, CAM_HEIGHT, LOOK_TARGET, DT_CLAMP_MAX, TIME_WRAP_PERIOD, DAMP_ANGLE_BASE, DAMP_SCROLL_BASE, DAMP_CAM_XZ_BASE, DAMP_CAM_Y_BASE, DAMP_HOVER_BASE } from './config/constants.js';
 
 export function startAnimateLoop(deps) {
   const {
@@ -22,6 +22,10 @@ export function startAnimateLoop(deps) {
     }
   });
 
+  function dampFactor(base, dt) {
+    return 1 - Math.pow(base, dt);
+  }
+
   let animationId;
 
   function animate() {
@@ -35,10 +39,10 @@ export function startAnimateLoop(deps) {
     const p = state.holdProgress;
 
     state.targetAngle = GOLD_ANGLE + p * (PURPLE_ANGLE - GOLD_ANGLE);
-    state.currentAngle += (state.targetAngle - state.currentAngle) * 0.14;
+    state.currentAngle += (state.targetAngle - state.currentAngle) * dampFactor(DAMP_ANGLE_BASE, dt);
 
     const scrollTarget = getScrollTarget();
-    state.scroll += (scrollTarget - state.scroll) * 0.1;
+    state.scroll += (scrollTarget - state.scroll) * dampFactor(DAMP_SCROLL_BASE, dt);
 
     portalGroup.position.y = 1.0 + Math.sin(state.time * 0.4) * 0.015;
 
@@ -49,18 +53,18 @@ export function startAnimateLoop(deps) {
     const targetX = Math.sin(orbitAngle) * orbitRadius;
     const targetZ = Math.cos(orbitAngle) * orbitRadius;
 
-    camera.position.x += (targetX - camera.position.x) * 0.15;
-    camera.position.z += (targetZ - camera.position.z) * 0.15;
-    camera.position.y += (camY - camera.position.y) * 0.12;
+    camera.position.x += (targetX - camera.position.x) * dampFactor(DAMP_CAM_XZ_BASE, dt);
+    camera.position.z += (targetZ - camera.position.z) * dampFactor(DAMP_CAM_XZ_BASE, dt);
+    camera.position.y += (camY - camera.position.y) * dampFactor(DAMP_CAM_Y_BASE, dt);
     camera.lookAt(LOOK_TARGET);
 
     const hv = state.hoverPortal ? 1.0 : 0.0;
     portalMatA.uniforms.uTime.value = wrappedTime;
     portalMatA.uniforms.uMouse.value.set(state.mouse.nx, state.mouse.ny);
-    portalMatA.uniforms.uHover.value += (hv - portalMatA.uniforms.uHover.value) * 0.05;
+    portalMatA.uniforms.uHover.value += (hv - portalMatA.uniforms.uHover.value) * dampFactor(DAMP_HOVER_BASE, dt);
     portalMatB.uniforms.uTime.value = wrappedTime;
     portalMatB.uniforms.uMouse.value.set(state.mouse.nx, state.mouse.ny);
-    portalMatB.uniforms.uHover.value += (hv - portalMatB.uniforms.uHover.value) * 0.05;
+    portalMatB.uniforms.uHover.value += (hv - portalMatB.uniforms.uHover.value) * dampFactor(DAMP_HOVER_BASE, dt);
 
     const tRed = 0.78 + p * (0.61 - 0.78);
     const tGrn = 0.66 + p * (0.43 - 0.66);

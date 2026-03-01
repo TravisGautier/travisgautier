@@ -11,14 +11,14 @@ describe('animate parity', () => {
     expect(src).toContain('GOLD_ANGLE + p * (PURPLE_ANGLE - GOLD_ANGLE)');
   });
 
-  /// Tests checklist items: [8]
+  /// Tests checklist items: [3, 4] — Feature 2.5
   it('parity_anim_angle_lerp', () => {
-    expect(src).toContain('state.currentAngle) * 0.14');
+    expect(src).toContain('state.currentAngle) * dampFactor(DAMP_ANGLE_BASE, dt)');
   });
 
-  /// Tests checklist items: [8]
+  /// Tests checklist items: [3, 4] — Feature 2.5
   it('parity_anim_scroll_lerp', () => {
-    expect(src).toContain('state.scroll) * 0.1');
+    expect(src).toContain('state.scroll) * dampFactor(DAMP_SCROLL_BASE, dt)');
   });
 
   /// Tests checklist items: [8]
@@ -34,17 +34,17 @@ describe('animate parity', () => {
     expect(src).toContain('state.mouse.ny * 0.25');
   });
 
-  /// Tests checklist items: [8]
+  /// Tests checklist items: [3, 4] — Feature 2.5
   it('parity_anim_camera_position_lerp', () => {
-    expect(src).toContain('camera.position.x) * 0.15');
-    expect(src).toContain('camera.position.z) * 0.15');
-    expect(src).toContain('camera.position.y) * 0.12');
+    expect(src).toContain('camera.position.x) * dampFactor(DAMP_CAM_XZ_BASE, dt)');
+    expect(src).toContain('camera.position.z) * dampFactor(DAMP_CAM_XZ_BASE, dt)');
+    expect(src).toContain('camera.position.y) * dampFactor(DAMP_CAM_Y_BASE, dt)');
   });
 
-  /// Tests checklist items: [8]
+  /// Tests checklist items: [3, 4] — Feature 2.5
   it('parity_anim_hover_lerp', () => {
-    expect(src).toContain('portalMatA.uniforms.uHover.value) * 0.05');
-    expect(src).toContain('portalMatB.uniforms.uHover.value) * 0.05');
+    expect(src).toContain('portalMatA.uniforms.uHover.value) * dampFactor(DAMP_HOVER_BASE, dt)');
+    expect(src).toContain('portalMatB.uniforms.uHover.value) * dampFactor(DAMP_HOVER_BASE, dt)');
   });
 
   /// Tests checklist items: [8]
@@ -131,5 +131,20 @@ describe('animate parity', () => {
     expect(src).toContain('skyMat.uniforms.uTime.value = wrappedTime');
     expect(src).toContain('cloudSeaMat.uniforms.uTime.value = wrappedTime');
     expect(src).toContain('cloudSea2.material.uniforms.uTime.value = wrappedTime');
+  });
+
+  /// Tests checklist items: [2, 3] — Feature 2.5
+  it('parity_anim_damp_imports', () => {
+    expect(src).toContain('DAMP_ANGLE_BASE');
+    expect(src).toContain('DAMP_SCROLL_BASE');
+    expect(src).toContain('DAMP_CAM_XZ_BASE');
+    expect(src).toContain('DAMP_CAM_Y_BASE');
+    expect(src).toContain('DAMP_HOVER_BASE');
+  });
+
+  /// Tests checklist items: [2] — Feature 2.5
+  it('parity_anim_damp_helper', () => {
+    expect(src).toContain('function dampFactor(base, dt)');
+    expect(src).toContain('1 - Math.pow(base, dt)');
   });
 });
