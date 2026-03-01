@@ -876,7 +876,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 
 ### Phase 2 — Resilience
 - [x] 2.1. Add dt clamping and `visibilitychange` handling
-- [ ] 2.2. Add WebGL context loss handler
+- [x] 2.2. Add WebGL context loss handler
 - [ ] 2.3. Add `precision highp float` to all fragment shaders
 - [ ] 2.4. Add time wrapping (`% 10000.0`)
 - [ ] 2.5. Convert lerps to frame-rate-independent damping
