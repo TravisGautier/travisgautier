@@ -878,7 +878,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 - [x] 2.1. Add dt clamping and `visibilitychange` handling
 - [x] 2.2. Add WebGL context loss handler
 - [x] 2.3. Add `precision highp float` to all fragment shaders
-- [ ] 2.4. Add time wrapping (`% 10000.0`)
+- [x] 2.4. Add time wrapping (`% 10000.0`)
 - [ ] 2.5. Convert lerps to frame-rate-independent damping
 - [ ] 2.6. Add scroll zoom bounds clamping
 - [ ] 2.7. Add trackpad vs mouse wheel detection
