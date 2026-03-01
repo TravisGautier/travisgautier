@@ -871,7 +871,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 - [x] 1.2. Extract CSS into `styles/main.css`
 - [x] 1.3. Extract JS into module files
 - [x] 1.4. Move shaders to `.glsl` files with `vite-plugin-glsl`
-- [ ] 1.5. Self-host fonts
+- [x] 1.5. Self-host fonts
 - [ ] 1.6. Verify parity with prototype
 
 ### Phase 2 — Resilience
