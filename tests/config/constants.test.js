@@ -6,6 +6,7 @@ import {
   CAM_HEIGHT,
   LOOK_TARGET,
   DT_CLAMP_MAX,
+  TIME_WRAP_PERIOD,
 } from '../../src/config/constants.js';
 
 describe('constants', () => {
@@ -29,5 +30,26 @@ describe('constants', () => {
   it('unit_constants_dt_clamp_max', () => {
     expect(DT_CLAMP_MAX).toBe(0.1);
     expect(DT_CLAMP_MAX).toBeGreaterThan(0);
+  });
+
+  /// Tests checklist items: [1] — Feature 2.4
+  it('unit_time_wrap_constant', () => {
+    expect(TIME_WRAP_PERIOD).toBeDefined();
+    expect(typeof TIME_WRAP_PERIOD).toBe('number');
+    expect(TIME_WRAP_PERIOD).toBe(10000.0);
+  });
+
+  /// Tests checklist items: [3] — Feature 2.4
+  it('unit_time_wrap_basic', () => {
+    expect(10000.0 % TIME_WRAP_PERIOD).toBe(0);
+    expect(15000.5 % TIME_WRAP_PERIOD).toBeCloseTo(5000.5, 5);
+    expect(25432.7 % TIME_WRAP_PERIOD).toBeCloseTo(5432.7, 5);
+  });
+
+  /// Tests checklist items: [3] — Feature 2.4
+  it('unit_time_wrap_small_values', () => {
+    expect(0 % TIME_WRAP_PERIOD).toBe(0);
+    expect(500.0 % TIME_WRAP_PERIOD).toBeCloseTo(500.0, 5);
+    expect(9999.9 % TIME_WRAP_PERIOD).toBeCloseTo(9999.9, 5);
   });
 });

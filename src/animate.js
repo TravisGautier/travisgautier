@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GOLD_ANGLE, PURPLE_ANGLE, CAM_ORBIT_RADIUS, CAM_HEIGHT, LOOK_TARGET, DT_CLAMP_MAX } from './config/constants.js';
+import { GOLD_ANGLE, PURPLE_ANGLE, CAM_ORBIT_RADIUS, CAM_HEIGHT, LOOK_TARGET, DT_CLAMP_MAX, TIME_WRAP_PERIOD } from './config/constants.js';
 
 export function startAnimateLoop(deps) {
   const {
@@ -28,6 +28,7 @@ export function startAnimateLoop(deps) {
     animationId = requestAnimationFrame(animate);
     const dt = Math.min(clock.getDelta(), DT_CLAMP_MAX);
     state.time += dt;
+    const wrappedTime = state.time % TIME_WRAP_PERIOD;
 
     updateHoldProgress(state, dt);
 
@@ -54,10 +55,10 @@ export function startAnimateLoop(deps) {
     camera.lookAt(LOOK_TARGET);
 
     const hv = state.hoverPortal ? 1.0 : 0.0;
-    portalMatA.uniforms.uTime.value = state.time;
+    portalMatA.uniforms.uTime.value = wrappedTime;
     portalMatA.uniforms.uMouse.value.set(state.mouse.nx, state.mouse.ny);
     portalMatA.uniforms.uHover.value += (hv - portalMatA.uniforms.uHover.value) * 0.05;
-    portalMatB.uniforms.uTime.value = state.time;
+    portalMatB.uniforms.uTime.value = wrappedTime;
     portalMatB.uniforms.uMouse.value.set(state.mouse.nx, state.mouse.ny);
     portalMatB.uniforms.uHover.value += (hv - portalMatB.uniforms.uHover.value) * 0.05;
 
@@ -90,11 +91,11 @@ export function startAnimateLoop(deps) {
     );
 
     skyMat.uniforms.uHold.value = p;
-    skyMat.uniforms.uTime.value = state.time;
+    skyMat.uniforms.uTime.value = wrappedTime;
 
-    cloudSeaMat.uniforms.uTime.value = state.time;
+    cloudSeaMat.uniforms.uTime.value = wrappedTime;
     cloudSeaMat.uniforms.uHold.value = p;
-    cloudSea2.material.uniforms.uTime.value = state.time;
+    cloudSea2.material.uniforms.uTime.value = wrappedTime;
     cloudSea2.material.uniforms.uHold.value = p;
 
     const fogR = 0.75 * (1 - p) + 0.68 * p;

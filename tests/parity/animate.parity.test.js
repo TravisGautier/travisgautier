@@ -113,4 +113,23 @@ describe('animate parity', () => {
   it('parity_anim_dt_clamp_import', () => {
     expect(src).toContain('DT_CLAMP_MAX');
   });
+
+  /// Tests checklist items: [2] — Feature 2.4
+  it('parity_anim_time_wrap_import', () => {
+    expect(src).toContain('TIME_WRAP_PERIOD');
+  });
+
+  /// Tests checklist items: [3] — Feature 2.4
+  it('parity_anim_time_wrap_calc', () => {
+    expect(src).toContain('state.time % TIME_WRAP_PERIOD');
+  });
+
+  /// Tests checklist items: [4] — Feature 2.4
+  it('parity_anim_uniforms_wrapped', () => {
+    expect(src).toContain('portalMatA.uniforms.uTime.value = wrappedTime');
+    expect(src).toContain('portalMatB.uniforms.uTime.value = wrappedTime');
+    expect(src).toContain('skyMat.uniforms.uTime.value = wrappedTime');
+    expect(src).toContain('cloudSeaMat.uniforms.uTime.value = wrappedTime');
+    expect(src).toContain('cloudSea2.material.uniforms.uTime.value = wrappedTime');
+  });
 });
