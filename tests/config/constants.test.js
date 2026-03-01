@@ -5,6 +5,7 @@ import {
   CAM_ORBIT_RADIUS,
   CAM_HEIGHT,
   LOOK_TARGET,
+  DT_CLAMP_MAX,
 } from '../../src/config/constants.js';
 
 describe('constants', () => {
@@ -22,5 +23,11 @@ describe('constants', () => {
     expect(LOOK_TARGET.x).toBe(0);
     expect(LOOK_TARGET.y).toBe(1.2);
     expect(LOOK_TARGET.z).toBe(0);
+  });
+
+  /// Tests checklist items: [1] — Feature 2.1
+  it('unit_constants_dt_clamp_max', () => {
+    expect(DT_CLAMP_MAX).toBe(0.1);
+    expect(DT_CLAMP_MAX).toBeGreaterThan(0);
   });
 });

@@ -96,4 +96,21 @@ describe('animate parity', () => {
   it('parity_anim_particle_opacity', () => {
     expect(src).toContain('0.3 + 0.2 * Math.sin(state.time * 0.4)');
   });
+
+  /// Tests checklist items: [2, 4] — Feature 2.1
+  it('parity_anim_dt_clamp', () => {
+    expect(src).toContain('Math.min(clock.getDelta(), DT_CLAMP_MAX)');
+  });
+
+  /// Tests checklist items: [3] — Feature 2.1
+  it('parity_anim_visibility_handler', () => {
+    expect(src).toContain("document.addEventListener('visibilitychange'");
+    expect(src).toContain('clock.stop()');
+    expect(src).toContain('clock.start()');
+  });
+
+  /// Tests checklist items: [2] — Feature 2.1
+  it('parity_anim_dt_clamp_import', () => {
+    expect(src).toContain('DT_CLAMP_MAX');
+  });
 });

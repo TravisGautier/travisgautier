@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GOLD_ANGLE, PURPLE_ANGLE, CAM_ORBIT_RADIUS, CAM_HEIGHT, LOOK_TARGET } from './config/constants.js';
+import { GOLD_ANGLE, PURPLE_ANGLE, CAM_ORBIT_RADIUS, CAM_HEIGHT, LOOK_TARGET, DT_CLAMP_MAX } from './config/constants.js';
 
 export function startAnimateLoop(deps) {
   const {
@@ -14,9 +14,17 @@ export function startAnimateLoop(deps) {
 
   const clock = new THREE.Clock();
 
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clock.stop();
+    } else {
+      clock.start();
+    }
+  });
+
   function animate() {
     requestAnimationFrame(animate);
-    const dt = clock.getDelta();
+    const dt = Math.min(clock.getDelta(), DT_CLAMP_MAX);
     state.time += dt;
 
     updateHoldProgress(state, dt);
