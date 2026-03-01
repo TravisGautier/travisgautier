@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { GOLD_ANGLE, CAM_ORBIT_RADIUS, CAM_HEIGHT, LOOK_TARGET } from '../config/constants.js';
 
-export function createSetup(container) {
+export function createSetup(container, options = {}) {
+  const { onContextLost, onContextRestored } = options;
   const scene = new THREE.Scene();
   scene.background = null;
   scene.fog = new THREE.FogExp2(0xC0D4E4, 0.008);
@@ -40,6 +41,16 @@ export function createSetup(container) {
     };
   }
   container.appendChild(renderer.domElement);
+
+  if (typeof renderer.domElement.addEventListener === 'function') {
+    renderer.domElement.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      onContextLost?.();
+    });
+    renderer.domElement.addEventListener('webglcontextrestored', () => {
+      onContextRestored?.();
+    });
+  }
 
   return { scene, camera, renderer };
 }

@@ -8,12 +8,21 @@ import { createLighting } from './scene/lighting.js';
 import { initControls } from './interaction/controls.js';
 import { initCursor } from './interaction/cursor.js';
 import { updateHoldProgress } from './interaction/holdMechanic.js';
-import { initOverlay } from './ui/overlay.js';
+import { initOverlay, showContextLostMessage } from './ui/overlay.js';
 import { startAnimateLoop } from './animate.js';
 
 function init() {
   const container = document.getElementById('canvas-container');
-  const { scene, camera, renderer } = createSetup(container);
+  let animLoop;
+  const { scene, camera, renderer } = createSetup(container, {
+    onContextLost: () => {
+      animLoop.stop();
+      showContextLostMessage();
+    },
+    onContextRestored: () => {
+      location.reload();
+    },
+  });
 
   const { skyMat, cloudSeaMat, cloudSea2, particles, particleSpeeds, particleMat } = createEnvironment(scene);
   createTemple(scene);
@@ -24,7 +33,7 @@ function init() {
   const { updateCursor } = initCursor();
   const { updateOverlay } = initOverlay();
 
-  startAnimateLoop({
+  animLoop = startAnimateLoop({
     state, scene, camera, renderer,
     portalGroup, portalMatA, portalMatB, edgeMat,
     goldLight, purpleLight, groundGlow, pillarLight1, pillarLight2, hemiLight,

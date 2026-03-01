@@ -19,3 +19,20 @@ export function initOverlay() {
 
   return { updateOverlay };
 }
+
+export function showContextLostMessage() {
+  if (typeof document === 'undefined') return;
+  const overlay = document.createElement('div');
+  overlay.className = 'context-lost-overlay';
+  overlay.innerHTML =
+    '<div class="context-lost-title">Session Interrupted</div>' +
+    '<p>The graphics session was paused by your device.</p>' +
+    '<button class="context-lost-btn" onclick="location.reload()">Reload</button>';
+  document.body.appendChild(overlay);
+}
+
+export function hideContextLostMessage() {
+  if (typeof document === 'undefined') return;
+  const overlay = document.querySelector('.context-lost-overlay');
+  if (overlay) overlay.remove();
+}

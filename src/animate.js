@@ -22,8 +22,10 @@ export function startAnimateLoop(deps) {
     }
   });
 
+  let animationId;
+
   function animate() {
-    requestAnimationFrame(animate);
+    animationId = requestAnimationFrame(animate);
     const dt = Math.min(clock.getDelta(), DT_CLAMP_MAX);
     state.time += dt;
 
@@ -127,4 +129,10 @@ export function startAnimateLoop(deps) {
   }
 
   animate();
+
+  return {
+    stop() {
+      cancelAnimationFrame(animationId);
+    }
+  };
 }

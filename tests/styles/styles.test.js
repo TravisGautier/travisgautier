@@ -122,6 +122,18 @@ describe('styles', () => {
     expect(css).toContain('@media (max-width: 768px)');
   });
 
+  // --- CONTEXT LOSS CSS TESTS ---
+
+  /// Tests checklist items: [7] — Feature 2.2
+  it('css_context_lost_classes', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    expect(css).toMatch(/\.context-lost-overlay\s*\{/);
+    expect(css).toMatch(/\.context-lost-btn\s*\{/);
+    expect(css).toMatch(/\.context-lost-title\s*\{/);
+    expect(css).toContain('@keyframes contextLostFadeIn');
+  });
+
   // --- ACCESSIBILITY TESTS ---
 
   /// Tests checklist items: [1]

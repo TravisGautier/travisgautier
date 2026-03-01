@@ -90,6 +90,14 @@ describe('module integration', () => {
     expect(() => initControls(state, camera, renderer)).not.toThrow();
   });
 
+  /// Tests checklist items: [2, 3] — Feature 2.2
+  it('int_overlay_exports_context_lost', async () => {
+    const overlay = await import('../../src/ui/overlay.js');
+
+    expect(typeof overlay.showContextLostMessage).toBe('function');
+    expect(typeof overlay.hideContextLostMessage).toBe('function');
+  });
+
   /// Tests checklist items: [9]
   it('int_overlay_updates', async () => {
     const { initOverlay } = await import('../../src/ui/overlay.js');
