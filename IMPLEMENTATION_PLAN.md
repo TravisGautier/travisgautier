@@ -175,7 +175,7 @@ Download Cormorant Garamond (300, 400, 600) and Outfit (200, 300, 400) as woff2 
 
 **Files**: `public/fonts/*.woff2` (NEW), `styles/main.css` (MODIFY)
 
-### Feature 1.6: Parity Verification — M
+### Feature 1.6: Parity Verification — M ✅
 
 End-to-end visual and behavioral verification that the modular build matches the single-file prototype exactly. Compare camera orbit, hold mechanic, shader rendering, overlay labels, cursor behavior, and all animations. Document any intentional deviations.
 
