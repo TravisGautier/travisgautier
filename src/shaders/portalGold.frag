@@ -1,3 +1,4 @@
+precision highp float;
 uniform float uTime;
 uniform vec2 uMouse;
 uniform float uHover;

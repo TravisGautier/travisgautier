@@ -100,4 +100,37 @@ describe('shader files', () => {
     expect(content).not.toContain('gl_Position');
     expect(content).not.toContain('gl_FragColor');
   });
+
+  /// Tests checklist items: 2.3 [1, 2, 3, 4, 5]
+  it('shader_precision_all_frags', () => {
+    const fragFiles = [
+      'portalGold.frag',
+      'portalPurple.frag',
+      'sky.frag',
+      'clouds1.frag',
+      'clouds2.frag',
+    ];
+    for (const file of fragFiles) {
+      const content = fs.readFileSync(path.join(shaderDir, file), 'utf-8');
+      expect(content).toContain('precision highp float;');
+    }
+  });
+
+  /// Tests checklist items: 2.3 [1, 2, 3, 4, 5]
+  it('shader_precision_before_uniforms', () => {
+    const fragFiles = [
+      'portalGold.frag',
+      'portalPurple.frag',
+      'sky.frag',
+      'clouds1.frag',
+      'clouds2.frag',
+    ];
+    for (const file of fragFiles) {
+      const content = fs.readFileSync(path.join(shaderDir, file), 'utf-8');
+      const precisionIndex = content.indexOf('precision highp float;');
+      const uniformIndex = content.indexOf('uniform');
+      expect(precisionIndex).not.toBe(-1);
+      expect(precisionIndex).toBeLessThan(uniformIndex);
+    }
+  });
 });

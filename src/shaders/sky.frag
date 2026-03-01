@@ -1,3 +1,4 @@
+precision highp float;
 uniform float uHold;
 uniform float uTime;
 varying vec3 vPos;
