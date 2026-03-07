@@ -64,6 +64,12 @@ describe('portal parity', () => {
     expect(surfB.material.uniforms).toHaveProperty('uHover');
   });
 
+  /// Tests checklist items: [1] — Feature 4.1
+  it('parity_portal_surfA_surfB_in_return', () => {
+    expect(result).toHaveProperty('surfA');
+    expect(result).toHaveProperty('surfB');
+  });
+
   /// Tests checklist items: [6]
   it('parity_portal_surface_geometry', () => {
     // W=1.1, H=1.5 → PlaneGeometry(W*2=2.2, H*2=3.0)

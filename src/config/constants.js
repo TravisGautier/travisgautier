@@ -19,3 +19,4 @@ export const SCROLL_MULT_WHEEL = 0.0008;
 export const FPS_SAMPLE_COUNT = 120;
 export const FPS_THRESHOLD = 0.022;
 export const FPS_DOWNGRADE_PIXEL_RATIO_DROP = 0.5;
+export const RAYCAST_THROTTLE_MS = 50;

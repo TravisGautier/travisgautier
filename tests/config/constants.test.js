@@ -19,6 +19,7 @@ import {
   FPS_SAMPLE_COUNT,
   FPS_THRESHOLD,
   FPS_DOWNGRADE_PIXEL_RATIO_DROP,
+  RAYCAST_THROTTLE_MS,
 } from '../../src/config/constants.js';
 
 describe('constants', () => {
@@ -175,5 +176,12 @@ describe('constants', () => {
   it('unit_constants_fps_downgrade_pixel_ratio_drop', () => {
     expect(typeof FPS_DOWNGRADE_PIXEL_RATIO_DROP).toBe('number');
     expect(FPS_DOWNGRADE_PIXEL_RATIO_DROP).toBe(0.5);
+  });
+
+  /// Tests checklist items: [2] — Feature 4.1
+  it('unit_constants_raycast_throttle_ms', () => {
+    expect(typeof RAYCAST_THROTTLE_MS).toBe('number');
+    expect(RAYCAST_THROTTLE_MS).toBe(50);
+    expect(RAYCAST_THROTTLE_MS).toBeGreaterThan(0);
   });
 });

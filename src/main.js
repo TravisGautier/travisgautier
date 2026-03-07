@@ -27,10 +27,10 @@ function init() {
 
   const { skyMat, cloudSeaMat, cloudSea2, particles, particleSpeeds, particleMat } = createEnvironment(scene);
   createTemple(scene);
-  const { portalGroup, portalMatA, portalMatB, edgeMat } = createPortal(scene);
+  const { portalGroup, portalMatA, portalMatB, edgeMat, surfA, surfB } = createPortal(scene);
   const { goldLight, purpleLight, groundGlow, pillarLight1, pillarLight2, hemiLight } = createLighting(scene);
 
-  const { getScrollTarget } = initControls(state, camera, renderer);
+  const { getScrollTarget } = initControls(state, camera, renderer, [surfA, surfB]);
   const { updateCursor } = initCursor();
   const { updateOverlay } = initOverlay();
 

@@ -23,4 +23,14 @@ describe('portal', () => {
     expect(result.portalMatB.uniforms).toHaveProperty('uHover');
     expect(result).toHaveProperty('edgeMat');
   });
+
+  /// Tests checklist items: [1] — Feature 4.1
+  it('unit_portal_exports_surfA_and_surfB', () => {
+    const scene = { add: () => {} };
+    const result = createPortal(scene);
+    expect(result).toHaveProperty('surfA');
+    expect(result).toHaveProperty('surfB');
+    expect(result.surfA.isMesh).toBe(true);
+    expect(result.surfB.isMesh).toBe(true);
+  });
 });

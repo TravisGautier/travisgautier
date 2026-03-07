@@ -37,4 +37,24 @@ describe('controls parity', () => {
   it('parity_controls_canvas_mousedown_prevention', () => {
     expect(src).toMatch(/domElement[\s\S]*mousedown[\s\S]*preventDefault/);
   });
+
+  /// Tests checklist items: [3, 4] — Feature 4.1
+  it('parity_controls_raycaster_usage', () => {
+    expect(src).toContain('Raycaster');
+  });
+
+  /// Tests checklist items: [4] — Feature 4.1
+  it('parity_controls_hover_cursor_class', () => {
+    expect(src).toMatch(/classList\.\w+\(['"]hover['"]\)/);
+  });
+
+  /// Tests checklist items: [4] — Feature 4.1
+  it('parity_controls_raycast_throttle', () => {
+    expect(src).toContain('RAYCAST_THROTTLE_MS');
+  });
+
+  /// Tests checklist items: [5] — Feature 4.1
+  it('parity_controls_portal_surfaces_param', () => {
+    expect(src).toContain('portalSurfaces');
+  });
 });

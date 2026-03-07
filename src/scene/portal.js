@@ -74,5 +74,5 @@ export function createPortal(scene) {
 
   scene.add(portalGroup);
 
-  return { portalGroup, portalMatA, portalMatB, edgeMat };
+  return { portalGroup, portalMatA, portalMatB, edgeMat, surfA, surfB };
 }
