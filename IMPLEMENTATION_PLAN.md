@@ -893,7 +893,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 - [x] 3.6. Add FPS monitor with runtime downgrade
 
 ### Phase 4 — Portal Interaction & Transitions
-- [ ] 4.1. Add portal raycasting + hover detection
+- [x] 4.1. Add portal raycasting + hover detection
 - [ ] 4.2. Wire transition screen triggers + external navigation
 - [ ] 4.3. Polish header navigation placeholders
 - [ ] 4.4. Add keyboard support for hold mechanic
