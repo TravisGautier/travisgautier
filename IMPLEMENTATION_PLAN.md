@@ -881,7 +881,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 - [x] 2.4. Add time wrapping (`% 10000.0`)
 - [x] 2.5. Convert lerps to frame-rate-independent damping
 - [x] 2.6. Add scroll zoom bounds clamping
-- [ ] 2.7. Add trackpad vs mouse wheel detection
+- [x] 2.7. Add trackpad vs mouse wheel detection
 - [ ] 2.8. Add right-click prevention + memory disposal
 
 ### Phase 3 — Adaptive Quality
