@@ -14,6 +14,8 @@ import {
   DAMP_HOVER_BASE,
   MIN_ORBIT_RADIUS,
   MAX_ORBIT_RADIUS,
+  SCROLL_MULT_TRACKPAD,
+  SCROLL_MULT_WHEEL,
 } from '../../src/config/constants.js';
 
 describe('constants', () => {
@@ -141,5 +143,16 @@ describe('constants', () => {
     // At scroll=0 (default): orbit radius = CAM_ORBIT_RADIUS (4.2, within bounds)
     const radiusDefault = Math.max(MIN_ORBIT_RADIUS, Math.min(MAX_ORBIT_RADIUS, CAM_ORBIT_RADIUS - 0 * 1.2));
     expect(radiusDefault).toBe(CAM_ORBIT_RADIUS);
+  });
+
+  /// Tests checklist items: [1, 5] — Feature 2.7
+  it('unit_constants_scroll_multipliers', () => {
+    expect(SCROLL_MULT_TRACKPAD).toBe(0.003);
+    expect(SCROLL_MULT_WHEEL).toBe(0.0008);
+  });
+
+  /// Tests checklist items: [1, 5] — Feature 2.7
+  it('unit_constants_scroll_multiplier_ratio', () => {
+    expect(SCROLL_MULT_TRACKPAD).toBeGreaterThan(SCROLL_MULT_WHEEL);
   });
 });

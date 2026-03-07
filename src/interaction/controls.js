@@ -1,5 +1,17 @@
+import { SCROLL_MULT_TRACKPAD, SCROLL_MULT_WHEEL } from '../config/constants.js';
+
+export function detectTrackpad(deltaY) {
+  return deltaY % 1 !== 0;
+}
+
+export function computeScrollDelta(scrollTarget, deltaY, isTrackpad) {
+  const mult = isTrackpad ? SCROLL_MULT_TRACKPAD : SCROLL_MULT_WHEEL;
+  return Math.max(-1.0, Math.min(1.0, scrollTarget + deltaY * mult));
+}
+
 export function initControls(state, camera, renderer) {
   let scrollTarget = 0;
+  let isTrackpad = false;
   const cursorEl = typeof document !== 'undefined' ? document.getElementById('cursor') : null;
   const cursorTrail = typeof document !== 'undefined' ? document.getElementById('cursorTrail') : null;
 
@@ -32,9 +44,11 @@ export function initControls(state, camera, renderer) {
     });
 
     window.addEventListener('wheel', (e) => {
-      scrollTarget += e.deltaY * 0.0008;
-      scrollTarget = Math.max(-1.0, Math.min(1.0, scrollTarget));
-    });
+      if (detectTrackpad(e.deltaY)) {
+        isTrackpad = true;
+      }
+      scrollTarget = computeScrollDelta(scrollTarget, e.deltaY, isTrackpad);
+    }, { passive: true });
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;

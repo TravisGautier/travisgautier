@@ -14,3 +14,5 @@ export const DAMP_SCROLL_BASE = Math.pow(1 - 0.10, 60);
 export const DAMP_CAM_XZ_BASE = Math.pow(1 - 0.15, 60);
 export const DAMP_CAM_Y_BASE = Math.pow(1 - 0.12, 60);
 export const DAMP_HOVER_BASE = Math.pow(1 - 0.05, 60);
+export const SCROLL_MULT_TRACKPAD = 0.003;
+export const SCROLL_MULT_WHEEL = 0.0008;
