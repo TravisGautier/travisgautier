@@ -33,6 +33,7 @@ export function createSetup(container, options = {}) {
       domElement: {},
       shadowMap: { enabled: config?.shadowsEnabled ?? true, type: THREE.PCFSoftShadowMap },
       setSize() {},
+      getPixelRatio() { return 1; },
       setPixelRatio() {},
       setClearColor() {},
       render() {},

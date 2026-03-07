@@ -16,6 +16,9 @@ import {
   MAX_ORBIT_RADIUS,
   SCROLL_MULT_TRACKPAD,
   SCROLL_MULT_WHEEL,
+  FPS_SAMPLE_COUNT,
+  FPS_THRESHOLD,
+  FPS_DOWNGRADE_PIXEL_RATIO_DROP,
 } from '../../src/config/constants.js';
 
 describe('constants', () => {
@@ -154,5 +157,23 @@ describe('constants', () => {
   /// Tests checklist items: [1, 5] — Feature 2.7
   it('unit_constants_scroll_multiplier_ratio', () => {
     expect(SCROLL_MULT_TRACKPAD).toBeGreaterThan(SCROLL_MULT_WHEEL);
+  });
+
+  /// Tests checklist items: [2] — Feature 3.6
+  it('unit_constants_fps_sample_count', () => {
+    expect(typeof FPS_SAMPLE_COUNT).toBe('number');
+    expect(FPS_SAMPLE_COUNT).toBe(120);
+  });
+
+  /// Tests checklist items: [2] — Feature 3.6
+  it('unit_constants_fps_threshold', () => {
+    expect(typeof FPS_THRESHOLD).toBe('number');
+    expect(FPS_THRESHOLD).toBe(0.022);
+  });
+
+  /// Tests checklist items: [2] — Feature 3.6
+  it('unit_constants_fps_downgrade_pixel_ratio_drop', () => {
+    expect(typeof FPS_DOWNGRADE_PIXEL_RATIO_DROP).toBe('number');
+    expect(FPS_DOWNGRADE_PIXEL_RATIO_DROP).toBe(0.5);
   });
 });

@@ -120,4 +120,29 @@ describe('module integration', () => {
     const setup = await import('../../src/scene/setup.js');
     expect(typeof setup.dispose).toBe('function');
   });
+
+  /// Tests checklist items: [1, 4] — Feature 3.6
+  it('int_fpsMonitor_module_exports', async () => {
+    const mod = await import('../../src/interaction/fpsMonitor.js');
+    expect(typeof mod.createFPSMonitor).toBe('function');
+    expect(typeof mod.applyRuntimeDowngrade).toBe('function');
+  });
+
+  /// Tests checklist items: [3] — Feature 3.6
+  it('int_animate_accepts_sampleFPS', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const src = fs.readFileSync(path.resolve('src/animate.js'), 'utf-8');
+    // sampleFPS should be in deps destructuring or called in loop
+    expect(src).toContain('sampleFPS');
+  });
+
+  /// Tests checklist items: [5] — Feature 3.6
+  it('int_main_imports_fpsMonitor', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const src = fs.readFileSync(path.resolve('src/main.js'), 'utf-8');
+    expect(src).toContain('createFPSMonitor');
+    expect(src).toContain('sampleFPS');
+  });
 });

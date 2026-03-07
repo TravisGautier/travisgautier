@@ -8,6 +8,7 @@ import { createLighting } from './scene/lighting.js';
 import { initControls } from './interaction/controls.js';
 import { initCursor } from './interaction/cursor.js';
 import { updateHoldProgress } from './interaction/holdMechanic.js';
+import { createFPSMonitor, applyRuntimeDowngrade } from './interaction/fpsMonitor.js';
 import { initOverlay, showContextLostMessage } from './ui/overlay.js';
 import { startAnimateLoop } from './animate.js';
 
@@ -33,6 +34,8 @@ function init() {
   const { updateCursor } = initCursor();
   const { updateOverlay } = initOverlay();
 
+  const sampleFPS = createFPSMonitor(() => applyRuntimeDowngrade(renderer, particleMat, skyMat));
+
   animLoop = startAnimateLoop({
     state, scene, camera, renderer,
     portalGroup, portalMatA, portalMatB, edgeMat,
@@ -41,6 +44,7 @@ function init() {
     particles, particleSpeeds, particleMat,
     updateHoldProgress, updateOverlay, updateCursor,
     getScrollTarget,
+    sampleFPS,
   });
 }
 

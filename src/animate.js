@@ -10,6 +10,7 @@ export function startAnimateLoop(deps) {
     particles, particleSpeeds, particleMat,
     updateHoldProgress, updateOverlay, updateCursor,
     getScrollTarget,
+    sampleFPS,
   } = deps;
 
   const clock = new THREE.Clock();
@@ -31,6 +32,7 @@ export function startAnimateLoop(deps) {
   function animate() {
     animationId = requestAnimationFrame(animate);
     const dt = Math.min(clock.getDelta(), DT_CLAMP_MAX);
+    sampleFPS?.(dt);
     state.time += dt;
     const wrappedTime = state.time % TIME_WRAP_PERIOD;
 
