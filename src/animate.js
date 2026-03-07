@@ -97,10 +97,14 @@ export function startAnimateLoop(deps) {
     skyMat.uniforms.uHold.value = p;
     skyMat.uniforms.uTime.value = wrappedTime;
 
-    cloudSeaMat.uniforms.uTime.value = wrappedTime;
-    cloudSeaMat.uniforms.uHold.value = p;
-    cloudSea2.material.uniforms.uTime.value = wrappedTime;
-    cloudSea2.material.uniforms.uHold.value = p;
+    if (cloudSeaMat) {
+      cloudSeaMat.uniforms.uTime.value = wrappedTime;
+      cloudSeaMat.uniforms.uHold.value = p;
+    }
+    if (cloudSea2) {
+      cloudSea2.material.uniforms.uTime.value = wrappedTime;
+      cloudSea2.material.uniforms.uHold.value = p;
+    }
 
     const fogR = 0.75 * (1 - p) + 0.68 * p;
     const fogG = 0.83 * (1 - p) + 0.72 * p;
@@ -115,7 +119,7 @@ export function startAnimateLoop(deps) {
     );
 
     const positions = particles.geometry.attributes.position.array;
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < particleSpeeds.length; i++) {
       positions[i * 3 + 1] += particleSpeeds[i];
       positions[i * 3] += Math.sin(state.time * 0.3 + i) * 0.001;
       if (positions[i * 3 + 1] > 8) {

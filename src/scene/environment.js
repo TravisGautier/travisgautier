@@ -5,42 +5,52 @@ import skyFrag from '../shaders/sky.frag';
 import clouds1Frag from '../shaders/clouds1.frag';
 import clouds2Frag from '../shaders/clouds2.frag';
 
-export function createEnvironment(scene) {
+export function createEnvironment(scene, config) {
+  const cloudLayers = config?.cloudLayers ?? 2;
+  const particleCount = config?.particleCount ?? 200;
+  const skyCloudNoise = config?.skyCloudNoise ?? true;
+
   // Sky dome
   const skyGeo = new THREE.SphereGeometry(200, 64, 32);
   const skyMat = new THREE.ShaderMaterial({
     side: THREE.BackSide,
     depthWrite: false,
-    uniforms: { uHold: { value: 0 }, uTime: { value: 0 } },
+    uniforms: { uHold: { value: 0 }, uTime: { value: 0 }, uSkyCloudNoise: { value: skyCloudNoise ? 1.0 : 0.0 } },
     vertexShader: skyVert,
     fragmentShader: skyFrag,
   });
   const sky = new THREE.Mesh(skyGeo, skyMat);
   scene.add(sky);
 
-  // Cloud sea layer 1
+  // Cloud sea layers
   const cloudSeaGeo = new THREE.PlaneGeometry(300, 300, 1, 1);
-  const cloudSeaMat = new THREE.ShaderMaterial({
-    transparent: true, side: THREE.DoubleSide, depthWrite: false,
-    uniforms: { uTime: { value: 0 }, uHold: { value: 0 } },
-    vertexShader: portalVert,
-    fragmentShader: clouds1Frag,
-  });
-  const cloudSea = new THREE.Mesh(cloudSeaGeo, cloudSeaMat);
-  cloudSea.rotation.x = -Math.PI / 2;
-  cloudSea.position.y = -3.5;
-  scene.add(cloudSea);
+  let cloudSeaMat = null;
+  let cloudSea2 = null;
 
-  // Cloud sea layer 2
-  const cloudSea2 = new THREE.Mesh(cloudSeaGeo.clone(), new THREE.ShaderMaterial({
-    transparent: true, side: THREE.DoubleSide, depthWrite: false,
-    uniforms: { uTime: { value: 0 }, uHold: { value: 0 } },
-    vertexShader: portalVert,
-    fragmentShader: clouds2Frag,
-  }));
-  cloudSea2.rotation.x = -Math.PI / 2;
-  cloudSea2.position.y = -5.5;
-  scene.add(cloudSea2);
+  if (cloudLayers >= 1) {
+    cloudSeaMat = new THREE.ShaderMaterial({
+      transparent: true, side: THREE.DoubleSide, depthWrite: false,
+      uniforms: { uTime: { value: 0 }, uHold: { value: 0 } },
+      vertexShader: portalVert,
+      fragmentShader: clouds1Frag,
+    });
+    const cloudSea = new THREE.Mesh(cloudSeaGeo, cloudSeaMat);
+    cloudSea.rotation.x = -Math.PI / 2;
+    cloudSea.position.y = -3.5;
+    scene.add(cloudSea);
+  }
+
+  if (cloudLayers >= 2) {
+    cloudSea2 = new THREE.Mesh(cloudSeaGeo.clone(), new THREE.ShaderMaterial({
+      transparent: true, side: THREE.DoubleSide, depthWrite: false,
+      uniforms: { uTime: { value: 0 }, uHold: { value: 0 } },
+      vertexShader: portalVert,
+      fragmentShader: clouds2Frag,
+    }));
+    cloudSea2.rotation.x = -Math.PI / 2;
+    cloudSea2.position.y = -5.5;
+    scene.add(cloudSea2);
+  }
 
   // Mountains
   const mtMat = new THREE.MeshStandardMaterial({ color: 0x8090A4, roughness: 0.85, metalness: 0.0 });
@@ -71,7 +81,6 @@ export function createEnvironment(scene) {
   });
 
   // Particles
-  const particleCount = 200;
   const particleGeo = new THREE.BufferGeometry();
   const particlePos = new Float32Array(particleCount * 3);
   const particleSpeeds = [];

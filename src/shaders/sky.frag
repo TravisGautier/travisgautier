@@ -1,6 +1,7 @@
 precision highp float;
 uniform float uHold;
 uniform float uTime;
+uniform float uSkyCloudNoise;
 varying vec3 vPos;
 varying vec2 vUv;
 #include "noise.glsl"
@@ -19,7 +20,7 @@ void main(){
   vec2 cloudUV = vPos.xz * 0.008;
   float c1 = snoise(cloudUV + uTime * 0.005) * 0.5 + 0.5;
   float c2 = snoise(cloudUV * 2.3 - uTime * 0.008) * 0.5 + 0.5;
-  float cloud = smoothstep(0.38, 0.72, c1 * c2) * cloudH * 0.35;
+  float cloud = uSkyCloudNoise * smoothstep(0.38, 0.72, c1 * c2) * cloudH * 0.35;
   col = mix(col, vec3(1.0, 0.98, 0.96), cloud);
   gl_FragColor = vec4(col, 1.0);
 }
