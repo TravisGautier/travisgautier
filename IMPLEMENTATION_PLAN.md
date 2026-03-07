@@ -872,7 +872,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 - [x] 1.3. Extract JS into module files
 - [x] 1.4. Move shaders to `.glsl` files with `vite-plugin-glsl`
 - [x] 1.5. Self-host fonts
-- [ ] 1.6. Verify parity with prototype
+- [x] 1.6. Verify parity with prototype
 
 ### Phase 2 — Resilience
 - [x] 2.1. Add dt clamping and `visibilitychange` handling
@@ -880,7 +880,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 - [x] 2.3. Add `precision highp float` to all fragment shaders
 - [x] 2.4. Add time wrapping (`% 10000.0`)
 - [x] 2.5. Convert lerps to frame-rate-independent damping
-- [ ] 2.6. Add scroll zoom bounds clamping
+- [x] 2.6. Add scroll zoom bounds clamping
 - [ ] 2.7. Add trackpad vs mouse wheel detection
 - [ ] 2.8. Add right-click prevention + memory disposal
 
