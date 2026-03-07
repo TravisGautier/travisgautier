@@ -888,7 +888,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 - [x] 3.1. Integrate `detect-gpu` and build quality config
 - [x] 3.2. Wire config into `temple.js` (pillar count, fluting)
 - [x] 3.3. Wire config into `environment.js` (cloud layers, sky noise, particles)
-- [ ] 3.4. Wire config into `setup.js` (shadows, pixel ratio)
+- [x] 3.4. Wire config into `setup.js` (shadows, pixel ratio)
 - [ ] 3.5. Add loading sequence with font + GPU detection
 - [ ] 3.6. Add FPS monitor with runtime downgrade
 
