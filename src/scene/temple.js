@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 
-export function createTemple(scene) {
+export function createTemple(scene, config) {
+  const pillarCount = config?.pillarCount ?? 12;
+  const pillarFluting = config?.pillarFluting ?? true;
+
   const marbleWhite = new THREE.MeshStandardMaterial({ color: 0xE8E0D4, metalness: 0.02, roughness: 0.45 });
   const marbleCream = new THREE.MeshStandardMaterial({ color: 0xF0E8DC, metalness: 0.02, roughness: 0.55 });
   const marbleWarm = new THREE.MeshStandardMaterial({ color: 0xD8CCBC, metalness: 0.05, roughness: 0.5 });
@@ -33,8 +36,12 @@ export function createTemple(scene) {
   ring2.rotation.x = -Math.PI / 2; ring2.position.y = 0.01; scene.add(ring2);
 
   // Pillars
-  const pillarCount = 12;
   const pillarRadius = 5.2;
+  const baseGeo = new THREE.BoxGeometry(0.6, 0.3, 0.6);
+  const shaftGeo = new THREE.CylinderGeometry(0.17, 0.22, 3.8, 20);
+  const fluteGeo = pillarFluting ? new THREE.CylinderGeometry(0.018, 0.024, 3.7, 4) : null;
+  const echinusGeo = new THREE.CylinderGeometry(0.28, 0.17, 0.15, 16);
+  const abacusGeo = new THREE.BoxGeometry(0.6, 0.1, 0.6);
 
   for (let i = 0; i < pillarCount; i++) {
     const angle = (i / pillarCount) * Math.PI * 2;
@@ -44,25 +51,27 @@ export function createTemple(scene) {
     const pillarGroup = new THREE.Group();
     pillarGroup.position.set(px, 0, pz);
 
-    const base = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.3, 0.6), marbleCream);
+    const base = new THREE.Mesh(baseGeo, marbleCream);
     base.position.y = 0.15; base.castShadow = true; base.receiveShadow = true;
     pillarGroup.add(base);
 
-    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.22, 3.8, 20), marbleWhite);
+    const shaft = new THREE.Mesh(shaftGeo, marbleWhite);
     shaft.position.y = 2.2; shaft.castShadow = true; shaft.receiveShadow = true;
     pillarGroup.add(shaft);
 
-    for (let f = 0; f < 8; f++) {
-      const flAngle = (f / 8) * Math.PI * 2;
-      const flute = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.024, 3.7, 4), marbleWarm);
-      flute.position.set(Math.cos(flAngle) * 0.19, 2.2, Math.sin(flAngle) * 0.19);
-      pillarGroup.add(flute);
+    if (pillarFluting) {
+      for (let f = 0; f < 8; f++) {
+        const flAngle = (f / 8) * Math.PI * 2;
+        const flute = new THREE.Mesh(fluteGeo, marbleWarm);
+        flute.position.set(Math.cos(flAngle) * 0.19, 2.2, Math.sin(flAngle) * 0.19);
+        pillarGroup.add(flute);
+      }
     }
 
-    const echinus = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.17, 0.15, 16), marbleCream);
+    const echinus = new THREE.Mesh(echinusGeo, marbleCream);
     echinus.position.y = 4.15; pillarGroup.add(echinus);
 
-    const abacus = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.1, 0.6), marbleWhite);
+    const abacus = new THREE.Mesh(abacusGeo, marbleWhite);
     abacus.position.y = 4.28; pillarGroup.add(abacus);
 
     scene.add(pillarGroup);
