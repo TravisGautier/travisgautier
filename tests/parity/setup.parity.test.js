@@ -43,4 +43,22 @@ describe('setup parity', () => {
     const src = fs.readFileSync(path.join(projectRoot, 'src', 'scene', 'setup.js'), 'utf-8');
     expect(src).toContain('setClearColor(0x87BADB)');
   });
+
+  /// Tests checklist items: [3, 6] — Feature 2.8
+  it('parity_setup_dispose_export', () => {
+    const src = fs.readFileSync(path.join(projectRoot, 'src', 'scene', 'setup.js'), 'utf-8');
+    expect(src).toContain('export function dispose');
+  });
+
+  /// Tests checklist items: [3] — Feature 2.8
+  it('parity_setup_dispose_traverses', () => {
+    const src = fs.readFileSync(path.join(projectRoot, 'src', 'scene', 'setup.js'), 'utf-8');
+    expect(src).toContain('scene.traverse');
+  });
+
+  /// Tests checklist items: [5] — Feature 2.8
+  it('parity_setup_dispose_renderer', () => {
+    const src = fs.readFileSync(path.join(projectRoot, 'src', 'scene', 'setup.js'), 'utf-8');
+    expect(src).toContain('renderer.dispose()');
+  });
 });

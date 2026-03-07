@@ -57,5 +57,10 @@ export function initControls(state, camera, renderer) {
     });
   }
 
+  if (typeof renderer.domElement.addEventListener === 'function') {
+    renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+    renderer.domElement.addEventListener('mousedown', (e) => e.preventDefault());
+  }
+
   return { getScrollTarget: () => scrollTarget };
 }

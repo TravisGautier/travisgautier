@@ -26,4 +26,15 @@ describe('controls parity', () => {
   it('parity_controls_isTrackpad_latch', () => {
     expect(src).toContain('isTrackpad = true');
   });
+
+  /// Tests checklist items: [1] — Feature 2.8
+  it('parity_controls_contextmenu_prevention', () => {
+    expect(src).toContain('contextmenu');
+    expect(src).toContain('preventDefault');
+  });
+
+  /// Tests checklist items: [2] — Feature 2.8
+  it('parity_controls_canvas_mousedown_prevention', () => {
+    expect(src).toMatch(/domElement[\s\S]*mousedown[\s\S]*preventDefault/);
+  });
 });

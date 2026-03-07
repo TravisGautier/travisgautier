@@ -54,3 +54,20 @@ export function createSetup(container, options = {}) {
 
   return { scene, camera, renderer };
 }
+
+export function dispose(scene, renderer) {
+  scene.traverse((obj) => {
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) {
+      if (Array.isArray(obj.material)) {
+        obj.material.forEach((m) => m.dispose());
+      } else {
+        obj.material.dispose();
+      }
+    }
+  });
+  renderer.dispose();
+  if (typeof renderer.forceContextLoss === 'function') {
+    renderer.forceContextLoss();
+  }
+}

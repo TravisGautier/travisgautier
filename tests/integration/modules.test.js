@@ -107,4 +107,10 @@ describe('module integration', () => {
     expect(result).toBeDefined();
     expect(typeof result.updateOverlay).toBe('function');
   });
+
+  /// Tests checklist items: [6] — Feature 2.8
+  it('int_setup_exports_dispose', async () => {
+    const setup = await import('../../src/scene/setup.js');
+    expect(typeof setup.dispose).toBe('function');
+  });
 });
