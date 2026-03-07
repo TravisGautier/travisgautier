@@ -886,7 +886,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 
 ### Phase 3 — Adaptive Quality
 - [x] 3.1. Integrate `detect-gpu` and build quality config
-- [ ] 3.2. Wire config into `temple.js` (pillar count, fluting)
+- [x] 3.2. Wire config into `temple.js` (pillar count, fluting)
 - [ ] 3.3. Wire config into `environment.js` (cloud layers, sky noise, particles)
 - [ ] 3.4. Wire config into `setup.js` (shadows, pixel ratio)
 - [ ] 3.5. Add loading sequence with font + GPU detection
