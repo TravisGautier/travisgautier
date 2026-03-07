@@ -32,6 +32,22 @@ describe('DOM parity', () => {
     expect(html).not.toMatch(/fonts\.googleapis\.com/);
   });
 
+  /// Tests checklist items: [1] — Feature 3.5
+  it('build_html_loading_div_exists', () => {
+    expect(html).toContain('id="loading"');
+
+    const loadingMatch = html.match(/<div[^>]*id=["']loading["'][^>]*>/);
+    expect(loadingMatch).not.toBeNull();
+
+    const loadingTag = loadingMatch[0];
+    expect(loadingTag).toMatch(/z-index:\s*1000/);
+    expect(loadingTag).toMatch(/background:\s*#c8dcea/);
+
+    const loadingSection = html.match(/<div[^>]*id=["']loading["'][^>]*>[\s\S]*?<\/div>/);
+    expect(loadingSection).not.toBeNull();
+    expect(loadingSection[0]).toContain('Travis Gautier');
+  });
+
   /// Tests checklist items: [11, 12]
   it('parity_dom_transition_css', () => {
     const transA = html.match(/<div[^>]*id="transitionA"[\s\S]*?<\/div>\s*<\/div>/);

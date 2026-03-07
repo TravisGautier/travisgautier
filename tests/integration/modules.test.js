@@ -108,6 +108,13 @@ describe('module integration', () => {
     expect(typeof result.updateOverlay).toBe('function');
   });
 
+  /// Tests checklist items: [3] — Feature 3.5
+  it('int_loading_module_exports', async () => {
+    const mod = await import('../../src/ui/loading.js');
+    expect(typeof mod.loadAssets).toBe('function');
+    expect(typeof mod.hideLoading).toBe('function');
+  });
+
   /// Tests checklist items: [6] — Feature 2.8
   it('int_setup_exports_dispose', async () => {
     const setup = await import('../../src/scene/setup.js');

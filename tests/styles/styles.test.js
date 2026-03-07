@@ -161,6 +161,24 @@ describe('styles', () => {
     expect(mediaContent).toMatch(/\.bottom-bar\s*\{[^}]*padding/);
   });
 
+  // --- LOADING SEQUENCE CSS TESTS ---
+
+  /// Tests checklist items: [2] — Feature 3.5
+  it('build_css_animation_paused', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    expect(css).toMatch(/\.header\s*\{[^}]*animation-play-state:\s*paused/s);
+    expect(css).toMatch(/\.bottom-bar\s*\{[^}]*animation-play-state:\s*paused/s);
+  });
+
+  /// Tests checklist items: [2] — Feature 3.5
+  it('build_css_scene_ready_unpauses', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    expect(css).toMatch(/body\.scene-ready\s+\.header\s*\{[^}]*animation-play-state:\s*running/s);
+    expect(css).toMatch(/body\.scene-ready\s+\.bottom-bar\s*\{[^}]*animation-play-state:\s*running/s);
+  });
+
   // --- INTEGRATION TESTS ---
 
   /// Tests checklist items: [5]
