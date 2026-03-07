@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GOLD_ANGLE, PURPLE_ANGLE, CAM_ORBIT_RADIUS, CAM_HEIGHT, LOOK_TARGET, DT_CLAMP_MAX, TIME_WRAP_PERIOD, DAMP_ANGLE_BASE, DAMP_SCROLL_BASE, DAMP_CAM_XZ_BASE, DAMP_CAM_Y_BASE, DAMP_HOVER_BASE } from './config/constants.js';
+import { GOLD_ANGLE, PURPLE_ANGLE, CAM_ORBIT_RADIUS, MIN_ORBIT_RADIUS, MAX_ORBIT_RADIUS, CAM_HEIGHT, LOOK_TARGET, DT_CLAMP_MAX, TIME_WRAP_PERIOD, DAMP_ANGLE_BASE, DAMP_SCROLL_BASE, DAMP_CAM_XZ_BASE, DAMP_CAM_Y_BASE, DAMP_HOVER_BASE } from './config/constants.js';
 
 export function startAnimateLoop(deps) {
   const {
@@ -47,7 +47,7 @@ export function startAnimateLoop(deps) {
     portalGroup.position.y = 1.0 + Math.sin(state.time * 0.4) * 0.015;
 
     const orbitAngle = state.currentAngle + state.mouse.nx * 0.12;
-    const orbitRadius = CAM_ORBIT_RADIUS - state.scroll * 1.2;
+    const orbitRadius = Math.max(MIN_ORBIT_RADIUS, Math.min(MAX_ORBIT_RADIUS, CAM_ORBIT_RADIUS - state.scroll * 1.2));
     const camY = CAM_HEIGHT + state.scroll * 0.4 + state.mouse.ny * 0.25;
 
     const targetX = Math.sin(orbitAngle) * orbitRadius;

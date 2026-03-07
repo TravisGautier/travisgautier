@@ -12,6 +12,8 @@ import {
   DAMP_CAM_XZ_BASE,
   DAMP_CAM_Y_BASE,
   DAMP_HOVER_BASE,
+  MIN_ORBIT_RADIUS,
+  MAX_ORBIT_RADIUS,
 } from '../../src/config/constants.js';
 
 describe('constants', () => {
@@ -112,5 +114,32 @@ describe('constants', () => {
     expect(1 - Math.pow(DAMP_CAM_XZ_BASE, dt60)).toBeCloseTo(0.15, 10);
     expect(1 - Math.pow(DAMP_CAM_Y_BASE, dt60)).toBeCloseTo(0.12, 10);
     expect(1 - Math.pow(DAMP_HOVER_BASE, dt60)).toBeCloseTo(0.05, 10);
+  });
+
+  /// Tests checklist items: [1] — Feature 2.6
+  it('unit_constants_orbit_bounds', () => {
+    expect(MIN_ORBIT_RADIUS).toBe(2.8);
+    expect(MAX_ORBIT_RADIUS).toBe(5.0);
+  });
+
+  /// Tests checklist items: [1] — Feature 2.6
+  it('unit_constants_orbit_bounds_range', () => {
+    expect(MIN_ORBIT_RADIUS).toBeLessThan(CAM_ORBIT_RADIUS);
+    expect(CAM_ORBIT_RADIUS).toBeLessThan(MAX_ORBIT_RADIUS);
+  });
+
+  /// Tests checklist items: [1, 3] — Feature 2.6
+  it('unit_orbit_clamp_behavior', () => {
+    // At scroll=1.0 (max zoom in): 4.2 - 1.0 * 1.2 = 3.0 (within bounds)
+    const radiusZoomIn = Math.max(MIN_ORBIT_RADIUS, Math.min(MAX_ORBIT_RADIUS, CAM_ORBIT_RADIUS - 1.0 * 1.2));
+    expect(radiusZoomIn).toBe(3.0);
+
+    // At scroll=-1.0 (max zoom out): 4.2 - (-1.0) * 1.2 = 5.4 → clamped to 5.0
+    const radiusZoomOut = Math.max(MIN_ORBIT_RADIUS, Math.min(MAX_ORBIT_RADIUS, CAM_ORBIT_RADIUS - (-1.0) * 1.2));
+    expect(radiusZoomOut).toBe(5.0);
+
+    // At scroll=0 (default): orbit radius = CAM_ORBIT_RADIUS (4.2, within bounds)
+    const radiusDefault = Math.max(MIN_ORBIT_RADIUS, Math.min(MAX_ORBIT_RADIUS, CAM_ORBIT_RADIUS - 0 * 1.2));
+    expect(radiusDefault).toBe(CAM_ORBIT_RADIUS);
   });
 });

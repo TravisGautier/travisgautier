@@ -147,4 +147,21 @@ describe('animate parity', () => {
     expect(src).toContain('function dampFactor(base, dt)');
     expect(src).toContain('1 - Math.pow(base, dt)');
   });
+
+  /// Tests checklist items: [2, 3, 4] — Feature 2.6
+  it('parity_anim_orbit_clamped', () => {
+    expect(src).toContain('MIN_ORBIT_RADIUS');
+    expect(src).toContain('MAX_ORBIT_RADIUS');
+    expect(src).toContain('Math.max(MIN_ORBIT_RADIUS');
+    expect(src).toContain('Math.min(MAX_ORBIT_RADIUS');
+  });
+
+  /// Tests checklist items: [2] — Feature 2.6
+  it('int_orbit_bounds_constants_imported', () => {
+    // The import statement in animate.js must include both orbit bound constants
+    const importMatch = src.match(/import\s*\{[^}]*\}\s*from\s*['"]\.\/config\/constants\.js['"]/s);
+    expect(importMatch).not.toBeNull();
+    expect(importMatch[0]).toContain('MIN_ORBIT_RADIUS');
+    expect(importMatch[0]).toContain('MAX_ORBIT_RADIUS');
+  });
 });
