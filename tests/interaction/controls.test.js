@@ -1360,3 +1360,150 @@ describe('gyroscope controls', () => {
     expect(mockRequestPermission).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('responsive controls', () => {
+  let state;
+  let mockDismiss;
+  let cursorEl;
+  let cursorTrail;
+
+  beforeEach(() => {
+    vi.resetModules();
+    state = {
+      mouse: { x: 0, y: 0, nx: 0, ny: 0 },
+      scroll: 0,
+      hoverPortal: false,
+      time: 0,
+      holding: false,
+      holdProgress: 0,
+      reversing: false,
+      currentAngle: 0.25,
+      targetAngle: 0.25,
+      hasEngaged: false,
+      transitioning: false,
+      dwellTimer: 0,
+    };
+    mockDismiss = vi.fn();
+    cursorEl = { classList: { add: vi.fn(), remove: vi.fn() } };
+    cursorTrail = { classList: { add: vi.fn(), remove: vi.fn() } };
+
+    vi.stubGlobal('document', {
+      getElementById: vi.fn((id) => {
+        if (id === 'cursor') return cursorEl;
+        if (id === 'cursorTrail') return cursorTrail;
+        return null;
+      }),
+      addEventListener: vi.fn(),
+    });
+    vi.stubGlobal('performance', { now: vi.fn(() => 0) });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  async function setupResponsiveTest(qualityConfig) {
+    const listeners = {};
+    vi.stubGlobal('window', {
+      innerWidth: 1920,
+      innerHeight: 1080,
+      addEventListener: vi.fn((event, handler, opts) => {
+        if (!listeners[event]) listeners[event] = [];
+        listeners[event].push({ handler, opts });
+      }),
+    });
+
+    const domListeners = {};
+    const domListenerOpts = {};
+    const mockRenderer = {
+      domElement: {
+        addEventListener: vi.fn((event, handler, opts) => {
+          if (!domListeners[event]) domListeners[event] = [];
+          domListeners[event].push(handler);
+          if (!domListenerOpts[event]) domListenerOpts[event] = [];
+          domListenerOpts[event].push(opts);
+        }),
+      },
+    };
+
+    const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
+
+    const { initControls } = await import('../../src/interaction/controls.js');
+    initControls(state, mockCamera, mockRenderer, [], mockDismiss, qualityConfig || {});
+
+    return { listeners, domListeners, domListenerOpts, mockCamera, mockRenderer };
+  }
+
+  /// Tests checklist items: [9] — Feature 5.5
+  it('unit_resize_refactored', async () => {
+    const { listeners, mockCamera } = await setupResponsiveTest();
+
+    // Resize listener must be registered
+    expect(listeners['resize']).toBeDefined();
+    expect(listeners['resize'].length).toBeGreaterThan(0);
+
+    // Trigger resize
+    const resizeEntry = listeners['resize'][0];
+    resizeEntry.handler();
+
+    // Camera aspect ratio should be updated
+    expect(mockCamera.aspect).toBe(1920 / 1080);
+    expect(mockCamera.updateProjectionMatrix).toHaveBeenCalled();
+  });
+
+  /// Tests checklist items: [7, 9] — Feature 5.5
+  it('unit_orientationchange_handler', async () => {
+    const { listeners } = await setupResponsiveTest();
+
+    // Either screen.orientation 'change' or window 'orientationchange' must be registered
+    const hasOrientation = listeners['orientationchange'] !== undefined;
+    const hasScreenOrientation = listeners['change'] !== undefined;
+
+    expect(hasOrientation || hasScreenOrientation).toBe(true);
+  });
+
+  /// Tests checklist items: [8] — Feature 5.5
+  it('unit_touchmove_prevents_default', async () => {
+    const { domListeners, domListenerOpts } = await setupResponsiveTest();
+
+    // touchmove must be registered
+    expect(domListeners['touchmove']).toBeDefined();
+
+    // touchmove must use { passive: false } to allow preventDefault
+    const touchmoveOpts = domListenerOpts['touchmove'];
+    expect(touchmoveOpts).toBeDefined();
+    const hasPassiveFalse = touchmoveOpts.some(opts =>
+      opts && typeof opts === 'object' && opts.passive === false
+    );
+    expect(hasPassiveFalse).toBe(true);
+
+    // Simulate touchmove — preventDefault must be called
+    const mockEvent = {
+      touches: [{ clientX: 500, clientY: 300 }],
+      preventDefault: vi.fn(),
+    };
+    const touchmoveHandler = domListeners['touchmove'][0];
+    touchmoveHandler(mockEvent);
+    expect(mockEvent.preventDefault).toHaveBeenCalled();
+  });
+
+  /// Tests checklist items: [7] — Feature 5.5
+  it('unit_orientation_timeout', async () => {
+    const originalSetTimeout = globalThis.setTimeout;
+    const setTimeoutSpy = vi.fn(originalSetTimeout);
+    vi.stubGlobal('setTimeout', setTimeoutSpy);
+
+    const { listeners } = await setupResponsiveTest();
+
+    // Trigger orientation change
+    const orientationEntry = listeners['orientationchange'] || listeners['change'];
+    expect(orientationEntry).toBeDefined();
+    orientationEntry[0].handler();
+
+    // setTimeout should be called with a delay (typically ~100ms for orientation settle)
+    expect(setTimeoutSpy).toHaveBeenCalled();
+    const delayArg = setTimeoutSpy.mock.calls.find(call => call[1] >= 50 && call[1] <= 200);
+    expect(delayArg).toBeDefined();
+  });
+});

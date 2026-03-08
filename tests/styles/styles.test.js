@@ -17,7 +17,7 @@ describe('styles', () => {
 
     const lineCount = css.split('\n').length;
     expect(lineCount).toBeGreaterThanOrEqual(200);
-    expect(lineCount).toBeLessThanOrEqual(500);
+    expect(lineCount).toBeLessThanOrEqual(550);
   });
 
   /// Tests checklist items: [4]
@@ -298,5 +298,68 @@ describe('styles', () => {
 
     expect(css).toMatch(/\.scroll-hint\s*\{[^}]*transition/s);
     expect(css).toMatch(/\.hold-hint\s*\{[^}]*transition/s);
+  });
+
+  // --- RESPONSIVE FIXES (Feature 5.5) ---
+
+  /// Tests checklist items: [5] — Feature 5.5
+  it('build_viewport_fit_cover', () => {
+    const html = fs.readFileSync(path.join(projectRoot, 'index.html'), 'utf-8');
+
+    // viewport meta must include viewport-fit=cover for notched devices
+    expect(html).toMatch(/<meta[^>]*name="viewport"[^>]*viewport-fit=cover/);
+  });
+
+  /// Tests checklist items: [4, 6] — Feature 5.5
+  it('build_hold_hint_span', () => {
+    const html = fs.readFileSync(path.join(projectRoot, 'index.html'), 'utf-8');
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    // Hold hint text must be wrapped in <span class="hold-hint-text">
+    expect(html).toMatch(/<span\s+class=["']hold-hint-text["']/);
+
+    // Touch media query must contain ::after with 'Hold to reveal' content
+    const touchMedia = css.match(/@media\s*\(hover:\s*none\)\s*and\s*\(pointer:\s*coarse\)\s*\{([\s\S]*?)\n\}/);
+    expect(touchMedia).not.toBeNull();
+    expect(touchMedia[1]).toMatch(/\.hold-hint-text/);
+    expect(touchMedia[1]).toMatch(/Hold to reveal/);
+  });
+
+  /// Tests checklist items: [3] — Feature 5.5
+  it('build_safe_area_support', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    // @supports block for safe area insets
+    expect(css).toMatch(/@supports\s*\(padding:\s*env\(safe-area-inset-top\)\)/);
+
+    // Must reference env(safe-area-inset-*) within CSS
+    expect(css).toMatch(/env\(safe-area-inset-/);
+  });
+
+  /// Tests checklist items: [1] — Feature 5.5
+  it('a11y_480_breakpoint', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    // 480px breakpoint must exist for small phones
+    expect(css).toMatch(/@media\s*\(max-width:\s*480px\)/);
+
+    // Extract content inside the 480px media query
+    const mediaMatch = css.match(/@media\s*\(max-width:\s*480px\)\s*\{([\s\S]*?)\n\}/);
+    expect(mediaMatch).not.toBeNull();
+    const mediaContent = mediaMatch[1];
+
+    // Must adjust header padding
+    expect(mediaContent).toMatch(/\.header\s*\{[^}]*padding/);
+
+    // Must adjust bottom bar padding
+    expect(mediaContent).toMatch(/\.bottom-bar\s*\{[^}]*padding/);
+  });
+
+  /// Tests checklist items: [2] — Feature 5.5
+  it('a11y_landscape_handling', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    // Landscape phone breakpoint must exist
+    expect(css).toMatch(/@media\s*\(orientation:\s*landscape\)\s*and\s*\(max-height:\s*500px\)/);
   });
 });

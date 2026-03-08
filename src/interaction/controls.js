@@ -123,10 +123,15 @@ export function initControls(state, camera, renderer, portalSurfaces = [], dismi
       scrollTarget = computeScrollDelta(scrollTarget, e.deltaY, isTrackpad);
     }, { passive: true });
 
-    window.addEventListener('resize', () => {
+    function handleResize() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      if (renderer.setSize) renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    window.addEventListener('resize', handleResize);
+
+    window.addEventListener('orientationchange', () => {
+      setTimeout(handleResize, 100);
     });
 
     if (qualityConfig.useGyroscope) {
@@ -171,6 +176,7 @@ export function initControls(state, camera, renderer, portalSurfaces = [], dismi
     }, { passive: false });
 
     renderer.domElement.addEventListener('touchmove', (e) => {
+      if (e.preventDefault) e.preventDefault();
       if (e.touches.length === 2) {
         const dist = computePinchDist(e.touches[0], e.touches[1]);
         if (lastPinchDist > 0) {
@@ -183,7 +189,7 @@ export function initControls(state, camera, renderer, portalSurfaces = [], dismi
         state.mouse.nx = (t.clientX / window.innerWidth) * 2 - 1;
         state.mouse.ny = -(t.clientY / window.innerHeight) * 2 + 1;
       }
-    }, { passive: true });
+    }, { passive: false });
 
     renderer.domElement.addEventListener('touchend', () => {
       touchHolding = false;

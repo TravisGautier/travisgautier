@@ -120,6 +120,13 @@ canvas { display: block; }
   .header-link {
     cursor: auto;
   }
+  .hold-hint-text {
+    font-size: 0;
+  }
+  .hold-hint-text::after {
+    content: 'Hold to reveal';
+    font-size: 0.85rem;
+  }
 }
 
 .overlay {
@@ -426,4 +433,24 @@ body.scene-ready .bottom-bar {
   .side-label.right { right: 1.5rem; }
   .side-label .label-title { font-size: 1.1rem; }
   .bottom-bar { padding: 1.5rem 2rem; }
+}
+
+@supports (padding: env(safe-area-inset-top)) {
+  .header {
+    padding-top: calc(2rem + env(safe-area-inset-top));
+    padding-left: calc(2.5rem + env(safe-area-inset-left));
+    padding-right: calc(2.5rem + env(safe-area-inset-right));
+  }
+  .bottom-bar {
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 480px) {
+  .header { padding: 1rem 1.2rem; }
+  .bottom-bar { padding: 1rem 1.2rem; }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .side-label .label-desc { display: none; }
 }
