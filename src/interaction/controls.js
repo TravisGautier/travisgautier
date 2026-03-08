@@ -21,13 +21,14 @@ export function initControls(state, camera, renderer, portalSurfaces = [], dismi
   let isTrackpad = false;
   let mouseHolding = false;
   let keyboardHolding = false;
+  let touchHolding = false;
   const cursorEl = typeof document !== 'undefined' ? document.getElementById('cursor') : null;
   const cursorTrail = typeof document !== 'undefined' ? document.getElementById('cursorTrail') : null;
   const raycaster = new THREE.Raycaster();
   let lastRaycast = 0;
 
   function updateHoldingState() {
-    state.holding = mouseHolding || keyboardHolding;
+    state.holding = mouseHolding || keyboardHolding || touchHolding;
     if (state.holding) {
       cursorEl?.classList.add('holding');
       cursorTrail?.classList.add('holding');
@@ -116,6 +117,31 @@ export function initControls(state, camera, renderer, portalSurfaces = [], dismi
   if (typeof renderer.domElement.addEventListener === 'function') {
     renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
     renderer.domElement.addEventListener('mousedown', (e) => e.preventDefault());
+
+    renderer.domElement.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      touchHolding = true;
+      const t = e.touches[0];
+      state.mouse.nx = (t.clientX / window.innerWidth) * 2 - 1;
+      state.mouse.ny = -(t.clientY / window.innerHeight) * 2 + 1;
+      updateHoldingState();
+    }, { passive: false });
+
+    renderer.domElement.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      state.mouse.nx = (t.clientX / window.innerWidth) * 2 - 1;
+      state.mouse.ny = -(t.clientY / window.innerHeight) * 2 + 1;
+    }, { passive: true });
+
+    renderer.domElement.addEventListener('touchend', () => {
+      touchHolding = false;
+      updateHoldingState();
+    }, { passive: true });
+
+    renderer.domElement.addEventListener('touchcancel', () => {
+      touchHolding = false;
+      updateHoldingState();
+    }, { passive: true });
   }
 
   return { getScrollTarget: () => scrollTarget };
