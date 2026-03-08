@@ -17,6 +17,9 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/**/*.test.js'],
+    environmentMatchGlobs: [
+      ['tests/**/*.dom.test.js', 'jsdom'],
+    ],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.js'],
