@@ -909,7 +909,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 ### Phase 6 — Accessibility
 - [x] 6.1. Add `prefers-reduced-motion` support
 - [x] 6.2. Add screen reader attributes and ARIA
-- [ ] 6.3. Add keyboard navigation + focus styles
+- [x] 6.3. Add keyboard navigation + focus styles
 - [ ] 6.4. Verify + fix color contrast (WCAG AA)
 
 ### Phase 7 — Testing Infrastructure
