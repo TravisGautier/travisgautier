@@ -64,6 +64,23 @@
   border: 0;
 }
 
+/* Skip link */
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 10000;
+  padding: 0.5rem 1rem;
+  background: var(--bg);
+  color: var(--gold);
+  font-family: 'Outfit', sans-serif;
+  text-decoration: none;
+}
+.skip-link:focus-visible {
+  top: 1rem;
+}
+
 /* Reset */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -196,7 +213,7 @@ canvas { display: block; }
 .header-link.purple { color: rgba(74,53,112,0.45); }
 .header-link.purple:hover { color: var(--purple); }
 .header-link:focus-visible {
-  outline: 1px solid var(--gold);
+  outline: 2px solid var(--gold);
   outline-offset: 4px;
 }
 .header-link.purple:focus-visible {
@@ -434,6 +451,10 @@ body.scene-ready .bottom-bar {
 .context-lost-btn:hover {
   border-color: var(--gold);
   color: var(--gold);
+}
+.context-lost-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 @keyframes contextLostFadeIn {
