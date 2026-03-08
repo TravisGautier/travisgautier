@@ -30,7 +30,7 @@ export function createSetup(container, options = {}) {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   } catch (e) {
     renderer = {
-      domElement: {},
+      domElement: (() => { const attrs = {}; return { setAttribute(k, v) { attrs[k] = v; }, getAttribute(k) { return attrs[k] ?? null; } }; })(),
       shadowMap: { enabled: config?.shadowsEnabled ?? true, type: THREE.PCFSoftShadowMap },
       setSize() {},
       getPixelRatio() { return 1; },
@@ -42,6 +42,9 @@ export function createSetup(container, options = {}) {
     };
   }
   container.appendChild(renderer.domElement);
+  if (typeof renderer.domElement.setAttribute === 'function') {
+    renderer.domElement.setAttribute('aria-hidden', 'true');
+  }
 
   if (typeof renderer.domElement.addEventListener === 'function') {
     renderer.domElement.addEventListener('webglcontextlost', (e) => {

@@ -130,4 +130,14 @@ describe('setup', () => {
       expect(result).toHaveProperty('renderer');
     });
   });
+
+  /// Tests checklist items: [7] — Feature 6.2
+  it('int_canvas_aria_hidden', () => {
+    const appendedChildren = [];
+    const container = { appendChild: (child) => appendedChildren.push(child) };
+    createSetup(container);
+    // The appended canvas (renderer.domElement) should have aria-hidden="true"
+    const canvas = appendedChildren[0];
+    expect(canvas.getAttribute('aria-hidden')).toBe('true');
+  });
 });

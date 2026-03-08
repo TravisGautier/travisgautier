@@ -8,9 +8,18 @@ export function initOverlay() {
   const scrollHint = typeof document !== 'undefined' ? document.getElementById('scrollHint') : null;
   const holdHint = typeof document !== 'undefined' ? document.getElementById('holdHint') : null;
   const scrollLine = typeof document !== 'undefined' ? document.getElementById('scrollLine') : null;
+  const ventureAnnouncer = typeof document !== 'undefined' ? document.getElementById('venture-announcer') : null;
+  let lastAnnouncedSide = null;
 
   function updateOverlay(p, transitioning, state) {
     if (holdFill) holdFill.style.width = (p * 100) + '%';
+    const currentSide = p > 0.5 ? 'purple' : 'gold';
+    if (ventureAnnouncer && currentSide !== lastAnnouncedSide) {
+      ventureAnnouncer.textContent = currentSide === 'purple'
+        ? 'Now showing Venture Omega: Creative & Strategy'
+        : 'Now showing Venture Alpha: Innovation & Technology';
+      lastAnnouncedSide = currentSide;
+    }
     if (p > 0.5) {
       if (labelLeft) labelLeft.classList.add('hidden');
       if (labelRight) labelRight.classList.add('visible');

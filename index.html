@@ -8,14 +8,14 @@
 </head>
 <body>
 
-<div class="cursor" id="cursor"></div>
-<div class="cursor-trail" id="cursorTrail"></div>
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+<div class="cursor-trail" id="cursorTrail" aria-hidden="true"></div>
 
-<div id="loading" style="position:fixed;inset:0;z-index:1000;background:#c8dcea;display:flex;align-items:center;justify-content:center;pointer-events:none;transition:opacity 0.8s ease">
+<div id="loading" aria-hidden="true" style="position:fixed;inset:0;z-index:1000;background:#c8dcea;display:flex;align-items:center;justify-content:center;pointer-events:none;transition:opacity 0.8s ease">
   Travis Gautier
 </div>
 
-<div id="canvas-container"></div>
+<div id="canvas-container" role="img" aria-label="Interactive 3D scene: a portal sitting inside an open-air Greek temple atop a mountain, surrounded by marble pillars and clouds below. Hold click to rotate between two ventures."></div>
 
 <div class="overlay">
   <div class="header">
@@ -26,13 +26,13 @@
   </div>
 
   <div class="side-label left" id="labelLeft">
-    <span class="label-num">01</span>
+    <span class="label-num" aria-hidden="true">01</span>
     <span class="label-title">Venture Alpha</span>
     <span class="label-desc">Innovation & Technology</span>
   </div>
 
   <div class="side-label right" id="labelRight">
-    <span class="label-num">02</span>
+    <span class="label-num" aria-hidden="true">02</span>
     <span class="label-title">Venture Omega</span>
     <span class="label-desc">Creative & Strategy</span>
   </div>
@@ -51,12 +51,14 @@
   </div>
 </div>
 
+<div id="venture-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
 <div class="transition-screen" id="transitionA">
-  <div class="transition-bg gold"></div>
+  <div class="transition-bg gold" aria-hidden="true"></div>
   <div class="inner"><h2>Venture Alpha</h2><p>Entering experience&hellip;</p></div>
 </div>
 <div class="transition-screen" id="transitionB">
-  <div class="transition-bg purple"></div>
+  <div class="transition-bg purple" aria-hidden="true"></div>
   <div class="inner"><h2>Venture Omega</h2><p>Entering experience&hellip;</p></div>
 </div>
 
