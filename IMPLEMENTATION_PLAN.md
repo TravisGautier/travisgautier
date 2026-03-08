@@ -894,7 +894,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 
 ### Phase 4 — Portal Interaction & Transitions
 - [x] 4.1. Add portal raycasting + hover detection
-- [ ] 4.2. Wire transition screen triggers + external navigation
+- [x] 4.2. Wire transition screen triggers + external navigation
 - [ ] 4.3. Polish header navigation placeholders
 - [ ] 4.4. Add keyboard support for hold mechanic
 - [ ] 4.5. Polish scroll/hold hint indicators
