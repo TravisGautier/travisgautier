@@ -49,4 +49,11 @@ describe('state', () => {
     state.mouse.nx = 0;
     state.holding = false;
   });
+
+  /// Tests checklist items: [4] — Feature 7.2
+  it('unit_state_additional_defaults', () => {
+    expect(state.hasEngaged).toBe(false);
+    expect(state.transitioning).toBe(false);
+    expect(state.dwellTimer).toBe(0);
+  });
 });

@@ -98,4 +98,17 @@ describe('holdMechanic', () => {
     // holdProgress snaps toward 1 (already there), hasEngaged stays true
     expect(state.hasEngaged).toBe(true);
   });
+
+  /// Tests checklist items: [3] — Feature 7.2
+  it('unit_holdMechanic_boundary_exactly_half', () => {
+    // At exactly 0.5, condition is > 0.5 (strict), so else branch fires
+    // and snaps toward 0 (gold side)
+    const state = { holding: false, reversing: false, holdProgress: 0.5 };
+
+    updateHoldProgress(state, 0.1);
+
+    // 0.5 - 0.1 * 2.5 = 0.25 (snaps toward gold)
+    expect(state.holdProgress).toBeCloseTo(0.25, 5);
+    expect(state.holdProgress).toBeGreaterThanOrEqual(0);
+  });
 });
