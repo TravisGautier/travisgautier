@@ -56,11 +56,12 @@ describe('shader files', () => {
     }
   });
 
-  /// Tests checklist items: [6]
+  /// Tests checklist items: [5]
   it('unit_sky_frag_declares_uniforms', () => {
     const content = fs.readFileSync(path.join(shaderDir, 'sky.frag'), 'utf-8');
     expect(content).toContain('uniform float uHold');
     expect(content).toContain('uniform float uTime');
+    expect(content).toContain('uniform float uSkyCloudNoise');
   });
 
   /// Tests checklist items: [7, 8]

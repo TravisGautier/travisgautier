@@ -915,7 +915,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 ### Phase 7 — Testing Infrastructure
 - [x] 7.1. Set up test infra + Three.js mocks
 - [x] 7.2. Write unit tests for pure logic
-- [ ] 7.3. Write shader validation tests
+- [x] 7.3. Write shader validation tests
 - [ ] 7.4. Write build output tests
 
 ### Phase 8 — SEO, Social & Assets
