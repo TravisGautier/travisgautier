@@ -902,7 +902,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 ### Phase 5 — Mobile & Touch
 - [x] 5.1. Add touch event mapping for hold mechanic
 - [x] 5.2. Add pinch-to-zoom
-- [ ] 5.3. Add gyroscope parallax with iOS permission handling
+- [x] 5.3. Add gyroscope parallax with iOS permission handling
 - [ ] 5.4. Hide custom cursor on touch devices
 - [ ] 5.5. Test on real devices + responsive fixes
 
