@@ -72,4 +72,19 @@ describe('controls parity', () => {
   it('parity_controls_pinch_dist_reset', () => {
     expect(src).toContain('lastPinchDist = 0');
   });
+
+  /// Tests checklist items: [3] — Feature 5.3
+  it('parity_controls_computeGyroParallax', () => {
+    expect(src).toContain('computeGyroParallax');
+  });
+
+  /// Tests checklist items: [5, 7] — Feature 5.3
+  it('parity_controls_deviceorientation', () => {
+    expect(src).toContain('deviceorientation');
+  });
+
+  /// Tests checklist items: [1] — Feature 5.3
+  it('parity_controls_gyro_constants', () => {
+    expect(src).toContain('GYRO_GAMMA_DIVISOR');
+  });
 });

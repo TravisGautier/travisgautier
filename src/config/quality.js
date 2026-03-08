@@ -1,10 +1,10 @@
 import { getGPUTier } from 'detect-gpu';
 
 const TIER_CONFIGS = [
-  { pixelRatio: 1, shadowMapSize: 0, shadowsEnabled: false, particleCount: 0, pillarCount: 6, pillarFluting: false, cloudLayers: 0, skyCloudNoise: false },
-  { pixelRatio: 1, shadowMapSize: 0, shadowsEnabled: false, particleCount: 50, pillarCount: 8, pillarFluting: false, cloudLayers: 1, skyCloudNoise: false },
-  { pixelRatio: 1.5, shadowMapSize: 1024, shadowsEnabled: true, particleCount: 100, pillarCount: 10, pillarFluting: false, cloudLayers: 1, skyCloudNoise: true },
-  { pixelRatio: 0, shadowMapSize: 2048, shadowsEnabled: true, particleCount: 200, pillarCount: 12, pillarFluting: true, cloudLayers: 2, skyCloudNoise: true },
+  { pixelRatio: 1, shadowMapSize: 0, shadowsEnabled: false, particleCount: 0, pillarCount: 6, pillarFluting: false, cloudLayers: 0, skyCloudNoise: false, useGyroscope: true },
+  { pixelRatio: 1, shadowMapSize: 0, shadowsEnabled: false, particleCount: 50, pillarCount: 8, pillarFluting: false, cloudLayers: 1, skyCloudNoise: false, useGyroscope: true },
+  { pixelRatio: 1.5, shadowMapSize: 1024, shadowsEnabled: true, particleCount: 100, pillarCount: 10, pillarFluting: false, cloudLayers: 1, skyCloudNoise: true, useGyroscope: false },
+  { pixelRatio: 0, shadowMapSize: 2048, shadowsEnabled: true, particleCount: 200, pillarCount: 12, pillarFluting: true, cloudLayers: 2, skyCloudNoise: true, useGyroscope: false },
 ];
 
 function isMobile() {

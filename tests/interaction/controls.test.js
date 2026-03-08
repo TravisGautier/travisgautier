@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { detectTrackpad, computeScrollDelta, checkPortalHover, computePinchDist } from '../../src/interaction/controls.js';
+import { detectTrackpad, computeScrollDelta, checkPortalHover, computePinchDist, computeGyroParallax } from '../../src/interaction/controls.js';
 
 describe('detectTrackpad', () => {
   /// Tests checklist items: [2, 6] — Feature 2.7
@@ -155,6 +155,100 @@ describe('computePinchDist', () => {
   /// Tests checklist items: [2] — Feature 5.2
   it('unit_computePinchDist_negative_coords', () => {
     expect(computePinchDist({ clientX: 100, clientY: 100 }, { clientX: 0, clientY: 0 })).toBeCloseTo(141.42, 1);
+  });
+});
+
+describe('computeGyroParallax', () => {
+  /// Tests checklist items: [3] — Feature 5.3
+  it('unit_computeGyroParallax_is_function', () => {
+    expect(typeof computeGyroParallax).toBe('function');
+  });
+
+  /// Tests checklist items: [3, 8] — Feature 5.3
+  it('unit_computeGyroParallax_neutral_position', () => {
+    const result = computeGyroParallax(0, 45);
+    expect(result.nx).toBeCloseTo(0, 5);
+    expect(result.ny).toBeCloseTo(0, 5);
+  });
+
+  /// Tests checklist items: [3, 8] — Feature 5.3
+  it('unit_computeGyroParallax_tilt_right', () => {
+    const result = computeGyroParallax(22.5, 45);
+    expect(result.nx).toBeCloseTo(0.5, 5);
+    expect(result.ny).toBeCloseTo(0, 5);
+  });
+
+  /// Tests checklist items: [3, 8] — Feature 5.3
+  it('unit_computeGyroParallax_tilt_left', () => {
+    const result = computeGyroParallax(-45, 45);
+    expect(result.nx).toBeCloseTo(-1, 5);
+    expect(result.ny).toBeCloseTo(0, 5);
+  });
+
+  /// Tests checklist items: [3, 8] — Feature 5.3
+  it('unit_computeGyroParallax_tilt_forward', () => {
+    const result = computeGyroParallax(0, 67.5);
+    expect(result.nx).toBeCloseTo(0, 5);
+    expect(result.ny).toBeCloseTo(0.5, 5);
+  });
+
+  /// Tests checklist items: [3, 8] — Feature 5.3
+  it('unit_computeGyroParallax_tilt_back', () => {
+    const result = computeGyroParallax(0, 0);
+    expect(result.nx).toBeCloseTo(0, 5);
+    expect(result.ny).toBeCloseTo(-1, 5);
+  });
+
+  /// Tests checklist items: [8] — Feature 5.3
+  it('unit_computeGyroParallax_clamps_nx_max', () => {
+    const result = computeGyroParallax(90, 45);
+    expect(result.nx).toBe(1);
+  });
+
+  /// Tests checklist items: [8] — Feature 5.3
+  it('unit_computeGyroParallax_clamps_nx_min', () => {
+    const result = computeGyroParallax(-90, 45);
+    expect(result.nx).toBe(-1);
+  });
+
+  /// Tests checklist items: [8] — Feature 5.3
+  it('unit_computeGyroParallax_clamps_ny_max', () => {
+    const result = computeGyroParallax(0, 135);
+    expect(result.ny).toBe(1);
+  });
+
+  /// Tests checklist items: [8] — Feature 5.3
+  it('unit_computeGyroParallax_clamps_ny_min', () => {
+    const result = computeGyroParallax(0, -90);
+    expect(result.ny).toBe(-1);
+  });
+
+  /// Tests checklist items: [3, 8] — Feature 5.3
+  it('unit_computeGyroParallax_null_gamma', () => {
+    const result = computeGyroParallax(null, 45);
+    expect(result.nx).toBeCloseTo(0, 5);
+    expect(result.ny).toBeCloseTo(0, 5);
+  });
+
+  /// Tests checklist items: [3, 8] — Feature 5.3
+  it('unit_computeGyroParallax_null_beta', () => {
+    const result = computeGyroParallax(0, null);
+    expect(result.nx).toBeCloseTo(0, 5);
+    expect(result.ny).toBeCloseTo(-1, 5);
+  });
+
+  /// Tests checklist items: [3, 8] — Feature 5.3
+  it('unit_computeGyroParallax_both_null', () => {
+    const result = computeGyroParallax(null, null);
+    expect(result.nx).toBeCloseTo(0, 5);
+    expect(result.ny).toBeCloseTo(-1, 5);
+  });
+
+  /// Tests checklist items: [3, 8] — Feature 5.3
+  it('unit_computeGyroParallax_undefined_values', () => {
+    const result = computeGyroParallax(undefined, undefined);
+    expect(result.nx).toBeCloseTo(0, 5);
+    expect(result.ny).toBeCloseTo(-1, 5);
   });
 });
 
@@ -1048,5 +1142,221 @@ describe('pinch zoom', () => {
     touchmoveHandler({ touches: [{ clientX: 960, clientY: 540 }] });
     expect(state.mouse.nx).toBeCloseTo(0, 5);
     expect(state.mouse.ny).toBeCloseTo(0, 5);
+  });
+});
+
+describe('gyroscope controls', () => {
+  let state;
+  let mockDismiss;
+  let cursorEl;
+  let cursorTrail;
+
+  beforeEach(() => {
+    vi.resetModules();
+    state = {
+      mouse: { x: 0, y: 0, nx: 0, ny: 0 },
+      scroll: 0,
+      hoverPortal: false,
+      time: 0,
+      holding: false,
+      holdProgress: 0,
+      reversing: false,
+      currentAngle: 0.25,
+      targetAngle: 0.25,
+      hasEngaged: false,
+      transitioning: false,
+      dwellTimer: 0,
+    };
+    mockDismiss = vi.fn();
+    cursorEl = { classList: { add: vi.fn(), remove: vi.fn() } };
+    cursorTrail = { classList: { add: vi.fn(), remove: vi.fn() } };
+
+    vi.stubGlobal('document', {
+      getElementById: vi.fn((id) => {
+        if (id === 'cursor') return cursorEl;
+        if (id === 'cursorTrail') return cursorTrail;
+        return null;
+      }),
+      addEventListener: vi.fn(),
+    });
+    vi.stubGlobal('performance', { now: vi.fn(() => 0) });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  async function setupGyroTest(qualityConfig) {
+    const listeners = {};
+    vi.stubGlobal('window', {
+      innerWidth: 1920,
+      innerHeight: 1080,
+      addEventListener: vi.fn((event, handler, opts) => {
+        if (!listeners[event]) listeners[event] = [];
+        listeners[event].push(handler);
+      }),
+    });
+
+    const domListeners = {};
+    const mockRenderer = {
+      domElement: {
+        addEventListener: vi.fn((event, handler, opts) => {
+          if (!domListeners[event]) domListeners[event] = [];
+          domListeners[event].push(handler);
+        }),
+      },
+    };
+
+    const { initControls } = await import('../../src/interaction/controls.js');
+    const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
+    const result = initControls(state, mockCamera, mockRenderer, [], mockDismiss, qualityConfig);
+
+    return { listeners, domListeners, result };
+  }
+
+  /// Tests checklist items: [5, 7] — Feature 5.3
+  it('int_gyro_binds_deviceorientation_when_enabled', async () => {
+    const { listeners } = await setupGyroTest({ useGyroscope: true });
+    expect(listeners['deviceorientation']).toBeDefined();
+    expect(listeners['deviceorientation'].length).toBeGreaterThan(0);
+  });
+
+  /// Tests checklist items: [5, 7] — Feature 5.3
+  it('int_gyro_updates_state_on_deviceorientation', async () => {
+    const { listeners } = await setupGyroTest({ useGyroscope: true });
+    const handler = listeners['deviceorientation'][0];
+
+    handler({ gamma: 22.5, beta: 67.5 });
+
+    expect(state.mouse.nx).toBeCloseTo(0.5, 5);
+    expect(state.mouse.ny).toBeCloseTo(0.5, 5);
+  });
+
+  /// Tests checklist items: [5] — Feature 5.3
+  it('int_gyro_skipped_when_useGyroscope_false', async () => {
+    const { listeners } = await setupGyroTest({ useGyroscope: false });
+    expect(listeners['deviceorientation']).toBeUndefined();
+  });
+
+  /// Tests checklist items: [4] — Feature 5.3
+  it('int_gyro_skipped_when_qualityConfig_empty', async () => {
+    const { listeners } = await setupGyroTest({});
+    expect(listeners['deviceorientation']).toBeUndefined();
+  });
+
+  /// Tests checklist items: [4] — Feature 5.3
+  it('int_gyro_skipped_when_no_qualityConfig', async () => {
+    const listeners = {};
+    vi.stubGlobal('window', {
+      innerWidth: 1920,
+      innerHeight: 1080,
+      addEventListener: vi.fn((event, handler, opts) => {
+        if (!listeners[event]) listeners[event] = [];
+        listeners[event].push(handler);
+      }),
+    });
+
+    const domListeners = {};
+    const mockRenderer = {
+      domElement: {
+        addEventListener: vi.fn((event, handler, opts) => {
+          if (!domListeners[event]) domListeners[event] = [];
+          domListeners[event].push(handler);
+        }),
+      },
+    };
+
+    const { initControls } = await import('../../src/interaction/controls.js');
+    const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
+    initControls(state, mockCamera, mockRenderer, [], mockDismiss);
+
+    expect(listeners['deviceorientation']).toBeUndefined();
+  });
+
+  /// Tests checklist items: [6] — Feature 5.3
+  it('int_gyro_ios_permission_granted', async () => {
+    const mockRequestPermission = vi.fn().mockResolvedValue('granted');
+    vi.stubGlobal('DeviceOrientationEvent', {
+      requestPermission: mockRequestPermission,
+    });
+
+    const { listeners, domListeners } = await setupGyroTest({ useGyroscope: true });
+
+    // Gyro should NOT be bound yet (iOS requires user gesture)
+    expect(listeners['deviceorientation']).toBeUndefined();
+
+    // Simulate touchstart (user gesture triggers permission request)
+    const touchstartHandler = domListeners['touchstart'][0];
+    touchstartHandler({ touches: [{ clientX: 960, clientY: 540 }], preventDefault: vi.fn() });
+
+    // Flush microtask for permission promise
+    await new Promise(r => setTimeout(r, 0));
+
+    expect(mockRequestPermission).toHaveBeenCalledTimes(1);
+    expect(listeners['deviceorientation']).toBeDefined();
+    expect(listeners['deviceorientation'].length).toBeGreaterThan(0);
+  });
+
+  /// Tests checklist items: [6] — Feature 5.3
+  it('int_gyro_ios_permission_denied', async () => {
+    const mockRequestPermission = vi.fn().mockResolvedValue('denied');
+    vi.stubGlobal('DeviceOrientationEvent', {
+      requestPermission: mockRequestPermission,
+    });
+
+    const { listeners, domListeners } = await setupGyroTest({ useGyroscope: true });
+
+    const touchstartHandler = domListeners['touchstart'][0];
+    touchstartHandler({ touches: [{ clientX: 960, clientY: 540 }], preventDefault: vi.fn() });
+
+    await new Promise(r => setTimeout(r, 0));
+
+    expect(mockRequestPermission).toHaveBeenCalledTimes(1);
+    expect(listeners['deviceorientation']).toBeUndefined();
+  });
+
+  /// Tests checklist items: [6] — Feature 5.3
+  it('int_gyro_ios_permission_error', async () => {
+    const mockRequestPermission = vi.fn().mockRejectedValue(new Error('Permission error'));
+    vi.stubGlobal('DeviceOrientationEvent', {
+      requestPermission: mockRequestPermission,
+    });
+
+    const { listeners, domListeners } = await setupGyroTest({ useGyroscope: true });
+
+    const touchstartHandler = domListeners['touchstart'][0];
+
+    // Should not throw
+    expect(() => {
+      touchstartHandler({ touches: [{ clientX: 960, clientY: 540 }], preventDefault: vi.fn() });
+    }).not.toThrow();
+
+    await new Promise(r => setTimeout(r, 0));
+
+    expect(mockRequestPermission).toHaveBeenCalledTimes(1);
+    expect(listeners['deviceorientation']).toBeUndefined();
+  });
+
+  /// Tests checklist items: [6] — Feature 5.3
+  it('int_gyro_ios_touchstart_fires_only_once', async () => {
+    const mockRequestPermission = vi.fn().mockResolvedValue('granted');
+    vi.stubGlobal('DeviceOrientationEvent', {
+      requestPermission: mockRequestPermission,
+    });
+
+    const { domListeners } = await setupGyroTest({ useGyroscope: true });
+
+    const touchstartHandler = domListeners['touchstart'][0];
+
+    // First touch — triggers permission request
+    touchstartHandler({ touches: [{ clientX: 960, clientY: 540 }], preventDefault: vi.fn() });
+    await new Promise(r => setTimeout(r, 0));
+
+    // Second touch — should NOT trigger permission request again
+    touchstartHandler({ touches: [{ clientX: 500, clientY: 300 }], preventDefault: vi.fn() });
+    await new Promise(r => setTimeout(r, 0));
+
+    expect(mockRequestPermission).toHaveBeenCalledTimes(1);
   });
 });

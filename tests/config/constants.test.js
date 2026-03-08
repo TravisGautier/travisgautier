@@ -22,6 +22,9 @@ import {
   RAYCAST_THROTTLE_MS,
   NAV_LINKS,
   PINCH_ZOOM_MULT,
+  GYRO_GAMMA_DIVISOR,
+  GYRO_BETA_OFFSET,
+  GYRO_BETA_DIVISOR,
 } from '../../src/config/constants.js';
 
 describe('constants', () => {
@@ -203,5 +206,23 @@ describe('constants', () => {
   /// Tests checklist items: [1] — Feature 5.2
   it('unit_constants_PINCH_ZOOM_MULT_value', () => {
     expect(PINCH_ZOOM_MULT).toBe(0.005);
+  });
+
+  /// Tests checklist items: [1] — Feature 5.3
+  it('unit_constants_GYRO_GAMMA_DIVISOR', () => {
+    expect(typeof GYRO_GAMMA_DIVISOR).toBe('number');
+    expect(GYRO_GAMMA_DIVISOR).toBe(45);
+  });
+
+  /// Tests checklist items: [1] — Feature 5.3
+  it('unit_constants_GYRO_BETA_OFFSET', () => {
+    expect(typeof GYRO_BETA_OFFSET).toBe('number');
+    expect(GYRO_BETA_OFFSET).toBe(45);
+  });
+
+  /// Tests checklist items: [1] — Feature 5.3
+  it('unit_constants_GYRO_BETA_DIVISOR', () => {
+    expect(typeof GYRO_BETA_DIVISOR).toBe('number');
+    expect(GYRO_BETA_DIVISOR).toBe(45);
   });
 });

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { SCROLL_MULT_TRACKPAD, SCROLL_MULT_WHEEL, RAYCAST_THROTTLE_MS, PINCH_ZOOM_MULT } from '../config/constants.js';
+import { SCROLL_MULT_TRACKPAD, SCROLL_MULT_WHEEL, RAYCAST_THROTTLE_MS, PINCH_ZOOM_MULT, GYRO_GAMMA_DIVISOR, GYRO_BETA_OFFSET, GYRO_BETA_DIVISOR } from '../config/constants.js';
 
 export function detectTrackpad(deltaY) {
   return deltaY % 1 !== 0;
@@ -22,13 +22,22 @@ export function computePinchDist(t0, t1) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-export function initControls(state, camera, renderer, portalSurfaces = [], dismissTransition) {
+export function computeGyroParallax(gamma, beta) {
+  const nx = Math.max(-1, Math.min(1, (gamma || 0) / GYRO_GAMMA_DIVISOR));
+  const ny = Math.max(-1, Math.min(1, ((beta || 0) - GYRO_BETA_OFFSET) / GYRO_BETA_DIVISOR));
+  return { nx, ny };
+}
+
+export function initControls(state, camera, renderer, portalSurfaces = [], dismissTransition, qualityConfig = {}) {
   let scrollTarget = 0;
   let isTrackpad = false;
   let mouseHolding = false;
   let keyboardHolding = false;
   let touchHolding = false;
   let lastPinchDist = 0;
+  let gyroNeedsPermission = false;
+  let permissionRequested = false;
+  let gyroHandler = null;
   const cursorEl = typeof document !== 'undefined' ? document.getElementById('cursor') : null;
   const cursorTrail = typeof document !== 'undefined' ? document.getElementById('cursorTrail') : null;
   const raycaster = new THREE.Raycaster();
@@ -119,6 +128,21 @@ export function initControls(state, camera, renderer, portalSurfaces = [], dismi
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
+
+    if (qualityConfig.useGyroscope) {
+      gyroHandler = (e) => {
+        const result = computeGyroParallax(e.gamma, e.beta);
+        state.mouse.nx = result.nx;
+        state.mouse.ny = result.ny;
+      };
+
+      if (typeof DeviceOrientationEvent !== 'undefined' &&
+          typeof DeviceOrientationEvent.requestPermission === 'function') {
+        gyroNeedsPermission = true;
+      } else {
+        window.addEventListener('deviceorientation', gyroHandler);
+      }
+    }
   }
 
   if (typeof renderer.domElement.addEventListener === 'function') {
@@ -132,6 +156,17 @@ export function initControls(state, camera, renderer, portalSurfaces = [], dismi
       state.mouse.nx = (t.clientX / window.innerWidth) * 2 - 1;
       state.mouse.ny = -(t.clientY / window.innerHeight) * 2 + 1;
       updateHoldingState();
+
+      if (gyroNeedsPermission && !permissionRequested) {
+        permissionRequested = true;
+        DeviceOrientationEvent.requestPermission()
+          .then((response) => {
+            if (response === 'granted') {
+              window.addEventListener('deviceorientation', gyroHandler);
+            }
+          })
+          .catch(() => {});
+      }
     }, { passive: false });
 
     renderer.domElement.addEventListener('touchmove', (e) => {

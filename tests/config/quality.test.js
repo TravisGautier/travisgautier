@@ -188,6 +188,52 @@ describe('quality', () => {
     expect(config.pixelRatio).toBe(1);
   });
 
+  /// Tests checklist items: [2] — Feature 5.3
+  it('unit_quality_tier0_useGyroscope', async () => {
+    const { getGPUTier } = await import('detect-gpu');
+    getGPUTier.mockResolvedValue({ tier: 0, type: 'WEBGL_UNSUPPORTED' });
+    const { determineQuality } = await import('../../src/config/quality.js');
+    const config = await determineQuality();
+    expect(config.useGyroscope).toBe(true);
+  });
+
+  /// Tests checklist items: [2] — Feature 5.3
+  it('unit_quality_tier1_useGyroscope', async () => {
+    const { getGPUTier } = await import('detect-gpu');
+    getGPUTier.mockResolvedValue({ tier: 1, type: 'FALLBACK' });
+    const { determineQuality } = await import('../../src/config/quality.js');
+    const config = await determineQuality();
+    expect(config.useGyroscope).toBe(true);
+  });
+
+  /// Tests checklist items: [2] — Feature 5.3
+  it('unit_quality_tier2_useGyroscope', async () => {
+    const { getGPUTier } = await import('detect-gpu');
+    getGPUTier.mockResolvedValue({ tier: 2, type: 'BENCHMARK' });
+    const { determineQuality } = await import('../../src/config/quality.js');
+    const config = await determineQuality();
+    expect(config.useGyroscope).toBe(false);
+  });
+
+  /// Tests checklist items: [2] — Feature 5.3
+  it('unit_quality_tier3_useGyroscope', async () => {
+    const { getGPUTier } = await import('detect-gpu');
+    getGPUTier.mockResolvedValue({ tier: 3, type: 'BENCHMARK' });
+    const { determineQuality } = await import('../../src/config/quality.js');
+    const config = await determineQuality();
+    expect(config.useGyroscope).toBe(false);
+  });
+
+  /// Tests checklist items: [2] — Feature 5.3
+  it('unit_quality_returns_all_keys_includes_useGyroscope', async () => {
+    const { getGPUTier } = await import('detect-gpu');
+    getGPUTier.mockResolvedValue({ tier: 3, type: 'BENCHMARK' });
+    const { determineQuality } = await import('../../src/config/quality.js');
+    const config = await determineQuality();
+    expect(config).toHaveProperty('useGyroscope');
+    expect(typeof config.useGyroscope).toBe('boolean');
+  });
+
   /// Tests checklist items: [5] — Feature 3.1
   it('unit_quality_config_valid_ranges', async () => {
     const tiers = [
@@ -215,6 +261,25 @@ describe('quality', () => {
       expect(typeof config.pillarFluting).toBe('boolean');
       expect([0, 1, 2]).toContain(config.cloudLayers);
       expect(typeof config.skyCloudNoise).toBe('boolean');
+    }
+  });
+
+  /// Tests checklist items: [2] — Feature 5.3
+  it('unit_quality_config_valid_ranges_includes_useGyroscope', async () => {
+    const tiers = [
+      { tier: 0, type: 'WEBGL_UNSUPPORTED' },
+      { tier: 1, type: 'FALLBACK' },
+      { tier: 2, type: 'BENCHMARK' },
+      { tier: 3, type: 'BENCHMARK' },
+    ];
+    const expectedGyro = [true, true, false, false];
+    for (let i = 0; i < tiers.length; i++) {
+      vi.resetModules();
+      const { getGPUTier } = await import('detect-gpu');
+      getGPUTier.mockResolvedValue(tiers[i]);
+      const { determineQuality } = await import('../../src/config/quality.js');
+      const config = await determineQuality();
+      expect(config.useGyroscope).toBe(expectedGyro[i]);
     }
   });
 });
