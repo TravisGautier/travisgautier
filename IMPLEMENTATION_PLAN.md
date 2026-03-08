@@ -910,7 +910,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 - [x] 6.1. Add `prefers-reduced-motion` support
 - [x] 6.2. Add screen reader attributes and ARIA
 - [x] 6.3. Add keyboard navigation + focus styles
-- [ ] 6.4. Verify + fix color contrast (WCAG AA)
+- [x] 6.4. Verify + fix color contrast (WCAG AA)
 
 ### Phase 7 — Testing Infrastructure
 - [ ] 7.1. Set up test infra + Three.js mocks
