@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { detectTrackpad, computeScrollDelta, checkPortalHover } from '../../src/interaction/controls.js';
+import { detectTrackpad, computeScrollDelta, checkPortalHover, computePinchDist } from '../../src/interaction/controls.js';
 
 describe('detectTrackpad', () => {
   /// Tests checklist items: [2, 6] — Feature 2.7
@@ -123,6 +123,38 @@ describe('checkPortalHover', () => {
 
     const result = checkPortalHover(raycaster, camera, ndc, []);
     expect(result).toBe(false);
+  });
+});
+
+describe('computePinchDist', () => {
+  /// Tests checklist items: [2] — Feature 5.2
+  it('unit_computePinchDist_is_function', () => {
+    expect(typeof computePinchDist).toBe('function');
+  });
+
+  /// Tests checklist items: [2] — Feature 5.2
+  it('unit_computePinchDist_horizontal', () => {
+    expect(computePinchDist({ clientX: 0, clientY: 0 }, { clientX: 100, clientY: 0 })).toBe(100);
+  });
+
+  /// Tests checklist items: [2] — Feature 5.2
+  it('unit_computePinchDist_vertical', () => {
+    expect(computePinchDist({ clientX: 0, clientY: 0 }, { clientX: 0, clientY: 200 })).toBe(200);
+  });
+
+  /// Tests checklist items: [2] — Feature 5.2
+  it('unit_computePinchDist_diagonal', () => {
+    expect(computePinchDist({ clientX: 0, clientY: 0 }, { clientX: 3, clientY: 4 })).toBe(5);
+  });
+
+  /// Tests checklist items: [2] — Feature 5.2
+  it('unit_computePinchDist_same_point', () => {
+    expect(computePinchDist({ clientX: 50, clientY: 50 }, { clientX: 50, clientY: 50 })).toBe(0);
+  });
+
+  /// Tests checklist items: [2] — Feature 5.2
+  it('unit_computePinchDist_negative_coords', () => {
+    expect(computePinchDist({ clientX: 100, clientY: 100 }, { clientX: 0, clientY: 0 })).toBeCloseTo(141.42, 1);
   });
 });
 
@@ -787,5 +819,234 @@ describe('touch controls', () => {
     const mouseupHandler = listeners['mouseup'][0];
     mouseupHandler();
     expect(state.holding).toBe(false);
+  });
+});
+
+describe('pinch zoom', () => {
+  let state;
+  let mockDismiss;
+  let cursorEl;
+  let cursorTrail;
+
+  beforeEach(() => {
+    vi.resetModules();
+    state = {
+      mouse: { x: 0, y: 0, nx: 0, ny: 0 },
+      scroll: 0,
+      hoverPortal: false,
+      time: 0,
+      holding: false,
+      holdProgress: 0,
+      reversing: false,
+      currentAngle: 0.25,
+      targetAngle: 0.25,
+      hasEngaged: false,
+      transitioning: false,
+      dwellTimer: 0,
+    };
+    mockDismiss = vi.fn();
+    cursorEl = { classList: { add: vi.fn(), remove: vi.fn() } };
+    cursorTrail = { classList: { add: vi.fn(), remove: vi.fn() } };
+
+    vi.stubGlobal('document', {
+      getElementById: vi.fn((id) => {
+        if (id === 'cursor') return cursorEl;
+        if (id === 'cursorTrail') return cursorTrail;
+        return null;
+      }),
+      addEventListener: vi.fn(),
+    });
+    vi.stubGlobal('performance', { now: vi.fn(() => 0) });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  async function setupPinchTest() {
+    const listeners = {};
+    vi.stubGlobal('window', {
+      innerWidth: 1920,
+      innerHeight: 1080,
+      addEventListener: vi.fn((event, handler, opts) => {
+        if (!listeners[event]) listeners[event] = [];
+        listeners[event].push(handler);
+      }),
+    });
+
+    const domListeners = {};
+    const mockRenderer = {
+      domElement: {
+        addEventListener: vi.fn((event, handler, opts) => {
+          if (!domListeners[event]) domListeners[event] = [];
+          domListeners[event].push(handler);
+        }),
+      },
+    };
+
+    const { initControls } = await import('../../src/interaction/controls.js');
+    const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
+    const result = initControls(state, mockCamera, mockRenderer, [], mockDismiss);
+
+    return { listeners, domListeners, result };
+  }
+
+  /// Tests checklist items: [5] — Feature 5.2
+  it('unit_pinch_zoom_updates_scroll_target', async () => {
+    const { domListeners, result } = await setupPinchTest();
+    const touchmoveHandler = domListeners['touchmove'][0];
+
+    // First 2-finger move — establishes baseline
+    touchmoveHandler({ touches: [{ clientX: 200, clientY: 300 }, { clientX: 400, clientY: 300 }] });
+    // Second 2-finger move — fingers closer (pinch in)
+    touchmoveHandler({ touches: [{ clientX: 250, clientY: 300 }, { clientX: 350, clientY: 300 }] });
+
+    expect(result.getScrollTarget()).toBeGreaterThan(0);
+  });
+
+  /// Tests checklist items: [5] — Feature 5.2
+  it('unit_pinch_zoom_outward_decreases_scroll', async () => {
+    const { domListeners, result } = await setupPinchTest();
+    const touchmoveHandler = domListeners['touchmove'][0];
+
+    // First 2-finger move — establishes baseline
+    touchmoveHandler({ touches: [{ clientX: 300, clientY: 300 }, { clientX: 350, clientY: 300 }] });
+    // Second 2-finger move — fingers further apart (pinch out)
+    touchmoveHandler({ touches: [{ clientX: 200, clientY: 300 }, { clientX: 450, clientY: 300 }] });
+
+    expect(result.getScrollTarget()).toBeLessThan(0);
+  });
+
+  /// Tests checklist items: [5] — Feature 5.2
+  it('unit_pinch_zoom_first_move_no_delta', async () => {
+    const { domListeners, result } = await setupPinchTest();
+    const touchmoveHandler = domListeners['touchmove'][0];
+
+    // Single 2-finger move — establishes baseline, no delta
+    touchmoveHandler({ touches: [{ clientX: 200, clientY: 300 }, { clientX: 400, clientY: 300 }] });
+
+    expect(result.getScrollTarget()).toBe(0);
+  });
+
+  /// Tests checklist items: [5] — Feature 5.2
+  it('unit_pinch_zoom_clamps_max', async () => {
+    const { domListeners, result } = await setupPinchTest();
+    const touchmoveHandler = domListeners['touchmove'][0];
+
+    // Establish baseline with large distance
+    touchmoveHandler({ touches: [{ clientX: 0, clientY: 300 }, { clientX: 500, clientY: 300 }] });
+    // Extreme pinch in — distance drops from 500 to 1
+    touchmoveHandler({ touches: [{ clientX: 249, clientY: 300 }, { clientX: 250, clientY: 300 }] });
+
+    expect(result.getScrollTarget()).toBe(1.0);
+  });
+
+  /// Tests checklist items: [5] — Feature 5.2
+  it('unit_pinch_zoom_clamps_min', async () => {
+    const { domListeners, result } = await setupPinchTest();
+    const touchmoveHandler = domListeners['touchmove'][0];
+
+    // Establish baseline with small distance
+    touchmoveHandler({ touches: [{ clientX: 249, clientY: 300 }, { clientX: 250, clientY: 300 }] });
+    // Extreme pinch out — distance jumps from 1 to 500
+    touchmoveHandler({ touches: [{ clientX: 0, clientY: 300 }, { clientX: 500, clientY: 300 }] });
+
+    expect(result.getScrollTarget()).toBe(-1.0);
+  });
+
+  /// Tests checklist items: [6] — Feature 5.2
+  it('unit_pinch_zoom_touchend_resets', async () => {
+    const { domListeners, result } = await setupPinchTest();
+    const touchmoveHandler = domListeners['touchmove'][0];
+    const touchendHandler = domListeners['touchend'][0];
+
+    // Pinch sequence
+    touchmoveHandler({ touches: [{ clientX: 200, clientY: 300 }, { clientX: 400, clientY: 300 }] });
+    touchmoveHandler({ touches: [{ clientX: 250, clientY: 300 }, { clientX: 350, clientY: 300 }] });
+    const scrollAfterPinch = result.getScrollTarget();
+    expect(scrollAfterPinch).toBeGreaterThan(0);
+
+    // touchend resets lastPinchDist
+    touchendHandler({});
+
+    // New pinch starts fresh — first move should not produce delta
+    const scrollBeforeNewPinch = result.getScrollTarget();
+    touchmoveHandler({ touches: [{ clientX: 200, clientY: 300 }, { clientX: 400, clientY: 300 }] });
+    expect(result.getScrollTarget()).toBe(scrollBeforeNewPinch);
+  });
+
+  /// Tests checklist items: [7] — Feature 5.2
+  it('unit_pinch_zoom_touchcancel_resets', async () => {
+    const { domListeners, result } = await setupPinchTest();
+    const touchmoveHandler = domListeners['touchmove'][0];
+    const touchcancelHandler = domListeners['touchcancel'][0];
+
+    // Pinch sequence
+    touchmoveHandler({ touches: [{ clientX: 200, clientY: 300 }, { clientX: 400, clientY: 300 }] });
+    touchmoveHandler({ touches: [{ clientX: 250, clientY: 300 }, { clientX: 350, clientY: 300 }] });
+    const scrollAfterPinch = result.getScrollTarget();
+    expect(scrollAfterPinch).toBeGreaterThan(0);
+
+    // touchcancel resets lastPinchDist
+    touchcancelHandler({});
+
+    // New pinch starts fresh — first move should not produce delta
+    const scrollBeforeNewPinch = result.getScrollTarget();
+    touchmoveHandler({ touches: [{ clientX: 200, clientY: 300 }, { clientX: 400, clientY: 300 }] });
+    expect(result.getScrollTarget()).toBe(scrollBeforeNewPinch);
+  });
+
+  /// Tests checklist items: [5] — Feature 5.2
+  it('unit_pinch_single_touch_still_updates_ndc', async () => {
+    const { domListeners } = await setupPinchTest();
+    const touchmoveHandler = domListeners['touchmove'][0];
+
+    // Single-finger touchmove
+    touchmoveHandler({ touches: [{ clientX: 480, clientY: 270 }] });
+
+    // NDC: nx = (480/1920)*2-1 = -0.5, ny = -(270/1080)*2+1 = 0.5
+    expect(state.mouse.nx).toBeCloseTo(-0.5, 5);
+    expect(state.mouse.ny).toBeCloseTo(0.5, 5);
+  });
+
+  /// Tests checklist items: [5] — Feature 5.2
+  it('unit_pinch_two_touch_does_not_update_ndc', async () => {
+    const { domListeners } = await setupPinchTest();
+    const touchmoveHandler = domListeners['touchmove'][0];
+
+    // Two-finger touchmove should NOT update NDC
+    touchmoveHandler({ touches: [{ clientX: 200, clientY: 300 }, { clientX: 400, clientY: 300 }] });
+
+    expect(state.mouse.nx).toBe(0);
+    expect(state.mouse.ny).toBe(0);
+  });
+
+  /// Tests checklist items: [5, 6] — Feature 5.2
+  it('int_pinch_then_single_touch_hold', async () => {
+    const { domListeners } = await setupPinchTest();
+    const touchstartHandler = domListeners['touchstart'][0];
+    const touchmoveHandler = domListeners['touchmove'][0];
+    const touchendHandler = domListeners['touchend'][0];
+
+    // touchstart with 1 finger — sets touchHolding
+    touchstartHandler({ touches: [{ clientX: 300, clientY: 300 }], preventDefault: vi.fn() });
+    expect(state.holding).toBe(true);
+
+    // 2-finger pinch gesture
+    touchmoveHandler({ touches: [{ clientX: 200, clientY: 300 }, { clientX: 400, clientY: 300 }] });
+    touchmoveHandler({ touches: [{ clientX: 250, clientY: 300 }, { clientX: 350, clientY: 300 }] });
+
+    // Lift one finger — touchend fires
+    touchendHandler({});
+
+    // After touchend, touchHolding is false, but we can start a new touch
+    touchstartHandler({ touches: [{ clientX: 500, clientY: 400 }], preventDefault: vi.fn() });
+    expect(state.holding).toBe(true);
+
+    // Single-finger touchmove resumes NDC updates
+    touchmoveHandler({ touches: [{ clientX: 960, clientY: 540 }] });
+    expect(state.mouse.nx).toBeCloseTo(0, 5);
+    expect(state.mouse.ny).toBeCloseTo(0, 5);
   });
 });

@@ -57,4 +57,19 @@ describe('controls parity', () => {
   it('parity_controls_portal_surfaces_param', () => {
     expect(src).toContain('portalSurfaces');
   });
+
+  /// Tests checklist items: [2, 3] — Feature 5.2
+  it('parity_controls_pinch_zoom_function', () => {
+    expect(src).toContain('computePinchDist');
+  });
+
+  /// Tests checklist items: [1] — Feature 5.2
+  it('parity_controls_pinch_zoom_multiplier', () => {
+    expect(src).toContain('PINCH_ZOOM_MULT');
+  });
+
+  /// Tests checklist items: [4] — Feature 5.2
+  it('parity_controls_pinch_dist_reset', () => {
+    expect(src).toContain('lastPinchDist = 0');
+  });
 });

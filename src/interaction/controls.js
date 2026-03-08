@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { SCROLL_MULT_TRACKPAD, SCROLL_MULT_WHEEL, RAYCAST_THROTTLE_MS } from '../config/constants.js';
+import { SCROLL_MULT_TRACKPAD, SCROLL_MULT_WHEEL, RAYCAST_THROTTLE_MS, PINCH_ZOOM_MULT } from '../config/constants.js';
 
 export function detectTrackpad(deltaY) {
   return deltaY % 1 !== 0;
@@ -16,12 +16,19 @@ export function checkPortalHover(raycaster, camera, ndc, surfaces) {
   return hits.length > 0;
 }
 
+export function computePinchDist(t0, t1) {
+  const dx = t1.clientX - t0.clientX;
+  const dy = t1.clientY - t0.clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
 export function initControls(state, camera, renderer, portalSurfaces = [], dismissTransition) {
   let scrollTarget = 0;
   let isTrackpad = false;
   let mouseHolding = false;
   let keyboardHolding = false;
   let touchHolding = false;
+  let lastPinchDist = 0;
   const cursorEl = typeof document !== 'undefined' ? document.getElementById('cursor') : null;
   const cursorTrail = typeof document !== 'undefined' ? document.getElementById('cursorTrail') : null;
   const raycaster = new THREE.Raycaster();
@@ -128,18 +135,29 @@ export function initControls(state, camera, renderer, portalSurfaces = [], dismi
     }, { passive: false });
 
     renderer.domElement.addEventListener('touchmove', (e) => {
-      const t = e.touches[0];
-      state.mouse.nx = (t.clientX / window.innerWidth) * 2 - 1;
-      state.mouse.ny = -(t.clientY / window.innerHeight) * 2 + 1;
+      if (e.touches.length === 2) {
+        const dist = computePinchDist(e.touches[0], e.touches[1]);
+        if (lastPinchDist > 0) {
+          const delta = lastPinchDist - dist;
+          scrollTarget = Math.max(-1.0, Math.min(1.0, scrollTarget + delta * PINCH_ZOOM_MULT));
+        }
+        lastPinchDist = dist;
+      } else {
+        const t = e.touches[0];
+        state.mouse.nx = (t.clientX / window.innerWidth) * 2 - 1;
+        state.mouse.ny = -(t.clientY / window.innerHeight) * 2 + 1;
+      }
     }, { passive: true });
 
     renderer.domElement.addEventListener('touchend', () => {
       touchHolding = false;
+      lastPinchDist = 0;
       updateHoldingState();
     }, { passive: true });
 
     renderer.domElement.addEventListener('touchcancel', () => {
       touchHolding = false;
+      lastPinchDist = 0;
       updateHoldingState();
     }, { passive: true });
   }

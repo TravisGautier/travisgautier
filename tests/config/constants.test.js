@@ -21,6 +21,7 @@ import {
   FPS_DOWNGRADE_PIXEL_RATIO_DROP,
   RAYCAST_THROTTLE_MS,
   NAV_LINKS,
+  PINCH_ZOOM_MULT,
 } from '../../src/config/constants.js';
 
 describe('constants', () => {
@@ -192,5 +193,15 @@ describe('constants', () => {
     expect(NAV_LINKS.contact).toBeDefined();
     expect(NAV_LINKS.contact.label).toBe('Contact');
     expect(NAV_LINKS.contact.href).toBe('mailto:travis@travisgautier.com');
+  });
+
+  /// Tests checklist items: [1] — Feature 5.2
+  it('unit_constants_PINCH_ZOOM_MULT_exists', () => {
+    expect(typeof PINCH_ZOOM_MULT).toBe('number');
+  });
+
+  /// Tests checklist items: [1] — Feature 5.2
+  it('unit_constants_PINCH_ZOOM_MULT_value', () => {
+    expect(PINCH_ZOOM_MULT).toBe(0.005);
   });
 });

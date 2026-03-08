@@ -16,6 +16,7 @@ export const DAMP_CAM_Y_BASE = Math.pow(1 - 0.12, 60);
 export const DAMP_HOVER_BASE = Math.pow(1 - 0.05, 60);
 export const SCROLL_MULT_TRACKPAD = 0.003;
 export const SCROLL_MULT_WHEEL = 0.0008;
+export const PINCH_ZOOM_MULT = 0.005;
 export const FPS_SAMPLE_COUNT = 120;
 export const FPS_THRESHOLD = 0.022;
 export const FPS_DOWNGRADE_PIXEL_RATIO_DROP = 0.5;
