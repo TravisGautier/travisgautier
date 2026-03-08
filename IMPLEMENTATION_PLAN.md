@@ -904,7 +904,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 - [x] 5.2. Add pinch-to-zoom
 - [x] 5.3. Add gyroscope parallax with iOS permission handling
 - [x] 5.4. Hide custom cursor on touch devices
-- [ ] 5.5. Test on real devices + responsive fixes
+- [x] 5.5. Test on real devices + responsive fixes
 
 ### Phase 6 — Accessibility
 - [ ] 6.1. Add `prefers-reduced-motion` support
