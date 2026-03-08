@@ -919,7 +919,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 - [x] 7.4. Write build output tests
 
 ### Phase 8 — SEO, Social & Assets
-- [ ] 8.1. Add meta tags + structured data
+- [x] 8.1. Add meta tags + structured data
 - [ ] 8.2. Create OG image
 - [ ] 8.3. Design + add favicon
 - [ ] 8.4. Integrate analytics
