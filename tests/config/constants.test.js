@@ -20,6 +20,7 @@ import {
   FPS_THRESHOLD,
   FPS_DOWNGRADE_PIXEL_RATIO_DROP,
   RAYCAST_THROTTLE_MS,
+  NAV_LINKS,
 } from '../../src/config/constants.js';
 
 describe('constants', () => {
@@ -183,5 +184,13 @@ describe('constants', () => {
     expect(typeof RAYCAST_THROTTLE_MS).toBe('number');
     expect(RAYCAST_THROTTLE_MS).toBe(50);
     expect(RAYCAST_THROTTLE_MS).toBeGreaterThan(0);
+  });
+
+  /// Tests checklist items: [3] — Feature 4.3
+  it('unit_nav_links_defined', () => {
+    expect(NAV_LINKS).toBeDefined();
+    expect(NAV_LINKS.contact).toBeDefined();
+    expect(NAV_LINKS.contact.label).toBe('Contact');
+    expect(NAV_LINKS.contact.href).toBe('mailto:travis@travisgautier.com');
   });
 });

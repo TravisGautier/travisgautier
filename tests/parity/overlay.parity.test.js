@@ -23,4 +23,12 @@ describe('overlay parity', () => {
     expect(src).toContain("logo.classList.add('purple')");
     expect(src).toContain("logo.classList.remove('purple')");
   });
+
+  /// Tests checklist items: [6] — Feature 4.3
+  it('parity_overlay_header_link_purple', () => {
+    expect(src).toContain("headerLinks");
+    expect(src).toContain("classList.add('purple')");
+    expect(src).toContain("classList.remove('purple')");
+    expect(src).toContain("querySelectorAll('.header-link')");
+  });
 });

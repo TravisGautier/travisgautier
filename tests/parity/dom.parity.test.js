@@ -48,6 +48,26 @@ describe('DOM parity', () => {
     expect(loadingSection[0]).toContain('Travis Gautier');
   });
 
+  /// Tests checklist items: [1, 2] — Feature 4.3
+  it('parity_header_no_hash_href', () => {
+    expect(html).not.toMatch(/class="header-link"[^>]*href="#"/);
+    expect(html).not.toMatch(/href="#"[^>]*class="header-link"/);
+  });
+
+  /// Tests checklist items: [2] — Feature 4.3
+  it('parity_header_contact_mailto', () => {
+    expect(html).toMatch(/href="mailto:travis@travisgautier\.com"/);
+  });
+
+  /// Tests checklist items: [2] — Feature 4.3
+  it('parity_header_links_data_hover', () => {
+    const headerLinks = html.match(/<a[^>]*class="header-link"[^>]*>/g) || [];
+    expect(headerLinks.length).toBeGreaterThan(0);
+    for (const link of headerLinks) {
+      expect(link).toContain('data-hover');
+    }
+  });
+
   /// Tests checklist items: [11, 12]
   it('parity_dom_transition_css', () => {
     const transA = html.match(/<div[^>]*id="transitionA"[\s\S]*?<\/div>\s*<\/div>/);

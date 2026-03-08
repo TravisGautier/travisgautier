@@ -179,6 +179,35 @@ describe('styles', () => {
     expect(css).toMatch(/body\.scene-ready\s+\.bottom-bar\s*\{[^}]*animation-play-state:\s*running/s);
   });
 
+  // --- HEADER LINK PURPLE / FOCUS TESTS (Feature 4.3) ---
+
+  /// Tests checklist items: [4] — Feature 4.3
+  it('css_header_link_purple_class', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+    expect(css).toMatch(/\.header-link\.purple\s*\{/);
+  });
+
+  /// Tests checklist items: [4] — Feature 4.3
+  it('css_header_link_purple_hover', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+    expect(css).toMatch(/\.header-link\.purple:hover\s*\{/);
+    expect(css).toMatch(/\.header-link\.purple:hover\s*\{[^}]*var\(--purple\)/s);
+  });
+
+  /// Tests checklist items: [5] — Feature 4.3
+  it('css_header_link_focus_visible', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+    expect(css).toMatch(/\.header-link:focus-visible\s*\{/);
+    expect(css).toMatch(/\.header-link:focus-visible\s*\{[^}]*outline/s);
+  });
+
+  /// Tests checklist items: [5] — Feature 4.3
+  it('css_header_link_purple_focus_visible', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+    expect(css).toMatch(/\.header-link\.purple:focus-visible\s*\{/);
+    expect(css).toMatch(/\.header-link\.purple:focus-visible\s*\{[^}]*outline-color:\s*var\(--purple\)/s);
+  });
+
   // --- INTEGRATION TESTS ---
 
   /// Tests checklist items: [5]

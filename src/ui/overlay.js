@@ -4,6 +4,7 @@ export function initOverlay() {
   const labelRight = typeof document !== 'undefined' ? document.getElementById('labelRight') : null;
   const logo = typeof document !== 'undefined' ? document.getElementById('logo') : null;
   const overlay = typeof document !== 'undefined' ? document.getElementById('overlay') : null;
+  const headerLinks = typeof document !== 'undefined' ? document.querySelectorAll('.header-link') : [];
 
   function updateOverlay(p, transitioning) {
     if (holdFill) holdFill.style.width = (p * 100) + '%';
@@ -11,10 +12,12 @@ export function initOverlay() {
       if (labelLeft) labelLeft.classList.add('hidden');
       if (labelRight) labelRight.classList.add('visible');
       if (logo) logo.classList.add('purple');
+      headerLinks.forEach(link => link.classList.add('purple'));
     } else {
       if (labelLeft) labelLeft.classList.remove('hidden');
       if (labelRight) labelRight.classList.remove('visible');
       if (logo) logo.classList.remove('purple');
+      headerLinks.forEach(link => link.classList.remove('purple'));
     }
     if (overlay) {
       if (transitioning) {

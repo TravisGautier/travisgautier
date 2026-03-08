@@ -161,6 +161,15 @@ canvas { display: block; }
   transition: color 0.3s ease;
 }
 .header-link:hover { color: var(--gold); }
+.header-link.purple { color: rgba(74,53,112,0.45); }
+.header-link.purple:hover { color: var(--purple); }
+.header-link:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 4px;
+}
+.header-link.purple:focus-visible {
+  outline-color: var(--purple);
+}
 
 .side-label {
   position: absolute;

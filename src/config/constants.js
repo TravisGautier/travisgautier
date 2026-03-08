@@ -22,6 +22,12 @@ export const FPS_DOWNGRADE_PIXEL_RATIO_DROP = 0.5;
 export const RAYCAST_THROTTLE_MS = 50;
 export const TRANSITION_DWELL_TIME = 0.5;
 export const TRANSITION_NAV_DELAY = 1500;
+export const NAV_LINKS = {
+  contact: {
+    label: 'Contact',
+    href: 'mailto:travis@travisgautier.com',
+  },
+};
 export const VENTURES = {
   gold: {
     name: 'Innovation & Technology',
