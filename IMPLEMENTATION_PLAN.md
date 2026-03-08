@@ -896,8 +896,8 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 - [x] 4.1. Add portal raycasting + hover detection
 - [x] 4.2. Wire transition screen triggers + external navigation
 - [x] 4.3. Polish header navigation placeholders
-- [ ] 4.4. Add keyboard support for hold mechanic
-- [ ] 4.5. Polish scroll/hold hint indicators
+- [x] 4.4. Add keyboard support for hold mechanic
+- [x] 4.5. Polish scroll/hold hint indicators
 
 ### Phase 5 — Mobile & Touch
 - [ ] 5.1. Add touch event mapping for hold mechanic
