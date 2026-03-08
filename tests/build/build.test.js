@@ -161,11 +161,55 @@ describe('build output', () => {
     const scriptTags = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
 
     for (const [, attrs, body] of scriptTags) {
-      // Every script tag should have a src attribute
+      // JSON-LD structured data scripts are allowed inline
+      if (attrs.includes('application/ld+json')) continue;
+      // Every other script tag should have a src attribute
       expect(attrs).toMatch(/src="/);
       // No inline JavaScript content
       expect(body.trim()).toBe('');
     }
+  });
+
+  /// Tests checklist items: [6] — Feature 8.1
+  it('build_inline_script_exempts_jsonld', () => {
+    const html = fs.readFileSync(path.join(distDir, 'index.html'), 'utf-8');
+    const scriptTags = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
+
+    // Find JSON-LD script — it should have inline content
+    const jsonldTag = scriptTags.find(([, attrs]) => attrs.includes('application/ld+json'));
+    expect(jsonldTag).toBeDefined();
+    expect(jsonldTag[2].trim().length).toBeGreaterThan(0);
+
+    // Non-JSON-LD scripts should still have src and empty body
+    const otherTags = scriptTags.filter(([, attrs]) => !attrs.includes('application/ld+json'));
+    for (const [, attrs, body] of otherTags) {
+      expect(attrs).toMatch(/src="/);
+      expect(body.trim()).toBe('');
+    }
+  });
+
+  /// Tests checklist items: [1, 2, 3, 4, 5] — Feature 8.1
+  it('build_meta_tags_survive', () => {
+    const html = fs.readFileSync(path.join(distDir, 'index.html'), 'utf-8');
+
+    // Description meta tag
+    expect(html).toMatch(/<meta\s+name=["']description["']/);
+
+    // Open Graph tags
+    expect(html).toMatch(/<meta\s+property=["']og:title["']/);
+    expect(html).toMatch(/<meta\s+property=["']og:image["']/);
+
+    // Twitter card tag
+    expect(html).toMatch(/<meta\s+name=["']twitter:card["']/);
+
+    // Canonical link
+    expect(html).toMatch(/<link\s+rel=["']canonical["']/);
+
+    // JSON-LD structured data with valid JSON
+    const jsonldMatch = html.match(/<script\s+type=["']application\/ld\+json["']>([\s\S]*?)<\/script>/);
+    expect(jsonldMatch).not.toBeNull();
+    const data = JSON.parse(jsonldMatch[1]);
+    expect(data['@type']).toBe('Person');
   });
 
   /// Tests checklist items: [1, 2]

@@ -38,8 +38,9 @@ describe('modules build', () => {
     // Should not have inline IIFE
     expect(html).not.toMatch(/\(\(\)\s*=>\s*\{/);
 
-    // Should have no other script tags besides the module entry
-    const scriptTags = html.match(/<script[\s>]/g) || [];
+    // Should have no other script tags besides the module entry and JSON-LD
+    const scriptTags = [...html.matchAll(/<script\b([^>]*)>/g)]
+      .filter(([, attrs]) => !attrs.includes('application/ld+json'));
     expect(scriptTags.length).toBe(1);
   });
 
