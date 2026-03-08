@@ -8,7 +8,7 @@ export function startAnimateLoop(deps) {
     goldLight, purpleLight, groundGlow, pillarLight1, pillarLight2, hemiLight,
     skyMat, cloudSeaMat, cloudSea2,
     particles, particleSpeeds, particleMat,
-    updateHoldProgress, updateOverlay, updateCursor,
+    updateHoldProgress, updateTransition, updateOverlay, updateCursor,
     getScrollTarget,
     sampleFPS,
   } = deps;
@@ -37,6 +37,7 @@ export function startAnimateLoop(deps) {
     const wrappedTime = state.time % TIME_WRAP_PERIOD;
 
     updateHoldProgress(state, dt);
+    updateTransition(state, dt);
 
     const p = state.holdProgress;
 
@@ -133,7 +134,7 @@ export function startAnimateLoop(deps) {
     particles.geometry.attributes.position.needsUpdate = true;
     particleMat.opacity = 0.3 + 0.2 * Math.sin(state.time * 0.4);
 
-    updateOverlay(p);
+    updateOverlay(p, state.transitioning);
     updateCursor(state);
 
     renderer.render(scene, camera);

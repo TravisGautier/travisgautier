@@ -8,4 +8,7 @@ export const state = {
   reversing: false,
   currentAngle: 0.25,
   targetAngle: 0.25,
+  hasEngaged: false,
+  transitioning: false,
+  dwellTimer: 0,
 };

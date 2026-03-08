@@ -10,6 +10,7 @@ import { initCursor } from './interaction/cursor.js';
 import { updateHoldProgress } from './interaction/holdMechanic.js';
 import { createFPSMonitor, applyRuntimeDowngrade } from './interaction/fpsMonitor.js';
 import { initOverlay, showContextLostMessage } from './ui/overlay.js';
+import { updateTransition } from './ui/transition.js';
 import { startAnimateLoop } from './animate.js';
 
 function init() {
@@ -42,7 +43,7 @@ function init() {
     goldLight, purpleLight, groundGlow, pillarLight1, pillarLight2, hemiLight,
     skyMat, cloudSeaMat, cloudSea2,
     particles, particleSpeeds, particleMat,
-    updateHoldProgress, updateOverlay, updateCursor,
+    updateHoldProgress, updateTransition, updateOverlay, updateCursor,
     getScrollTarget,
     sampleFPS,
   });

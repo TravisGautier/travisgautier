@@ -59,4 +59,43 @@ describe('holdMechanic', () => {
     updateHoldProgress(state2, 0.016);
     expect(state2.reversing).toBe(false);
   });
+
+  /// Tests checklist items: [3] — Feature 4.2
+  it('unit_holdMechanic_freezes_when_transitioning', () => {
+    // holdProgress should not change when transitioning is true
+    const state = {
+      holding: true,
+      reversing: false,
+      holdProgress: 1.0,
+      transitioning: true,
+    };
+
+    updateHoldProgress(state, 0.5);
+
+    expect(state.holdProgress).toBe(1.0);
+    expect(state.reversing).toBe(false);
+  });
+
+  /// Tests checklist items: [3] — Feature 4.2
+  it('unit_holdMechanic_sets_hasEngaged', () => {
+    // hasEngaged should become true when holdProgress exceeds 0.5
+    const state = {
+      holding: true,
+      reversing: false,
+      holdProgress: 0.4,
+      hasEngaged: false,
+      transitioning: false,
+    };
+
+    // Advance past 0.5: 0.4 + 0.5 * 1.2 = 1.0
+    updateHoldProgress(state, 0.5);
+    expect(state.hasEngaged).toBe(true);
+
+    // Once set, hasEngaged should never revert
+    state.holding = false;
+    state.reversing = false;
+    updateHoldProgress(state, 0.5);
+    // holdProgress snaps toward 1 (already there), hasEngaged stays true
+    expect(state.hasEngaged).toBe(true);
+  });
 });

@@ -20,3 +20,19 @@ export const FPS_SAMPLE_COUNT = 120;
 export const FPS_THRESHOLD = 0.022;
 export const FPS_DOWNGRADE_PIXEL_RATIO_DROP = 0.5;
 export const RAYCAST_THROTTLE_MS = 50;
+export const TRANSITION_DWELL_TIME = 0.5;
+export const TRANSITION_NAV_DELAY = 1500;
+export const VENTURES = {
+  gold: {
+    name: 'Innovation & Technology',
+    subtitle: 'Entering experience\u2026',
+    url: '/ventures/gold',
+    transitionId: 'transitionA',
+  },
+  purple: {
+    name: 'Creative & Strategy',
+    subtitle: 'Entering experience\u2026',
+    url: '/ventures/purple',
+    transitionId: 'transitionB',
+  },
+};

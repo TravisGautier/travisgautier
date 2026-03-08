@@ -3,8 +3,9 @@ export function initOverlay() {
   const labelLeft = typeof document !== 'undefined' ? document.getElementById('labelLeft') : null;
   const labelRight = typeof document !== 'undefined' ? document.getElementById('labelRight') : null;
   const logo = typeof document !== 'undefined' ? document.getElementById('logo') : null;
+  const overlay = typeof document !== 'undefined' ? document.getElementById('overlay') : null;
 
-  function updateOverlay(p) {
+  function updateOverlay(p, transitioning) {
     if (holdFill) holdFill.style.width = (p * 100) + '%';
     if (p > 0.5) {
       if (labelLeft) labelLeft.classList.add('hidden');
@@ -14,6 +15,13 @@ export function initOverlay() {
       if (labelLeft) labelLeft.classList.remove('hidden');
       if (labelRight) labelRight.classList.remove('visible');
       if (logo) logo.classList.remove('purple');
+    }
+    if (overlay) {
+      if (transitioning) {
+        overlay.classList.add('fading');
+      } else {
+        overlay.classList.remove('fading');
+      }
     }
   }
 

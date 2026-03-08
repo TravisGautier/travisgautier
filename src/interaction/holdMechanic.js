@@ -1,4 +1,6 @@
 export function updateHoldProgress(state, dt) {
+  if (state.transitioning) return;
+
   if (state.holding) {
     if (state.reversing) {
       state.holdProgress = Math.max(0, state.holdProgress - dt * 1.2);
@@ -20,5 +22,9 @@ export function updateHoldProgress(state, dt) {
   }
   if (p < 0.01) {
     state.reversing = false;
+  }
+
+  if (state.holdProgress > 0.5) {
+    state.hasEngaged = true;
   }
 }
