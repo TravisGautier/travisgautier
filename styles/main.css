@@ -111,6 +111,17 @@ canvas { display: block; }
   border-color: rgba(124, 82, 212, 0.45);
 }
 
+@media (hover: none) and (pointer: coarse) {
+  .cursor,
+  .cursor-trail {
+    display: none;
+  }
+  body,
+  .header-link {
+    cursor: auto;
+  }
+}
+
 .overlay {
   position: fixed;
   top: 0; left: 0;

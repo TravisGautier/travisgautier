@@ -87,4 +87,9 @@ describe('controls parity', () => {
   it('parity_controls_gyro_constants', () => {
     expect(src).toContain('GYRO_GAMMA_DIVISOR');
   });
+
+  /// Tests checklist items: [4] — Feature 5.4
+  it('parity_controls_sets_isTouchDevice_on_touch', () => {
+    expect(src).toContain('state.isTouchDevice = true');
+  });
 });

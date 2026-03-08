@@ -11,4 +11,5 @@ export const state = {
   hasEngaged: false,
   transitioning: false,
   dwellTimer: 0,
+  isTouchDevice: false,
 };

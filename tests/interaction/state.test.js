@@ -16,6 +16,21 @@ describe('state', () => {
     expect(state.reversing).toBe(false);
     expect(state.currentAngle).toBe(0.25);
     expect(state.targetAngle).toBe(0.25);
+    expect(state.isTouchDevice).toBe(false);
+  });
+
+  /// Tests checklist items: [2] — Feature 5.4
+  it('unit_state_isTouchDevice_default', () => {
+    expect(state.isTouchDevice).toBe(false);
+  });
+
+  /// Tests checklist items: [2] — Feature 5.4
+  it('unit_state_isTouchDevice_mutable', () => {
+    state.isTouchDevice = true;
+    expect(state.isTouchDevice).toBe(true);
+
+    // Reset to default for other tests
+    state.isTouchDevice = false;
   });
 
   /// Tests checklist items: [2]

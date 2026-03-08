@@ -3,6 +3,7 @@ export function initCursor() {
   const cursorTrail = typeof document !== 'undefined' ? document.getElementById('cursorTrail') : null;
 
   function updateCursor(state) {
+    if (state.isTouchDevice) return;
     if (cursorEl) {
       cursorEl.style.left = state.mouse.x + 'px';
       cursorEl.style.top = state.mouse.y + 'px';

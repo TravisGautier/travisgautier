@@ -151,6 +151,7 @@ export function initControls(state, camera, renderer, portalSurfaces = [], dismi
 
     renderer.domElement.addEventListener('touchstart', (e) => {
       e.preventDefault();
+      state.isTouchDevice = true;
       touchHolding = true;
       const t = e.touches[0];
       state.mouse.nx = (t.clientX / window.innerWidth) * 2 - 1;

@@ -122,6 +122,22 @@ describe('styles', () => {
     expect(css).toContain('@media (max-width: 768px)');
   });
 
+  // --- TOUCH DEVICE CURSOR HIDING (Feature 5.4) ---
+
+  /// Tests checklist items: [1] — Feature 5.4
+  it('css_touch_device_cursor_hiding', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    expect(css).toMatch(/@media\s*\(hover:\s*none\)\s*and\s*\(pointer:\s*coarse\)/);
+
+    const mediaMatch = css.match(/@media\s*\(hover:\s*none\)\s*and\s*\(pointer:\s*coarse\)\s*\{([\s\S]*?)\n\}/);
+    expect(mediaMatch).not.toBeNull();
+    const mediaContent = mediaMatch[1];
+
+    expect(mediaContent).toContain('display: none');
+    expect(mediaContent).toContain('cursor: auto');
+  });
+
   // --- CONTEXT LOSS CSS TESTS ---
 
   /// Tests checklist items: [7] — Feature 2.2
