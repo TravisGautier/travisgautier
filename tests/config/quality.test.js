@@ -282,4 +282,68 @@ describe('quality', () => {
       expect(config.useGyroscope).toBe(expectedGyro[i]);
     }
   });
+
+  // --- REDUCED MOTION TESTS (Feature 6.1) ---
+
+  /// Tests checklist items: [1] — Feature 6.1
+  it('unit_quality_reduced_motion_flags_true', async () => {
+    vi.stubGlobal('matchMedia', (query) => ({
+      matches: query === '(prefers-reduced-motion: reduce)',
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    const { getGPUTier } = await import('detect-gpu');
+    getGPUTier.mockResolvedValue({ tier: 3, type: 'BENCHMARK' });
+    const { determineQuality } = await import('../../src/config/quality.js');
+    const config = await determineQuality();
+    expect(config.freezeShaderTime).toBe(true);
+    expect(config.disableParticles).toBe(true);
+    expect(config.disablePortalBob).toBe(true);
+    expect(config.instantCameraTransition).toBe(true);
+  });
+
+  /// Tests checklist items: [1] — Feature 6.1
+  it('unit_quality_reduced_motion_flags_false', async () => {
+    vi.stubGlobal('matchMedia', (query) => ({
+      matches: false,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    const { getGPUTier } = await import('detect-gpu');
+    getGPUTier.mockResolvedValue({ tier: 3, type: 'BENCHMARK' });
+    const { determineQuality } = await import('../../src/config/quality.js');
+    const config = await determineQuality();
+    expect(config.freezeShaderTime).toBe(false);
+    expect(config.disableParticles).toBe(false);
+    expect(config.disablePortalBob).toBe(false);
+    expect(config.instantCameraTransition).toBe(false);
+  });
+
+  /// Tests checklist items: [1] — Feature 6.1
+  it('unit_quality_reduced_motion_no_matchMedia', async () => {
+    vi.stubGlobal('matchMedia', undefined);
+    const { getGPUTier } = await import('detect-gpu');
+    getGPUTier.mockResolvedValue({ tier: 3, type: 'BENCHMARK' });
+    const { determineQuality } = await import('../../src/config/quality.js');
+    const config = await determineQuality();
+    expect(config.freezeShaderTime).toBe(false);
+    expect(config.disableParticles).toBe(false);
+    expect(config.disablePortalBob).toBe(false);
+    expect(config.instantCameraTransition).toBe(false);
+  });
+
+  /// Tests checklist items: [1] — Feature 6.1
+  it('unit_quality_reduced_motion_matchMedia_throws', async () => {
+    vi.stubGlobal('matchMedia', () => { throw new Error('matchMedia not supported'); });
+    const { getGPUTier } = await import('detect-gpu');
+    getGPUTier.mockResolvedValue({ tier: 3, type: 'BENCHMARK' });
+    const { determineQuality } = await import('../../src/config/quality.js');
+    const config = await determineQuality();
+    expect(config.freezeShaderTime).toBe(false);
+    expect(config.disableParticles).toBe(false);
+    expect(config.disablePortalBob).toBe(false);
+    expect(config.instantCameraTransition).toBe(false);
+  });
 });

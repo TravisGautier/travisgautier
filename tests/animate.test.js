@@ -28,3 +28,33 @@ describe('animate loop transition wiring', () => {
     expect(transIdx).toBeLessThan(overlayIdx);
   });
 });
+
+describe('reduced motion guards', () => {
+  const projectRoot = path.resolve(import.meta.dirname, '..');
+  const source = fs.readFileSync(path.join(projectRoot, 'src', 'animate.js'), 'utf-8');
+
+  /// Tests checklist items: [3] — Feature 6.1
+  it('unit_animate_accepts_motionConfig', () => {
+    expect(source).toContain('motionConfig');
+  });
+
+  /// Tests checklist items: [3] — Feature 6.1
+  it('unit_animate_freezeShaderTime_guard', () => {
+    expect(source).toMatch(/freezeShaderTime/);
+  });
+
+  /// Tests checklist items: [3] — Feature 6.1
+  it('unit_animate_disablePortalBob_guard', () => {
+    expect(source).toMatch(/disablePortalBob/);
+  });
+
+  /// Tests checklist items: [3] — Feature 6.1
+  it('unit_animate_disableParticles_guard', () => {
+    expect(source).toMatch(/disableParticles/);
+  });
+
+  /// Tests checklist items: [3] — Feature 6.1
+  it('unit_animate_instantCameraTransition_guard', () => {
+    expect(source).toMatch(/instantCameraTransition/);
+  });
+});

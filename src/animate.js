@@ -11,7 +11,10 @@ export function startAnimateLoop(deps) {
     updateHoldProgress, updateTransition, updateOverlay, updateCursor,
     getScrollTarget,
     sampleFPS,
+    motionConfig,
   } = deps;
+
+  const { freezeShaderTime, disableParticles, disablePortalBob, instantCameraTransition } = motionConfig || {};
 
   const clock = new THREE.Clock();
 
@@ -34,7 +37,7 @@ export function startAnimateLoop(deps) {
     const dt = Math.min(clock.getDelta(), DT_CLAMP_MAX);
     sampleFPS?.(dt);
     state.time += dt;
-    const wrappedTime = state.time % TIME_WRAP_PERIOD;
+    const wrappedTime = freezeShaderTime ? 0 : state.time % TIME_WRAP_PERIOD;
 
     updateHoldProgress(state, dt);
     updateTransition(state, dt);
@@ -47,7 +50,9 @@ export function startAnimateLoop(deps) {
     const scrollTarget = getScrollTarget();
     state.scroll += (scrollTarget - state.scroll) * dampFactor(DAMP_SCROLL_BASE, dt);
 
-    portalGroup.position.y = 1.0 + Math.sin(state.time * 0.4) * 0.015;
+    if (!disablePortalBob) {
+      portalGroup.position.y = 1.0 + Math.sin(state.time * 0.4) * 0.015;
+    }
 
     const orbitAngle = state.currentAngle + state.mouse.nx * 0.12;
     const orbitRadius = Math.max(MIN_ORBIT_RADIUS, Math.min(MAX_ORBIT_RADIUS, CAM_ORBIT_RADIUS - state.scroll * 1.2));
@@ -56,9 +61,15 @@ export function startAnimateLoop(deps) {
     const targetX = Math.sin(orbitAngle) * orbitRadius;
     const targetZ = Math.cos(orbitAngle) * orbitRadius;
 
-    camera.position.x += (targetX - camera.position.x) * dampFactor(DAMP_CAM_XZ_BASE, dt);
-    camera.position.z += (targetZ - camera.position.z) * dampFactor(DAMP_CAM_XZ_BASE, dt);
-    camera.position.y += (camY - camera.position.y) * dampFactor(DAMP_CAM_Y_BASE, dt);
+    if (instantCameraTransition) {
+      camera.position.x = targetX;
+      camera.position.z = targetZ;
+      camera.position.y = camY;
+    } else {
+      camera.position.x += (targetX - camera.position.x) * dampFactor(DAMP_CAM_XZ_BASE, dt);
+      camera.position.z += (targetZ - camera.position.z) * dampFactor(DAMP_CAM_XZ_BASE, dt);
+      camera.position.y += (camY - camera.position.y) * dampFactor(DAMP_CAM_Y_BASE, dt);
+    }
     camera.lookAt(LOOK_TARGET);
 
     const hv = state.hoverPortal ? 1.0 : 0.0;
@@ -121,18 +132,20 @@ export function startAnimateLoop(deps) {
       0.86 * (1 - p) + 0.78 * p
     );
 
-    const positions = particles.geometry.attributes.position.array;
-    for (let i = 0; i < particleSpeeds.length; i++) {
-      positions[i * 3 + 1] += particleSpeeds[i];
-      positions[i * 3] += Math.sin(state.time * 0.3 + i) * 0.001;
-      if (positions[i * 3 + 1] > 8) {
-        positions[i * 3 + 1] = -1;
-        positions[i * 3] = (Math.random() - 0.5) * 16;
-        positions[i * 3 + 2] = (Math.random() - 0.5) * 16;
+    if (!disableParticles) {
+      const positions = particles.geometry.attributes.position.array;
+      for (let i = 0; i < particleSpeeds.length; i++) {
+        positions[i * 3 + 1] += particleSpeeds[i];
+        positions[i * 3] += Math.sin(state.time * 0.3 + i) * 0.001;
+        if (positions[i * 3 + 1] > 8) {
+          positions[i * 3 + 1] = -1;
+          positions[i * 3] = (Math.random() - 0.5) * 16;
+          positions[i * 3 + 2] = (Math.random() - 0.5) * 16;
+        }
       }
+      particles.geometry.attributes.position.needsUpdate = true;
+      particleMat.opacity = 0.3 + 0.2 * Math.sin(state.time * 0.4);
     }
-    particles.geometry.attributes.position.needsUpdate = true;
-    particleMat.opacity = 0.3 + 0.2 * Math.sin(state.time * 0.4);
 
     updateOverlay(p, state.transitioning, state);
     updateCursor(state);

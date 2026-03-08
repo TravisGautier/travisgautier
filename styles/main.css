@@ -454,3 +454,13 @@ body.scene-ready .bottom-bar {
 @media (orientation: landscape) and (max-height: 500px) {
   .side-label .label-desc { display: none; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .header, .bottom-bar {
+    opacity: 1 !important;
+  }
+}

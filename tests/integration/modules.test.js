@@ -145,4 +145,13 @@ describe('module integration', () => {
     expect(src).toContain('createFPSMonitor');
     expect(src).toContain('sampleFPS');
   });
+
+  /// Tests checklist items: [2] — Feature 6.1
+  it('int_main_passes_motionConfig', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const src = fs.readFileSync(path.resolve('src/main.js'), 'utf-8');
+    expect(src).toContain('determineQuality');
+    expect(src).toContain('motionConfig');
+  });
 });

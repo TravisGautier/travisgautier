@@ -23,6 +23,14 @@ function isSmallScreen() {
   }
 }
 
+function prefersReducedMotion() {
+  try {
+    return globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+  } catch {
+    return false;
+  }
+}
+
 export async function determineQuality() {
   let tier = 0;
 
@@ -44,6 +52,12 @@ export async function determineQuality() {
     const dpr = globalThis.devicePixelRatio || 1;
     config.pixelRatio = Math.min(dpr, 2);
   }
+
+  const rm = prefersReducedMotion();
+  config.freezeShaderTime = rm;
+  config.disableParticles = rm;
+  config.disablePortalBob = rm;
+  config.instantCameraTransition = rm;
 
   return config;
 }

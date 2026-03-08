@@ -12,8 +12,9 @@ import { createFPSMonitor, applyRuntimeDowngrade } from './interaction/fpsMonito
 import { initOverlay, showContextLostMessage } from './ui/overlay.js';
 import { updateTransition, dismissTransition } from './ui/transition.js';
 import { startAnimateLoop } from './animate.js';
+import { determineQuality } from './config/quality.js';
 
-function init() {
+async function init() {
   const container = document.getElementById('canvas-container');
   let animLoop;
   const { scene, camera, renderer } = createSetup(container, {
@@ -37,6 +38,14 @@ function init() {
 
   const sampleFPS = createFPSMonitor(() => applyRuntimeDowngrade(renderer, particleMat, skyMat));
 
+  const quality = await determineQuality();
+  const motionConfig = {
+    freezeShaderTime: quality.freezeShaderTime,
+    disableParticles: quality.disableParticles,
+    disablePortalBob: quality.disablePortalBob,
+    instantCameraTransition: quality.instantCameraTransition,
+  };
+
   animLoop = startAnimateLoop({
     state, scene, camera, renderer,
     portalGroup, portalMatA, portalMatB, edgeMat,
@@ -46,6 +55,7 @@ function init() {
     updateHoldProgress, updateTransition, updateOverlay, updateCursor,
     getScrollTarget,
     sampleFPS,
+    motionConfig,
   });
 }
 

@@ -362,4 +362,38 @@ describe('styles', () => {
     // Landscape phone breakpoint must exist
     expect(css).toMatch(/@media\s*\(orientation:\s*landscape\)\s*and\s*\(max-height:\s*500px\)/);
   });
+
+  // --- REDUCED MOTION CSS TESTS (Feature 6.1) ---
+
+  /// Tests checklist items: [4] — Feature 6.1
+  it('a11y_css_reduced_motion_media_query', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+    expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+  });
+
+  /// Tests checklist items: [4] — Feature 6.1
+  it('a11y_css_reduced_motion_disables_animations', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    // Extract content inside the reduced-motion media query
+    const mediaMatch = css.match(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{([\s\S]*?)\n\}/);
+    expect(mediaMatch).not.toBeNull();
+    const mediaContent = mediaMatch[1];
+
+    expect(mediaContent).toMatch(/animation-duration/);
+    expect(mediaContent).toMatch(/transition-duration/);
+  });
+
+  /// Tests checklist items: [4] — Feature 6.1
+  it('a11y_css_reduced_motion_header_visible', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    // Extract content inside the reduced-motion media query
+    const mediaMatch = css.match(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{([\s\S]*?)\n\}/);
+    expect(mediaMatch).not.toBeNull();
+    const mediaContent = mediaMatch[1];
+
+    // Header and bottom-bar should be immediately visible
+    expect(mediaContent).toMatch(/opacity:\s*1/);
+  });
 });
