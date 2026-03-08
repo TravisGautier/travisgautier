@@ -246,4 +246,41 @@ describe('styles', () => {
       }
     }
   });
+
+  // --- HINT POLISH CSS TESTS (Feature 4.5) ---
+
+  /// Tests checklist items: [2] — Feature 4.5
+  it('build_css_hint_purple_classes', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    expect(css).toMatch(/\.scroll-hint\.purple\s*\{/);
+    expect(css).toMatch(/\.hold-hint\.purple\s*\{/);
+    expect(css).toMatch(/\.scroll-line\.purple\s*\{/);
+    expect(css).toMatch(/\.scroll-line\.purple::after\s*\{/);
+  });
+
+  /// Tests checklist items: [3] — Feature 4.5
+  it('build_css_hint_hidden_class', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    expect(css).toMatch(/\.scroll-hint\.hint-hidden\s*\{/);
+    expect(css).toMatch(/\.hold-hint\.hint-hidden\s*\{/);
+    expect(css).toMatch(/\.scroll-hint\.hint-hidden\s*\{[^}]*opacity:\s*0/s);
+    expect(css).toMatch(/\.hold-hint\.hint-hidden\s*\{[^}]*opacity:\s*0/s);
+  });
+
+  /// Tests checklist items: [5] — Feature 4.5
+  it('build_css_hold_indicator_luxury_easing', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    expect(css).toMatch(/\.hold-indicator-fill\s*\{[^}]*cubic-bezier/s);
+  });
+
+  /// Tests checklist items: [4] — Feature 4.5
+  it('build_css_hints_transitions', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    expect(css).toMatch(/\.scroll-hint\s*\{[^}]*transition/s);
+    expect(css).toMatch(/\.hold-hint\s*\{[^}]*transition/s);
+  });
 });

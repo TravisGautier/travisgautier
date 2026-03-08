@@ -10,7 +10,7 @@ import { initCursor } from './interaction/cursor.js';
 import { updateHoldProgress } from './interaction/holdMechanic.js';
 import { createFPSMonitor, applyRuntimeDowngrade } from './interaction/fpsMonitor.js';
 import { initOverlay, showContextLostMessage } from './ui/overlay.js';
-import { updateTransition } from './ui/transition.js';
+import { updateTransition, dismissTransition } from './ui/transition.js';
 import { startAnimateLoop } from './animate.js';
 
 function init() {
@@ -31,7 +31,7 @@ function init() {
   const { portalGroup, portalMatA, portalMatB, edgeMat, surfA, surfB } = createPortal(scene);
   const { goldLight, purpleLight, groundGlow, pillarLight1, pillarLight2, hemiLight } = createLighting(scene);
 
-  const { getScrollTarget } = initControls(state, camera, renderer, [surfA, surfB]);
+  const { getScrollTarget } = initControls(state, camera, renderer, [surfA, surfB], dismissTransition);
   const { updateCursor } = initCursor();
   const { updateOverlay } = initOverlay();
 

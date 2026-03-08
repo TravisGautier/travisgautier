@@ -16,13 +16,26 @@ export function checkPortalHover(raycaster, camera, ndc, surfaces) {
   return hits.length > 0;
 }
 
-export function initControls(state, camera, renderer, portalSurfaces = []) {
+export function initControls(state, camera, renderer, portalSurfaces = [], dismissTransition) {
   let scrollTarget = 0;
   let isTrackpad = false;
+  let mouseHolding = false;
+  let keyboardHolding = false;
   const cursorEl = typeof document !== 'undefined' ? document.getElementById('cursor') : null;
   const cursorTrail = typeof document !== 'undefined' ? document.getElementById('cursorTrail') : null;
   const raycaster = new THREE.Raycaster();
   let lastRaycast = 0;
+
+  function updateHoldingState() {
+    state.holding = mouseHolding || keyboardHolding;
+    if (state.holding) {
+      cursorEl?.classList.add('holding');
+      cursorTrail?.classList.add('holding');
+    } else {
+      cursorEl?.classList.remove('holding');
+      cursorTrail?.classList.remove('holding');
+    }
+  }
 
   if (typeof document !== 'undefined') {
     document.addEventListener('mousemove', (e) => {
@@ -49,20 +62,41 @@ export function initControls(state, camera, renderer, portalSurfaces = []) {
   if (typeof window !== 'undefined') {
     window.addEventListener('mousedown', (e) => {
       if (e.button === 0) {
-        state.holding = true;
-        cursorEl?.classList.add('holding');
-        cursorTrail?.classList.add('holding');
+        mouseHolding = true;
+        updateHoldingState();
       }
     });
     window.addEventListener('mouseup', () => {
-      state.holding = false;
-      cursorEl?.classList.remove('holding');
-      cursorTrail?.classList.remove('holding');
+      mouseHolding = false;
+      updateHoldingState();
     });
     window.addEventListener('mouseleave', () => {
-      state.holding = false;
-      cursorEl?.classList.remove('holding');
-      cursorTrail?.classList.remove('holding');
+      mouseHolding = false;
+      updateHoldingState();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === ' ' && !e.repeat && !e.target.closest('a, button, input, textarea, select, [contenteditable]')) {
+        e.preventDefault();
+        keyboardHolding = true;
+        updateHoldingState();
+      }
+      if (e.key === 'Escape') {
+        dismissTransition?.(state);
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      if (e.key === ' ') {
+        e.preventDefault();
+        keyboardHolding = false;
+        updateHoldingState();
+      }
+    });
+
+    window.addEventListener('blur', () => {
+      mouseHolding = false;
+      keyboardHolding = false;
+      updateHoldingState();
     });
 
     window.addEventListener('wheel', (e) => {

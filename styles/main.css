@@ -242,6 +242,7 @@ body.scene-ready .bottom-bar {
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  transition: color 0.6s ease, opacity 0.6s ease;
 }
 .scroll-line {
   width: 40px; height: 1px;
@@ -266,6 +267,7 @@ body.scene-ready .bottom-bar {
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  transition: color 0.6s ease, opacity 0.6s ease;
 }
 .hold-indicator {
   width: 50px; height: 2px;
@@ -280,8 +282,16 @@ body.scene-ready .bottom-bar {
   height: 100%; width: 0%;
   background: linear-gradient(90deg, var(--gold), var(--purple));
   border-radius: 1px;
-  transition: width 0.15s ease;
+  transition: width 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+.scroll-hint.purple { color: rgba(74,53,112,0.25); }
+.hold-hint.purple { color: rgba(74,53,112,0.25); }
+.scroll-line.purple { background: rgba(124,82,212,0.25); }
+.scroll-line.purple::after { background: var(--purple); }
+
+.scroll-hint.hint-hidden { opacity: 0; }
+.hold-hint.hint-hidden { opacity: 0; }
 
 .transition-screen {
   position: fixed;

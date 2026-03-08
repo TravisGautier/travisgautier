@@ -134,7 +134,7 @@ export function startAnimateLoop(deps) {
     particles.geometry.attributes.position.needsUpdate = true;
     particleMat.opacity = 0.3 + 0.2 * Math.sin(state.time * 0.4);
 
-    updateOverlay(p, state.transitioning);
+    updateOverlay(p, state.transitioning, state);
     updateCursor(state);
 
     renderer.render(scene, camera);

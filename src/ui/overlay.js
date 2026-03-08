@@ -5,19 +5,44 @@ export function initOverlay() {
   const logo = typeof document !== 'undefined' ? document.getElementById('logo') : null;
   const overlay = typeof document !== 'undefined' ? document.getElementById('overlay') : null;
   const headerLinks = typeof document !== 'undefined' ? document.querySelectorAll('.header-link') : [];
+  const scrollHint = typeof document !== 'undefined' ? document.getElementById('scrollHint') : null;
+  const holdHint = typeof document !== 'undefined' ? document.getElementById('holdHint') : null;
+  const scrollLine = typeof document !== 'undefined' ? document.getElementById('scrollLine') : null;
 
-  function updateOverlay(p, transitioning) {
+  function updateOverlay(p, transitioning, state) {
     if (holdFill) holdFill.style.width = (p * 100) + '%';
     if (p > 0.5) {
       if (labelLeft) labelLeft.classList.add('hidden');
       if (labelRight) labelRight.classList.add('visible');
       if (logo) logo.classList.add('purple');
       headerLinks.forEach(link => link.classList.add('purple'));
+      if (scrollHint) scrollHint.classList.add('purple');
+      if (holdHint) holdHint.classList.add('purple');
+      if (scrollLine) scrollLine.classList.add('purple');
     } else {
       if (labelLeft) labelLeft.classList.remove('hidden');
       if (labelRight) labelRight.classList.remove('visible');
       if (logo) logo.classList.remove('purple');
       headerLinks.forEach(link => link.classList.remove('purple'));
+      if (scrollHint) scrollHint.classList.remove('purple');
+      if (holdHint) holdHint.classList.remove('purple');
+      if (scrollLine) scrollLine.classList.remove('purple');
+    }
+    if (state) {
+      if (scrollHint) {
+        if (state.scroll > 0) {
+          scrollHint.classList.add('hint-hidden');
+        } else {
+          scrollHint.classList.remove('hint-hidden');
+        }
+      }
+      if (holdHint) {
+        if (state.hasEngaged) {
+          holdHint.classList.add('hint-hidden');
+        } else {
+          holdHint.classList.remove('hint-hidden');
+        }
+      }
     }
     if (overlay) {
       if (transitioning) {

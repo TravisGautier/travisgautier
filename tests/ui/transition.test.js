@@ -228,4 +228,93 @@ describe('transition', () => {
     expect(css).toMatch(/\.transition-screen\.active\s*\{[^}]*opacity:\s*1/);
     expect(css).toMatch(/\.transition-screen\.active\s*\{[^}]*pointer-events:\s*auto/);
   });
+
+  // ============================================================
+  // dismissTransition tests — Feature 4.4
+  // ============================================================
+
+  /// Tests checklist items: [4] — Feature 4.4
+  it('unit_dismissTransition_resets_state', async () => {
+    const { dismissTransition } = await import('../../src/ui/transition.js');
+
+    const state = {
+      holdProgress: 1.0,
+      holding: false,
+      hasEngaged: true,
+      transitioning: true,
+      dwellTimer: 0.6,
+    };
+
+    dismissTransition(state);
+    expect(state.transitioning).toBe(false);
+    expect(state.dwellTimer).toBe(0);
+  });
+
+  /// Tests checklist items: [4] — Feature 4.4
+  it('unit_dismissTransition_removes_active_class', async () => {
+    const { dismissTransition } = await import('../../src/ui/transition.js');
+
+    const state = {
+      holdProgress: 1.0,
+      holding: false,
+      hasEngaged: true,
+      transitioning: true,
+      dwellTimer: 0.6,
+    };
+
+    dismissTransition(state);
+    expect(transitionA.classList.remove).toHaveBeenCalledWith('active');
+    expect(transitionB.classList.remove).toHaveBeenCalledWith('active');
+  });
+
+  /// Tests checklist items: [4] — Feature 4.4
+  it('unit_dismissTransition_noop_when_not_transitioning', async () => {
+    const { dismissTransition } = await import('../../src/ui/transition.js');
+
+    const state = {
+      holdProgress: 0.5,
+      holding: false,
+      hasEngaged: false,
+      transitioning: false,
+      dwellTimer: 0,
+    };
+
+    dismissTransition(state);
+    expect(transitionA.classList.remove).not.toHaveBeenCalled();
+    expect(transitionB.classList.remove).not.toHaveBeenCalled();
+  });
+
+  /// Tests checklist items: [4] — Feature 4.4
+  it('unit_dismissTransition_cancels_timeout', async () => {
+    const mockClearTimeout = vi.fn();
+    vi.stubGlobal('clearTimeout', mockClearTimeout);
+    const mockSetTimeout = vi.fn(() => 42);
+    vi.stubGlobal('setTimeout', mockSetTimeout);
+
+    const { updateTransition, dismissTransition } = await import('../../src/ui/transition.js');
+
+    const state = {
+      holdProgress: 1.0,
+      holding: false,
+      hasEngaged: true,
+      transitioning: false,
+      dwellTimer: 0,
+    };
+
+    // Trigger transition to set the timeout
+    updateTransition(state, 0.6);
+    expect(state.transitioning).toBe(true);
+    expect(mockSetTimeout).toHaveBeenCalled();
+
+    // Dismiss should clear the timeout
+    dismissTransition(state);
+    expect(mockClearTimeout).toHaveBeenCalledWith(42);
+    expect(state.transitioning).toBe(false);
+  });
+
+  /// Tests checklist items: [4] — Feature 4.4
+  it('unit_dismissTransition_is_exported', async () => {
+    const mod = await import('../../src/ui/transition.js');
+    expect(typeof mod.dismissTransition).toBe('function');
+  });
 });
