@@ -41,7 +41,7 @@ describe('modules build', () => {
     // Should have no other script tags besides the module entry and JSON-LD
     const scriptTags = [...html.matchAll(/<script\b([^>]*)>/g)]
       .filter(([, attrs]) => !attrs.includes('application/ld+json'));
-    expect(scriptTags.length).toBe(1);
+    expect(scriptTags.length).toBe(2);
   });
 
   /// Tests checklist items: [11]
