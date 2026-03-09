@@ -212,6 +212,16 @@ describe('build output', () => {
     expect(data['@type']).toBe('Person');
   });
 
+  /// Tests checklist items: [2] — Feature 8.2
+  it('build_og_image_in_output', () => {
+    const distOgImage = path.join(distDir, 'og-image.jpg');
+    expect(fs.existsSync(distOgImage)).toBe(true);
+
+    const srcSize = fs.statSync(path.join(projectRoot, 'public', 'og-image.jpg')).size;
+    const distSize = fs.statSync(distOgImage).size;
+    expect(distSize).toBe(srcSize);
+  });
+
   /// Tests checklist items: [1, 2]
   it('build_bundle_sizes_reasonable', () => {
     const files = fs.readdirSync(assetsDir);
