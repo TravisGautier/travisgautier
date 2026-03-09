@@ -923,7 +923,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 - [x] 8.2. Create OG image
 - [x] 8.3. Design + add favicon
 - [x] 8.4. Integrate analytics
-- [ ] 8.5. Verify social sharing previews
+- [x] 8.5. Verify social sharing previews
 
 ### Phase 9 — Build, Deploy & Error Handling
 - [ ] 9.1. Finalize Vite build configuration
