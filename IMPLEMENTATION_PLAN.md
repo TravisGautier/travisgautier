@@ -927,7 +927,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 
 ### Phase 9 — Build, Deploy & Error Handling
 - [x] 9.1. Finalize Vite build configuration
-- [ ] 9.2. Configure caching headers
+- [x] 9.2. Configure caching headers
 - [ ] 9.3. Create branded 404 page
 - [ ] 9.4. Build Tier 0 static fallback
 - [ ] 9.5. Deploy to Cloudflare Pages
