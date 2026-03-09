@@ -222,6 +222,19 @@ describe('build output', () => {
     expect(distSize).toBe(srcSize);
   });
 
+  /// Tests checklist items: [1, 2, 3] — Feature 8.3
+  it('build_favicons_in_output', () => {
+    const faviconFiles = ['favicon.svg', 'favicon.ico', 'apple-touch-icon.png'];
+    for (const file of faviconFiles) {
+      const distPath = path.join(distDir, file);
+      expect(fs.existsSync(distPath)).toBe(true);
+
+      const srcSize = fs.statSync(path.join(projectRoot, 'public', file)).size;
+      const outSize = fs.statSync(distPath).size;
+      expect(outSize).toBe(srcSize);
+    }
+  });
+
   /// Tests checklist items: [1, 2]
   it('build_bundle_sizes_reasonable', () => {
     const files = fs.readdirSync(assetsDir);
