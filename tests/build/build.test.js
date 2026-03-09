@@ -270,4 +270,14 @@ describe('build output', () => {
     }
     expect(threeJsSize).toBeGreaterThan(totalJsSize * 0.5);
   });
+
+  /// Tests checklist items: [1, 2, 3] — Feature 9.2
+  it('build_headers_in_dist', () => {
+    const distHeaders = path.join(distDir, '_headers');
+    expect(fs.existsSync(distHeaders)).toBe(true);
+
+    const srcContent = fs.readFileSync(path.join(projectRoot, 'public', '_headers'), 'utf-8');
+    const distContent = fs.readFileSync(distHeaders, 'utf-8');
+    expect(distContent).toBe(srcContent);
+  });
 });
