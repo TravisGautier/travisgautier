@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [glsl()],
   build: {
     target: 'es2020',
-    minify: 'esbuild',
+    minify: 'terser',
     rollupOptions: {
       output: {
         manualChunks: {

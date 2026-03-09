@@ -7,6 +7,17 @@ const projectRoot = path.resolve(import.meta.dirname, '..', '..');
 const distDir = path.join(projectRoot, 'dist');
 const assetsDir = path.join(distDir, 'assets');
 
+describe('build config', () => {
+  const configPath = path.join(projectRoot, 'vite.config.js');
+  const configContent = fs.readFileSync(configPath, 'utf-8');
+
+  /// Tests checklist items: [1, 2]
+  it('build_config_uses_terser', () => {
+    expect(configContent).toMatch(/minify:\s*['"]terser['"]/);
+    expect(configContent).not.toMatch(/minify:\s*['"]esbuild['"]/);
+  });
+});
+
 const expectedFonts = [
   'CormorantGaramond-Light.woff2',
   'CormorantGaramond-Regular.woff2',
