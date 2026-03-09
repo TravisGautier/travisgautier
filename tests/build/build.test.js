@@ -271,6 +271,16 @@ describe('build output', () => {
     expect(threeJsSize).toBeGreaterThan(totalJsSize * 0.5);
   });
 
+  /// Tests checklist items: [9] — Feature 9.3
+  it('build_404_in_dist', () => {
+    const dist404 = path.join(distDir, '404.html');
+    expect(fs.existsSync(dist404)).toBe(true);
+
+    const srcContent = fs.readFileSync(path.join(projectRoot, 'public', '404.html'), 'utf-8');
+    const distContent = fs.readFileSync(dist404, 'utf-8');
+    expect(distContent).toBe(srcContent);
+  });
+
   /// Tests checklist items: [1, 2, 3] — Feature 9.2
   it('build_headers_in_dist', () => {
     const distHeaders = path.join(distDir, '_headers');
