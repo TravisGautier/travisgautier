@@ -17,6 +17,7 @@ describe('modules build', () => {
       'src/interaction/cursor.js',
       'src/interaction/holdMechanic.js',
       'src/ui/overlay.js',
+      'src/ui/fallback.js',
       'src/animate.js',
     ];
 

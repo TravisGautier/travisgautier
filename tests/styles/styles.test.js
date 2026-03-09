@@ -224,6 +224,23 @@ describe('styles', () => {
     expect(css).toMatch(/\.header-link\.purple:focus-visible\s*\{[^}]*outline-color:\s*var\(--purple\)/s);
   });
 
+  // --- FALLBACK CSS TESTS (Feature 9.4) ---
+
+  /// Tests checklist items: [4] — Feature 9.4
+  it('build_css_fallback_mode_classes', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    expect(css).toMatch(/\.fallback-mode/);
+    expect(css).toMatch(/\.fallback-tint/);
+  });
+
+  /// Tests checklist items: [4] — Feature 9.4
+  it('build_css_fallback_scroll_hint_hidden', () => {
+    const css = fs.readFileSync(path.join(projectRoot, 'styles', 'main.css'), 'utf-8');
+
+    expect(css).toMatch(/\.fallback-mode\s+\.scroll-hint\s*\{[^}]*display:\s*none/s);
+  });
+
   // --- INTEGRATION TESTS ---
 
   /// Tests checklist items: [5]

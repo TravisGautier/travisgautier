@@ -90,6 +90,24 @@ describe('module integration', () => {
     expect(() => initControls(state, camera, renderer)).not.toThrow();
   });
 
+  /// Tests checklist items: [2] — Feature 9.4
+  it('int_fallback_module_exports', async () => {
+    const fallback = await import('../../src/ui/fallback.js');
+    expect(typeof fallback.initFallback).toBe('function');
+  });
+
+  /// Tests checklist items: [1] — Feature 9.4
+  it('int_main_tier0_branch', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const src = fs.readFileSync(path.resolve('src/main.js'), 'utf-8');
+
+    // main.js must check for tier 0
+    expect(src).toMatch(/quality\.tier\s*===\s*0/);
+    // main.js must dynamically import fallback.js
+    expect(src).toContain('./ui/fallback.js');
+  });
+
   /// Tests checklist items: [2, 3] — Feature 2.2
   it('int_overlay_exports_context_lost', async () => {
     const overlay = await import('../../src/ui/overlay.js');

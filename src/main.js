@@ -13,8 +13,18 @@ import { initOverlay, showContextLostMessage } from './ui/overlay.js';
 import { updateTransition, dismissTransition } from './ui/transition.js';
 import { startAnimateLoop } from './animate.js';
 import { determineQuality } from './config/quality.js';
+import { hideLoading } from './ui/loading.js';
 
 async function init() {
+  const quality = await determineQuality();
+
+  if (quality.tier === 0) {
+    const { initFallback } = await import('./ui/fallback.js');
+    initFallback();
+    hideLoading();
+    return;
+  }
+
   const container = document.getElementById('canvas-container');
   let animLoop;
   const { scene, camera, renderer } = createSetup(container, {
@@ -38,7 +48,6 @@ async function init() {
 
   const sampleFPS = createFPSMonitor(() => applyRuntimeDowngrade(renderer, particleMat, skyMat));
 
-  const quality = await determineQuality();
   const motionConfig = {
     freezeShaderTime: quality.freezeShaderTime,
     disableParticles: quality.disableParticles,

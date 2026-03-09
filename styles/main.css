@@ -512,3 +512,19 @@ body.scene-ready .bottom-bar {
     opacity: 1 !important;
   }
 }
+
+/* Fallback mode */
+.fallback-mode #canvas-container {
+  background: url('/fallback-hero.jpg') center/cover no-repeat;
+}
+
+.fallback-tint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: background 0.3s ease;
+}
+
+.fallback-mode .scroll-hint {
+  display: none;
+}
