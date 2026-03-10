@@ -61,12 +61,12 @@ describe('animate parity', () => {
 
   /// Tests checklist items: [8]
   it('parity_anim_gold_light_formula', () => {
-    expect(src).toContain('(2.5 + Math.sin(state.time * 0.5) * 0.4) * (1 - p)');
+    expect(src).toContain('(2.5 + Math.sin(state.time * 0.5) * 0.3 + Math.sin(state.time * 1.3) * 0.1) * (1 - p)');
   });
 
   /// Tests checklist items: [8]
   it('parity_anim_purple_light_formula', () => {
-    expect(src).toContain('(2.5 + Math.cos(state.time * 0.4) * 0.4) * p');
+    expect(src).toContain('(2.5 + Math.cos(state.time * 0.4) * 0.3 + Math.cos(state.time * 1.1) * 0.1) * p');
   });
 
   /// Tests checklist items: [8]
@@ -140,6 +140,41 @@ describe('animate parity', () => {
     expect(src).toContain('DAMP_CAM_XZ_BASE');
     expect(src).toContain('DAMP_CAM_Y_BASE');
     expect(src).toContain('DAMP_HOVER_BASE');
+  });
+
+  /// Tests checklist items: [3] — Feature 10.1
+  it('parity_anim_fog_density', () => {
+    expect(src).toContain('scene.fog.density = 0.007 + p * 0.003');
+  });
+
+  /// Tests checklist items: [5] — Feature 10.1
+  it('parity_anim_ground_glow_formula', () => {
+    expect(src).toContain('0.8 + Math.sin(state.time * 0.6) * 0.2 + Math.sin(state.time * 1.7) * 0.1');
+  });
+
+  /// Tests checklist items: [6] — Feature 10.1
+  it('parity_anim_pillar_breathing', () => {
+    expect(src).toContain('0.5 + Math.sin(state.time * 0.7) * 0.08 + Math.sin(state.time * 1.9) * 0.04');
+    expect(src).toContain('pillarLight1.intensity = pillarBreath');
+    expect(src).toContain('pillarLight2.intensity = pillarBreath');
+  });
+
+  /// Tests checklist items: [7] — Feature 10.1
+  it('parity_anim_hemi_intensity', () => {
+    expect(src).toContain('hemiLight.intensity = 0.6 + Math.sin(state.time * 0.35) * 0.05');
+  });
+
+  /// Tests checklist items: [1] — Feature 10.1
+  it('parity_anim_particle_color_shift', () => {
+    expect(src).toContain('1.0 + p * (0.88 - 1.0)');
+    expect(src).toContain('0.97 + p * (0.82 - 0.97)');
+    expect(src).toContain('0.88 + p * (1.0 - 0.88)');
+  });
+
+  /// Tests checklist items: [2] — Feature 10.1
+  it('parity_anim_particle_attraction', () => {
+    expect(src).toContain('dx / dist * 0.0004');
+    expect(src).toContain('dz / dist * 0.0004');
   });
 
   /// Tests checklist items: [2] — Feature 2.5

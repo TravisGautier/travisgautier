@@ -87,15 +87,15 @@ export function startAnimateLoop(deps) {
     edgeMat.emissive.setRGB(tRed * 0.5, tGrn * 0.5, tBlu * 0.5);
     edgeMat.emissiveIntensity = 0.08 + Math.sin(state.time * 0.8) * 0.04;
 
-    goldLight.intensity = (2.5 + Math.sin(state.time * 0.5) * 0.4) * (1 - p);
-    purpleLight.intensity = (2.5 + Math.cos(state.time * 0.4) * 0.4) * p;
+    goldLight.intensity = (2.5 + Math.sin(state.time * 0.5) * 0.3 + Math.sin(state.time * 1.3) * 0.1) * (1 - p);
+    purpleLight.intensity = (2.5 + Math.cos(state.time * 0.4) * 0.3 + Math.cos(state.time * 1.1) * 0.1) * p;
 
     groundGlow.color.setRGB(
       0.78 * (1 - p) + 0.61 * p,
       0.66 * (1 - p) + 0.43 * p,
       0.30 * (1 - p) + 1.0 * p
     );
-    groundGlow.intensity = 0.8 + Math.sin(state.time * 0.6) * 0.3;
+    groundGlow.intensity = 0.8 + Math.sin(state.time * 0.6) * 0.2 + Math.sin(state.time * 1.7) * 0.1;
 
     pillarLight1.color.setRGB(
       1.0 * (1 - p) + 0.75 * p,
@@ -107,6 +107,9 @@ export function startAnimateLoop(deps) {
       0.91 * (1 - p) + 0.60 * p,
       0.77 * (1 - p) + 1.0 * p
     );
+    const pillarBreath = 0.5 + Math.sin(state.time * 0.7) * 0.08 + Math.sin(state.time * 1.9) * 0.04;
+    pillarLight1.intensity = pillarBreath;
+    pillarLight2.intensity = pillarBreath;
 
     skyMat.uniforms.uHold.value = p;
     skyMat.uniforms.uTime.value = wrappedTime;
@@ -125,18 +128,25 @@ export function startAnimateLoop(deps) {
     const fogB = 0.89 * (1 - p) + 0.88 * p;
     scene.fog.color.setRGB(fogR, fogG, fogB);
     renderer.setClearColor(scene.fog.color);
+    scene.fog.density = 0.007 + p * 0.003;
 
     hemiLight.color.setRGB(
       0.53 * (1 - p) + 0.45 * p,
       0.73 * (1 - p) + 0.55 * p,
       0.86 * (1 - p) + 0.78 * p
     );
+    hemiLight.intensity = 0.6 + Math.sin(state.time * 0.35) * 0.05;
 
     if (!disableParticles) {
       const positions = particles.geometry.attributes.position.array;
       for (let i = 0; i < particleSpeeds.length; i++) {
         positions[i * 3 + 1] += particleSpeeds[i];
         positions[i * 3] += Math.sin(state.time * 0.3 + i) * 0.001;
+        const dx = -positions[i * 3];
+        const dz = -positions[i * 3 + 2];
+        const dist = Math.sqrt(dx * dx + dz * dz) + 0.1;
+        positions[i * 3] += dx / dist * 0.0004;
+        positions[i * 3 + 2] += dz / dist * 0.0004;
         if (positions[i * 3 + 1] > 8) {
           positions[i * 3 + 1] = -1;
           positions[i * 3] = (Math.random() - 0.5) * 16;
@@ -145,6 +155,11 @@ export function startAnimateLoop(deps) {
       }
       particles.geometry.attributes.position.needsUpdate = true;
       particleMat.opacity = 0.3 + 0.2 * Math.sin(state.time * 0.4);
+      particleMat.color.setRGB(
+        1.0 + p * (0.88 - 1.0),
+        0.97 + p * (0.82 - 0.97),
+        0.88 + p * (1.0 - 0.88)
+      );
     }
 
     updateOverlay(p, state.transitioning, state);
