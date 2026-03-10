@@ -1,8 +1,9 @@
 import { state } from '../interaction/state.js';
-import { updateHoldProgress } from '../interaction/holdMechanic.js';
+import { updateDragPhysics, deriveHoldProgress } from '../interaction/dragOrbit.js';
 import { initOverlay } from './overlay.js';
 import { updateTransition, dismissTransition } from './transition.js';
 import { initCursor } from '../interaction/cursor.js';
+import { DRAG_SENSITIVITY, TOUCH_DRAG_SENSITIVITY, TILT_MIN, TILT_MAX, TILT_SENSITIVITY } from '../config/constants.js';
 
 const DT_CLAMP_MAX = 0.1;
 
@@ -23,60 +24,90 @@ export function initFallback() {
   tintEl.setAttribute('aria-hidden', 'true');
   container.appendChild(tintEl);
 
+  let lastMoveTime = 0;
+
   function onMouseMove(e) {
     state.mouse.x = e.clientX;
     state.mouse.y = e.clientY;
-    state.mouse.nx = (e.clientX / window.innerWidth) * 2 - 1;
-    state.mouse.ny = -(e.clientY / window.innerHeight) * 2 + 1;
+    if (state.dragging) {
+      const deltaX = e.clientX - state.lastDragX;
+      state.targetAngle -= deltaX * DRAG_SENSITIVITY;
+      const now = performance.now();
+      const moveDt = (now - lastMoveTime) / 1000;
+      if (moveDt > 0 && moveDt < 0.1) {
+        state.dragVelocity = (-deltaX * DRAG_SENSITIVITY) / moveDt;
+      }
+      lastMoveTime = now;
+      state.lastDragX = e.clientX;
+      state.lastDragY = e.clientY;
+    } else {
+      state.mouse.nx = (e.clientX / window.innerWidth) * 2 - 1;
+      state.mouse.ny = -(e.clientY / window.innerHeight) * 2 + 1;
+    }
   }
 
-  function onMouseDown() {
-    state.holding = true;
+  function onMouseDown(e) {
+    state.dragging = true;
+    state.lastDragX = e.clientX;
+    state.lastDragY = e.clientY;
+    state.dragVelocity = 0;
+    state.snappedTo = null;
+    lastMoveTime = performance.now();
   }
 
   function onMouseUp() {
-    state.holding = false;
+    state.dragging = false;
   }
 
   function onKeyDown(e) {
-    if (e.key === ' ') {
-      e.preventDefault();
-      state.holding = true;
-    } else if (e.key === 'Escape') {
+    if (e.key === 'Escape') {
       e.preventDefault();
       state.transitioning = false;
       state.dwellTimer = 0;
     }
   }
 
-  function onKeyUp(e) {
-    if (e.key === ' ') {
-      state.holding = false;
-    }
-  }
-
   function onTouchStart(e) {
     e.preventDefault();
     state.isTouchDevice = true;
-    state.holding = true;
     if (e.touches && e.touches[0]) {
+      state.dragging = true;
+      state.lastDragX = e.touches[0].clientX;
+      state.lastDragY = e.touches[0].clientY;
+      state.dragVelocity = 0;
+      state.snappedTo = null;
+      lastMoveTime = performance.now();
       state.mouse.x = e.touches[0].clientX;
       state.mouse.y = e.touches[0].clientY;
-      state.mouse.nx = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
-      state.mouse.ny = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+    }
+  }
+
+  function onTouchMove(e) {
+    if (e.touches && e.touches.length === 1) {
+      const t = e.touches[0];
+      const deltaX = t.clientX - state.lastDragX;
+      state.targetAngle -= deltaX * TOUCH_DRAG_SENSITIVITY;
+      const now = performance.now();
+      const moveDt = (now - lastMoveTime) / 1000;
+      if (moveDt > 0 && moveDt < 0.1) {
+        state.dragVelocity = (-deltaX * TOUCH_DRAG_SENSITIVITY) / moveDt;
+      }
+      lastMoveTime = now;
+      state.lastDragX = t.clientX;
+      state.lastDragY = t.clientY;
     }
   }
 
   function onTouchEnd() {
-    state.holding = false;
+    state.dragging = false;
   }
 
   document.addEventListener('mousemove', onMouseMove);
   document.addEventListener('mousedown', onMouseDown);
   document.addEventListener('mouseup', onMouseUp);
   document.addEventListener('keydown', onKeyDown);
-  document.addEventListener('keyup', onKeyUp);
   container.addEventListener('touchstart', onTouchStart, { passive: false });
+  container.addEventListener('touchmove', onTouchMove, { passive: false });
   container.addEventListener('touchend', onTouchEnd);
 
   let rafId = null;
@@ -88,7 +119,7 @@ export function initFallback() {
     const dt = Math.min((now - lastTime) / 1000, DT_CLAMP_MAX);
     lastTime = now;
 
-    updateHoldProgress(state, dt);
+    updateDragPhysics(state, dt);
     updateTransition(state, dt);
 
     const p = state.holdProgress;
@@ -109,8 +140,8 @@ export function initFallback() {
     document.removeEventListener('mousedown', onMouseDown);
     document.removeEventListener('mouseup', onMouseUp);
     document.removeEventListener('keydown', onKeyDown);
-    document.removeEventListener('keyup', onKeyUp);
     container.removeEventListener('touchstart', onTouchStart);
+    container.removeEventListener('touchmove', onTouchMove);
     container.removeEventListener('touchend', onTouchEnd);
   }
 

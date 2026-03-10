@@ -11,12 +11,18 @@ describe('state', () => {
     expect(state.scroll).toBe(0);
     expect(state.hoverPortal).toBe(false);
     expect(state.time).toBe(0);
-    expect(state.holding).toBe(false);
     expect(state.holdProgress).toBe(0);
-    expect(state.reversing).toBe(false);
     expect(state.currentAngle).toBe(0.25);
     expect(state.targetAngle).toBe(0.25);
     expect(state.isTouchDevice).toBe(false);
+    expect(state.dragging).toBe(false);
+    expect(state.dragVelocity).toBe(0);
+    expect(state.tiltVelocity).toBe(0);
+    expect(state.lastDragX).toBe(0);
+    expect(state.lastDragY).toBe(0);
+    expect(state.targetTilt).toBe(0);
+    expect(state.currentTilt).toBe(0);
+    expect(state.snappedTo).toBe(null);
   });
 
   /// Tests checklist items: [2] — Feature 5.4
@@ -41,13 +47,13 @@ describe('state', () => {
     state.mouse.nx = 0.7;
     expect(state.mouse.nx).toBe(0.7);
 
-    state.holding = true;
-    expect(state.holding).toBe(true);
+    state.dragging = true;
+    expect(state.dragging).toBe(true);
 
     // Reset to defaults for other tests
     state.holdProgress = 0;
     state.mouse.nx = 0;
-    state.holding = false;
+    state.dragging = false;
   });
 
   /// Tests checklist items: [4] — Feature 7.2

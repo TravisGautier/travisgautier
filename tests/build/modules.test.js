@@ -15,7 +15,7 @@ describe('modules build', () => {
       'src/scene/lighting.js',
       'src/interaction/controls.js',
       'src/interaction/cursor.js',
-      'src/interaction/holdMechanic.js',
+      'src/interaction/dragOrbit.js',
       'src/ui/overlay.js',
       'src/ui/fallback.js',
       'src/animate.js',

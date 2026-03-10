@@ -196,9 +196,9 @@ describe('createMockState', () => {
   });
 
   it('unit_mockState_accepts_top_level_overrides', () => {
-    const mock = createMockState({ holdProgress: 0.5, holding: true });
+    const mock = createMockState({ holdProgress: 0.5, dragging: true });
     expect(mock.holdProgress).toBe(0.5);
-    expect(mock.holding).toBe(true);
+    expect(mock.dragging).toBe(true);
     expect(mock.scroll).toBe(0);
   });
 

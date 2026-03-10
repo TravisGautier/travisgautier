@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { GOLD_ANGLE, PURPLE_ANGLE, CAM_ORBIT_RADIUS, MIN_ORBIT_RADIUS, MAX_ORBIT_RADIUS, CAM_HEIGHT, LOOK_TARGET, DT_CLAMP_MAX, TIME_WRAP_PERIOD, DAMP_ANGLE_BASE, DAMP_SCROLL_BASE, DAMP_CAM_XZ_BASE, DAMP_CAM_Y_BASE, DAMP_HOVER_BASE } from './config/constants.js';
+import { GOLD_ANGLE, PURPLE_ANGLE, CAM_ORBIT_RADIUS, MIN_ORBIT_RADIUS, MAX_ORBIT_RADIUS, CAM_HEIGHT, LOOK_TARGET, DT_CLAMP_MAX, TIME_WRAP_PERIOD, DAMP_ANGLE_BASE, DAMP_SCROLL_BASE, DAMP_CAM_XZ_BASE, DAMP_CAM_Y_BASE, DAMP_HOVER_BASE, DAMP_TILT_BASE } from './config/constants.js';
+import { shortestAngularDiff } from './interaction/dragOrbit.js';
 
 export function startAnimateLoop(deps) {
   const {
@@ -42,10 +43,10 @@ export function startAnimateLoop(deps) {
     updateHoldProgress(state, dt);
     updateTransition(state, dt);
 
-    const p = state.holdProgress;
+    const angleDiff = shortestAngularDiff(state.targetAngle, state.currentAngle);
+    state.currentAngle += angleDiff * dampFactor(DAMP_ANGLE_BASE, dt);
 
-    state.targetAngle = GOLD_ANGLE + p * (PURPLE_ANGLE - GOLD_ANGLE);
-    state.currentAngle += (state.targetAngle - state.currentAngle) * dampFactor(DAMP_ANGLE_BASE, dt);
+    const p = state.holdProgress;
 
     const scrollTarget = getScrollTarget();
     state.scroll += (scrollTarget - state.scroll) * dampFactor(DAMP_SCROLL_BASE, dt);
@@ -54,9 +55,10 @@ export function startAnimateLoop(deps) {
       portalGroup.position.y = 1.0 + Math.sin(state.time * 0.4) * 0.015;
     }
 
-    const orbitAngle = state.currentAngle + state.mouse.nx * 0.12;
+    const orbitAngle = state.currentAngle;
     const orbitRadius = Math.max(MIN_ORBIT_RADIUS, Math.min(MAX_ORBIT_RADIUS, CAM_ORBIT_RADIUS - state.scroll * 1.2));
-    const camY = CAM_HEIGHT + state.scroll * 0.4 + state.mouse.ny * 0.25;
+    state.currentTilt += (state.targetTilt - state.currentTilt) * dampFactor(DAMP_TILT_BASE, dt);
+    const camY = CAM_HEIGHT + state.scroll * 0.4;
 
     const targetX = Math.sin(orbitAngle) * orbitRadius;
     const targetZ = Math.cos(orbitAngle) * orbitRadius;
@@ -70,7 +72,8 @@ export function startAnimateLoop(deps) {
       camera.position.z += (targetZ - camera.position.z) * dampFactor(DAMP_CAM_XZ_BASE, dt);
       camera.position.y += (camY - camera.position.y) * dampFactor(DAMP_CAM_Y_BASE, dt);
     }
-    camera.lookAt(LOOK_TARGET);
+    const lookY = LOOK_TARGET.y + state.currentTilt * 2.0;
+    camera.lookAt(new THREE.Vector3(LOOK_TARGET.x, lookY, LOOK_TARGET.z));
 
     const hv = state.hoverPortal ? 1.0 : 0.0;
     portalMatA.uniforms.uTime.value = wrappedTime;

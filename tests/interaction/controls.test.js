@@ -265,14 +265,20 @@ describe('keyboard controls', () => {
       scroll: 0,
       hoverPortal: false,
       time: 0,
-      holding: false,
       holdProgress: 0,
-      reversing: false,
       currentAngle: 0.25,
       targetAngle: 0.25,
       hasEngaged: false,
       transitioning: false,
       dwellTimer: 0,
+      dragging: false,
+      dragVelocity: 0,
+      tiltVelocity: 0,
+      lastDragX: 0,
+      lastDragY: 0,
+      targetTilt: 0,
+      currentTilt: 0,
+      snappedTo: null,
     };
     mockDismiss = vi.fn();
     cursorEl = { classList: { add: vi.fn(), remove: vi.fn() } };
@@ -294,102 +300,6 @@ describe('keyboard controls', () => {
     vi.restoreAllMocks();
   });
 
-  /// Tests checklist items: [1] — Feature 4.4
-  it('unit_keyboard_space_sets_holding_true', async () => {
-    const listeners = {};
-    vi.stubGlobal('window', {
-      innerWidth: 1920,
-      innerHeight: 1080,
-      addEventListener: vi.fn((event, handler, opts) => {
-        if (!listeners[event]) listeners[event] = [];
-        listeners[event].push(handler);
-      }),
-    });
-
-    const { initControls } = await import('../../src/interaction/controls.js');
-    const mockRenderer = { domElement: { addEventListener: vi.fn() } };
-    const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
-    initControls(state, mockCamera, mockRenderer, [], mockDismiss);
-
-    const keydownHandler = listeners['keydown'][0];
-    keydownHandler({ key: ' ', repeat: false, preventDefault: vi.fn(), target: { closest: () => null } });
-
-    expect(state.holding).toBe(true);
-  });
-
-  /// Tests checklist items: [1] — Feature 4.4
-  it('unit_keyboard_space_keyup_sets_holding_false', async () => {
-    const listeners = {};
-    vi.stubGlobal('window', {
-      innerWidth: 1920,
-      innerHeight: 1080,
-      addEventListener: vi.fn((event, handler, opts) => {
-        if (!listeners[event]) listeners[event] = [];
-        listeners[event].push(handler);
-      }),
-    });
-
-    const { initControls } = await import('../../src/interaction/controls.js');
-    const mockRenderer = { domElement: { addEventListener: vi.fn() } };
-    const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
-    initControls(state, mockCamera, mockRenderer, [], mockDismiss);
-
-    const keydownHandler = listeners['keydown'][0];
-    const keyupHandler = listeners['keyup'][0];
-    keydownHandler({ key: ' ', repeat: false, preventDefault: vi.fn(), target: { closest: () => null } });
-    expect(state.holding).toBe(true);
-
-    keyupHandler({ key: ' ', preventDefault: vi.fn() });
-    expect(state.holding).toBe(false);
-  });
-
-  /// Tests checklist items: [1] — Feature 4.4
-  it('unit_keyboard_space_repeat_ignored', async () => {
-    const listeners = {};
-    vi.stubGlobal('window', {
-      innerWidth: 1920,
-      innerHeight: 1080,
-      addEventListener: vi.fn((event, handler, opts) => {
-        if (!listeners[event]) listeners[event] = [];
-        listeners[event].push(handler);
-      }),
-    });
-
-    const { initControls } = await import('../../src/interaction/controls.js');
-    const mockRenderer = { domElement: { addEventListener: vi.fn() } };
-    const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
-    initControls(state, mockCamera, mockRenderer, [], mockDismiss);
-
-    const keydownHandler = listeners['keydown'][0];
-    keydownHandler({ key: ' ', repeat: true, preventDefault: vi.fn(), target: { closest: () => null } });
-
-    expect(state.holding).toBe(false);
-  });
-
-  /// Tests checklist items: [1] — Feature 4.4
-  it('unit_keyboard_space_prevents_default', async () => {
-    const listeners = {};
-    vi.stubGlobal('window', {
-      innerWidth: 1920,
-      innerHeight: 1080,
-      addEventListener: vi.fn((event, handler, opts) => {
-        if (!listeners[event]) listeners[event] = [];
-        listeners[event].push(handler);
-      }),
-    });
-
-    const { initControls } = await import('../../src/interaction/controls.js');
-    const mockRenderer = { domElement: { addEventListener: vi.fn() } };
-    const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
-    initControls(state, mockCamera, mockRenderer, [], mockDismiss);
-
-    const pd = vi.fn();
-    const keydownHandler = listeners['keydown'][0];
-    keydownHandler({ key: ' ', repeat: false, preventDefault: pd, target: { closest: () => null } });
-
-    expect(pd).toHaveBeenCalled();
-  });
-
   /// Tests checklist items: [2] — Feature 4.4
   it('unit_keyboard_escape_calls_dismiss', async () => {
     const listeners = {};
@@ -408,7 +318,7 @@ describe('keyboard controls', () => {
     initControls(state, mockCamera, mockRenderer, [], mockDismiss);
 
     const keydownHandler = listeners['keydown'][0];
-    keydownHandler({ key: 'Escape', repeat: false, preventDefault: vi.fn(), target: { closest: () => null } });
+    keydownHandler({ key: 'Escape' });
 
     expect(mockDismiss).toHaveBeenCalledWith(state);
   });
@@ -431,14 +341,14 @@ describe('keyboard controls', () => {
     initControls(state, mockCamera, mockRenderer, [], mockDismiss);
 
     const keydownHandler = listeners['keydown'][0];
-    keydownHandler({ key: 'a', repeat: false, preventDefault: vi.fn(), target: { closest: () => null } });
+    keydownHandler({ key: 'a' });
 
-    expect(state.holding).toBe(false);
+    expect(state.dragging).toBe(false);
     expect(mockDismiss).not.toHaveBeenCalled();
   });
 
-  /// Tests checklist items: [1, 7] — Feature 4.4
-  it('unit_keyboard_space_adds_holding_class', async () => {
+  /// Tests checklist items: [1] — Feature 4.4
+  it('unit_mousedown_sets_dragging_true', async () => {
     const listeners = {};
     vi.stubGlobal('window', {
       innerWidth: 1920,
@@ -454,15 +364,64 @@ describe('keyboard controls', () => {
     const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
     initControls(state, mockCamera, mockRenderer, [], mockDismiss);
 
-    const keydownHandler = listeners['keydown'][0];
-    keydownHandler({ key: ' ', repeat: false, preventDefault: vi.fn(), target: { closest: () => null } });
+    const mousedownHandler = listeners['mousedown'][0];
+    mousedownHandler({ button: 0 });
 
-    expect(cursorEl.classList.add).toHaveBeenCalledWith('holding');
-    expect(cursorTrail.classList.add).toHaveBeenCalledWith('holding');
+    expect(state.dragging).toBe(true);
+  });
+
+  /// Tests checklist items: [1] — Feature 4.4
+  it('unit_mouseup_sets_dragging_false', async () => {
+    const listeners = {};
+    vi.stubGlobal('window', {
+      innerWidth: 1920,
+      innerHeight: 1080,
+      addEventListener: vi.fn((event, handler, opts) => {
+        if (!listeners[event]) listeners[event] = [];
+        listeners[event].push(handler);
+      }),
+    });
+
+    const { initControls } = await import('../../src/interaction/controls.js');
+    const mockRenderer = { domElement: { addEventListener: vi.fn() } };
+    const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
+    initControls(state, mockCamera, mockRenderer, [], mockDismiss);
+
+    const mousedownHandler = listeners['mousedown'][0];
+    mousedownHandler({ button: 0 });
+    expect(state.dragging).toBe(true);
+
+    const mouseupHandler = listeners['mouseup'][0];
+    mouseupHandler();
+    expect(state.dragging).toBe(false);
+  });
+
+  /// Tests checklist items: [1, 7] — Feature 4.4
+  it('unit_mousedown_adds_grabbing_class', async () => {
+    const listeners = {};
+    vi.stubGlobal('window', {
+      innerWidth: 1920,
+      innerHeight: 1080,
+      addEventListener: vi.fn((event, handler, opts) => {
+        if (!listeners[event]) listeners[event] = [];
+        listeners[event].push(handler);
+      }),
+    });
+
+    const { initControls } = await import('../../src/interaction/controls.js');
+    const mockRenderer = { domElement: { addEventListener: vi.fn() } };
+    const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
+    initControls(state, mockCamera, mockRenderer, [], mockDismiss);
+
+    const mousedownHandler = listeners['mousedown'][0];
+    mousedownHandler({ button: 0 });
+
+    expect(cursorEl.classList.add).toHaveBeenCalledWith('grabbing');
+    expect(cursorTrail.classList.add).toHaveBeenCalledWith('grabbing');
   });
 
   /// Tests checklist items: [2] — Feature 4.4
-  it('unit_keyboard_dual_track_mouseup_keeps_holding_if_space_held', async () => {
+  it('unit_blur_ends_drag', async () => {
     const listeners = {};
     vi.stubGlobal('window', {
       innerWidth: 1920,
@@ -478,25 +437,13 @@ describe('keyboard controls', () => {
     const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
     initControls(state, mockCamera, mockRenderer, [], mockDismiss);
 
-    // Hold Space
-    const keydownHandler = listeners['keydown'][0];
-    keydownHandler({ key: ' ', repeat: false, preventDefault: vi.fn(), target: { closest: () => null } });
-    expect(state.holding).toBe(true);
-
-    // Also hold mouse
     const mousedownHandler = listeners['mousedown'][0];
     mousedownHandler({ button: 0 });
-    expect(state.holding).toBe(true);
+    expect(state.dragging).toBe(true);
 
-    // Release mouse — Space is still held, so holding should stay true
-    const mouseupHandler = listeners['mouseup'][0];
-    mouseupHandler();
-    expect(state.holding).toBe(true);
-
-    // Release Space — now holding should be false
-    const keyupHandler = listeners['keyup'][0];
-    keyupHandler({ key: ' ', preventDefault: vi.fn() });
-    expect(state.holding).toBe(false);
+    const blurHandler = listeners['blur'][0];
+    blurHandler();
+    expect(state.dragging).toBe(false);
   });
 });
 
@@ -513,14 +460,21 @@ describe('touch controls', () => {
       scroll: 0,
       hoverPortal: false,
       time: 0,
-      holding: false,
       holdProgress: 0,
-      reversing: false,
       currentAngle: 0.25,
       targetAngle: 0.25,
       hasEngaged: false,
       transitioning: false,
       dwellTimer: 0,
+      dragging: false,
+      dragVelocity: 0,
+      tiltVelocity: 0,
+      lastDragX: 0,
+      lastDragY: 0,
+      targetTilt: 0,
+      currentTilt: 0,
+      snappedTo: null,
+      isTouchDevice: false,
     };
     mockDismiss = vi.fn();
     cursorEl = { classList: { add: vi.fn(), remove: vi.fn() } };
@@ -543,7 +497,7 @@ describe('touch controls', () => {
   });
 
   /// Tests checklist items: [3] — Feature 5.1
-  it('unit_touch_start_sets_holding_true', async () => {
+  it('unit_touch_start_sets_dragging_true', async () => {
     const listeners = {};
     vi.stubGlobal('window', {
       innerWidth: 1920,
@@ -571,11 +525,11 @@ describe('touch controls', () => {
     const touchstartHandler = domListeners['touchstart'][0];
     touchstartHandler({ touches: [{ clientX: 960, clientY: 540 }], preventDefault: vi.fn() });
 
-    expect(state.holding).toBe(true);
+    expect(state.dragging).toBe(true);
   });
 
   /// Tests checklist items: [5] — Feature 5.1
-  it('unit_touch_end_sets_holding_false', async () => {
+  it('unit_touch_end_sets_dragging_false', async () => {
     const listeners = {};
     vi.stubGlobal('window', {
       innerWidth: 1920,
@@ -603,16 +557,16 @@ describe('touch controls', () => {
     // Touch down then up
     const touchstartHandler = domListeners['touchstart'][0];
     touchstartHandler({ touches: [{ clientX: 960, clientY: 540 }], preventDefault: vi.fn() });
-    expect(state.holding).toBe(true);
+    expect(state.dragging).toBe(true);
 
     const touchendHandler = domListeners['touchend'][0];
     touchendHandler({});
 
-    expect(state.holding).toBe(false);
+    expect(state.dragging).toBe(false);
   });
 
   /// Tests checklist items: [3] — Feature 5.1
-  it('unit_touch_start_updates_mouse_ndc', async () => {
+  it('unit_touch_start_sets_drag_position', async () => {
     const listeners = {};
     vi.stubGlobal('window', {
       innerWidth: 1920,
@@ -640,14 +594,13 @@ describe('touch controls', () => {
     const touchstartHandler = domListeners['touchstart'][0];
     touchstartHandler({ touches: [{ clientX: 480, clientY: 270 }], preventDefault: vi.fn() });
 
-    // NDC: nx = (480/1920)*2-1 = 0.5-1 = -0.5
-    // NDC: ny = -(270/1080)*2+1 = -0.5+1 = 0.5
-    expect(state.mouse.nx).toBeCloseTo(-0.5, 5);
-    expect(state.mouse.ny).toBeCloseTo(0.5, 5);
+    // Touch start sets lastDragX/lastDragY for drag tracking
+    expect(state.lastDragX).toBe(480);
+    expect(state.lastDragY).toBe(270);
   });
 
   /// Tests checklist items: [4] — Feature 5.1
-  it('unit_touch_move_updates_mouse_ndc', async () => {
+  it('unit_touch_move_updates_target_angle', async () => {
     const listeners = {};
     vi.stubGlobal('window', {
       innerWidth: 1920,
@@ -672,13 +625,16 @@ describe('touch controls', () => {
     const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
     initControls(state, mockCamera, mockRenderer, [], mockDismiss);
 
-    const touchmoveHandler = domListeners['touchmove'][0];
-    touchmoveHandler({ touches: [{ clientX: 1440, clientY: 810 }] });
+    // Set up initial drag position
+    state.lastDragX = 960;
+    state.lastDragY = 540;
+    const initialAngle = state.targetAngle;
 
-    // NDC: nx = (1440/1920)*2-1 = 1.5-1 = 0.5
-    // NDC: ny = -(810/1080)*2+1 = -1.5+1 = -0.5
-    expect(state.mouse.nx).toBeCloseTo(0.5, 5);
-    expect(state.mouse.ny).toBeCloseTo(-0.5, 5);
+    const touchmoveHandler = domListeners['touchmove'][0];
+    touchmoveHandler({ touches: [{ clientX: 1060, clientY: 540 }] });
+
+    // Single-finger touchmove should update targetAngle via drag
+    expect(state.targetAngle).not.toBe(initialAngle);
   });
 
   /// Tests checklist items: [3] — Feature 5.1
@@ -715,7 +671,7 @@ describe('touch controls', () => {
   });
 
   /// Tests checklist items: [6] — Feature 5.1
-  it('unit_touch_cancel_clears_holding', async () => {
+  it('unit_touch_cancel_clears_dragging', async () => {
     const listeners = {};
     vi.stubGlobal('window', {
       innerWidth: 1920,
@@ -743,16 +699,16 @@ describe('touch controls', () => {
     // Touch down then cancel
     const touchstartHandler = domListeners['touchstart'][0];
     touchstartHandler({ touches: [{ clientX: 960, clientY: 540 }], preventDefault: vi.fn() });
-    expect(state.holding).toBe(true);
+    expect(state.dragging).toBe(true);
 
     const touchcancelHandler = domListeners['touchcancel'][0];
     touchcancelHandler({});
 
-    expect(state.holding).toBe(false);
+    expect(state.dragging).toBe(false);
   });
 
   /// Tests checklist items: [3] — Feature 5.1
-  it('unit_touch_start_adds_holding_class', async () => {
+  it('unit_touch_start_adds_grabbing_class', async () => {
     const listeners = {};
     vi.stubGlobal('window', {
       innerWidth: 1920,
@@ -780,12 +736,12 @@ describe('touch controls', () => {
     const touchstartHandler = domListeners['touchstart'][0];
     touchstartHandler({ touches: [{ clientX: 960, clientY: 540 }], preventDefault: vi.fn() });
 
-    expect(cursorEl.classList.add).toHaveBeenCalledWith('holding');
-    expect(cursorTrail.classList.add).toHaveBeenCalledWith('holding');
+    expect(cursorEl.classList.add).toHaveBeenCalledWith('grabbing');
+    expect(cursorTrail.classList.add).toHaveBeenCalledWith('grabbing');
   });
 
   /// Tests checklist items: [5] — Feature 5.1
-  it('unit_touch_end_removes_holding_class', async () => {
+  it('unit_touch_end_removes_grabbing_class', async () => {
     const listeners = {};
     vi.stubGlobal('window', {
       innerWidth: 1920,
@@ -817,12 +773,12 @@ describe('touch controls', () => {
     const touchendHandler = domListeners['touchend'][0];
     touchendHandler({});
 
-    expect(cursorEl.classList.remove).toHaveBeenCalledWith('holding');
-    expect(cursorTrail.classList.remove).toHaveBeenCalledWith('holding');
+    expect(cursorEl.classList.remove).toHaveBeenCalledWith('grabbing');
+    expect(cursorTrail.classList.remove).toHaveBeenCalledWith('grabbing');
   });
 
   /// Tests checklist items: [2, 8] — Feature 5.1
-  it('int_touch_dual_track_keyboard', async () => {
+  it('int_touch_drag_resets_snappedTo', async () => {
     const listeners = {};
     vi.stubGlobal('window', {
       innerWidth: 1920,
@@ -847,29 +803,19 @@ describe('touch controls', () => {
     const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
     initControls(state, mockCamera, mockRenderer, [], mockDismiss);
 
-    // Hold Space
-    const keydownHandler = listeners['keydown'][0];
-    keydownHandler({ key: ' ', repeat: false, preventDefault: vi.fn(), target: { closest: () => null } });
-    expect(state.holding).toBe(true);
+    // Set snappedTo before drag
+    state.snappedTo = 'gold';
 
-    // Also touch down
+    // Touch down — should clear snappedTo
     const touchstartHandler = domListeners['touchstart'][0];
     touchstartHandler({ touches: [{ clientX: 960, clientY: 540 }], preventDefault: vi.fn() });
-    expect(state.holding).toBe(true);
 
-    // Release touch — Space is still held, so holding should stay true
-    const touchendHandler = domListeners['touchend'][0];
-    touchendHandler({});
-    expect(state.holding).toBe(true);
-
-    // Release Space — now holding should be false
-    const keyupHandler = listeners['keyup'][0];
-    keyupHandler({ key: ' ', preventDefault: vi.fn() });
-    expect(state.holding).toBe(false);
+    expect(state.snappedTo).toBe(null);
+    expect(state.dragging).toBe(true);
   });
 
   /// Tests checklist items: [2, 8] — Feature 5.1
-  it('int_touch_dual_track_mouse', async () => {
+  it('int_touch_end_clears_dragging', async () => {
     const listeners = {};
     vi.stubGlobal('window', {
       innerWidth: 1920,
@@ -894,25 +840,15 @@ describe('touch controls', () => {
     const mockCamera = { aspect: 1, updateProjectionMatrix: vi.fn() };
     initControls(state, mockCamera, mockRenderer, [], mockDismiss);
 
-    // Mouse down
-    const mousedownHandler = listeners['mousedown'][0];
-    mousedownHandler({ button: 0 });
-    expect(state.holding).toBe(true);
-
-    // Also touch down
+    // Touch down
     const touchstartHandler = domListeners['touchstart'][0];
     touchstartHandler({ touches: [{ clientX: 960, clientY: 540 }], preventDefault: vi.fn() });
-    expect(state.holding).toBe(true);
+    expect(state.dragging).toBe(true);
 
-    // Release touch — mouse is still down, so holding should stay true
+    // Touch end
     const touchendHandler = domListeners['touchend'][0];
     touchendHandler({});
-    expect(state.holding).toBe(true);
-
-    // Release mouse — now holding should be false
-    const mouseupHandler = listeners['mouseup'][0];
-    mouseupHandler();
-    expect(state.holding).toBe(false);
+    expect(state.dragging).toBe(false);
   });
 });
 
@@ -929,14 +865,21 @@ describe('pinch zoom', () => {
       scroll: 0,
       hoverPortal: false,
       time: 0,
-      holding: false,
       holdProgress: 0,
-      reversing: false,
       currentAngle: 0.25,
       targetAngle: 0.25,
       hasEngaged: false,
       transitioning: false,
       dwellTimer: 0,
+      dragging: false,
+      dragVelocity: 0,
+      tiltVelocity: 0,
+      lastDragX: 0,
+      lastDragY: 0,
+      targetTilt: 0,
+      currentTilt: 0,
+      snappedTo: null,
+      isTouchDevice: false,
     };
     mockDismiss = vi.fn();
     cursorEl = { classList: { add: vi.fn(), remove: vi.fn() } };
@@ -1092,16 +1035,19 @@ describe('pinch zoom', () => {
   });
 
   /// Tests checklist items: [5] — Feature 5.2
-  it('unit_pinch_single_touch_still_updates_ndc', async () => {
+  it('unit_pinch_single_touch_updates_drag', async () => {
     const { domListeners } = await setupPinchTest();
     const touchmoveHandler = domListeners['touchmove'][0];
 
-    // Single-finger touchmove
-    touchmoveHandler({ touches: [{ clientX: 480, clientY: 270 }] });
+    // Set up initial drag position
+    state.lastDragX = 960;
+    state.lastDragY = 540;
+    const initialAngle = state.targetAngle;
 
-    // NDC: nx = (480/1920)*2-1 = -0.5, ny = -(270/1080)*2+1 = 0.5
-    expect(state.mouse.nx).toBeCloseTo(-0.5, 5);
-    expect(state.mouse.ny).toBeCloseTo(0.5, 5);
+    // Single-finger touchmove should update targetAngle via drag
+    touchmoveHandler({ touches: [{ clientX: 1060, clientY: 540 }] });
+
+    expect(state.targetAngle).not.toBe(initialAngle);
   });
 
   /// Tests checklist items: [5] — Feature 5.2
@@ -1117,15 +1063,15 @@ describe('pinch zoom', () => {
   });
 
   /// Tests checklist items: [5, 6] — Feature 5.2
-  it('int_pinch_then_single_touch_hold', async () => {
+  it('int_pinch_then_single_touch_drag', async () => {
     const { domListeners } = await setupPinchTest();
     const touchstartHandler = domListeners['touchstart'][0];
     const touchmoveHandler = domListeners['touchmove'][0];
     const touchendHandler = domListeners['touchend'][0];
 
-    // touchstart with 1 finger — sets touchHolding
+    // touchstart with 1 finger — sets dragging
     touchstartHandler({ touches: [{ clientX: 300, clientY: 300 }], preventDefault: vi.fn() });
-    expect(state.holding).toBe(true);
+    expect(state.dragging).toBe(true);
 
     // 2-finger pinch gesture
     touchmoveHandler({ touches: [{ clientX: 200, clientY: 300 }, { clientX: 400, clientY: 300 }] });
@@ -1133,15 +1079,16 @@ describe('pinch zoom', () => {
 
     // Lift one finger — touchend fires
     touchendHandler({});
+    expect(state.dragging).toBe(false);
 
-    // After touchend, touchHolding is false, but we can start a new touch
+    // Start a new touch — dragging resumes
     touchstartHandler({ touches: [{ clientX: 500, clientY: 400 }], preventDefault: vi.fn() });
-    expect(state.holding).toBe(true);
+    expect(state.dragging).toBe(true);
 
-    // Single-finger touchmove resumes NDC updates
-    touchmoveHandler({ touches: [{ clientX: 960, clientY: 540 }] });
-    expect(state.mouse.nx).toBeCloseTo(0, 5);
-    expect(state.mouse.ny).toBeCloseTo(0, 5);
+    // Single-finger touchmove updates drag position
+    const prevAngle = state.targetAngle;
+    touchmoveHandler({ touches: [{ clientX: 600, clientY: 400 }] });
+    expect(state.lastDragX).toBe(600);
   });
 });
 
@@ -1158,14 +1105,21 @@ describe('gyroscope controls', () => {
       scroll: 0,
       hoverPortal: false,
       time: 0,
-      holding: false,
       holdProgress: 0,
-      reversing: false,
       currentAngle: 0.25,
       targetAngle: 0.25,
       hasEngaged: false,
       transitioning: false,
       dwellTimer: 0,
+      dragging: false,
+      dragVelocity: 0,
+      tiltVelocity: 0,
+      lastDragX: 0,
+      lastDragY: 0,
+      targetTilt: 0,
+      currentTilt: 0,
+      snappedTo: null,
+      isTouchDevice: false,
     };
     mockDismiss = vi.fn();
     cursorEl = { classList: { add: vi.fn(), remove: vi.fn() } };
@@ -1374,14 +1328,21 @@ describe('responsive controls', () => {
       scroll: 0,
       hoverPortal: false,
       time: 0,
-      holding: false,
       holdProgress: 0,
-      reversing: false,
       currentAngle: 0.25,
       targetAngle: 0.25,
       hasEngaged: false,
       transitioning: false,
       dwellTimer: 0,
+      dragging: false,
+      dragVelocity: 0,
+      tiltVelocity: 0,
+      lastDragX: 0,
+      lastDragY: 0,
+      targetTilt: 0,
+      currentTilt: 0,
+      snappedTo: null,
+      isTouchDevice: false,
     };
     mockDismiss = vi.fn();
     cursorEl = { classList: { add: vi.fn(), remove: vi.fn() } };

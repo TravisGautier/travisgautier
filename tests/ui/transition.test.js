@@ -38,8 +38,7 @@ describe('transition', () => {
     const { updateTransition } = await import('../../src/ui/transition.js');
 
     const state = {
-      holdProgress: 1.0,
-      holding: false,
+      snappedTo: 'purple',
       hasEngaged: true,
       transitioning: false,
       dwellTimer: 0,
@@ -57,8 +56,7 @@ describe('transition', () => {
     const { updateTransition } = await import('../../src/ui/transition.js');
 
     const state = {
-      holdProgress: 1.0,
-      holding: false,
+      snappedTo: 'purple',
       hasEngaged: true,
       transitioning: false,
       dwellTimer: 0,
@@ -68,8 +66,8 @@ describe('transition', () => {
     updateTransition(state, 0.2);
     expect(state.dwellTimer).toBeCloseTo(0.2, 5);
 
-    // Move holdProgress away from endpoint — dwell resets
-    state.holdProgress = 0.8;
+    // No longer snapped — dwell resets
+    state.snappedTo = null;
     updateTransition(state, 0.1);
     expect(state.dwellTimer).toBe(0);
   });
@@ -83,8 +81,7 @@ describe('transition', () => {
     const { updateTransition } = await import('../../src/ui/transition.js');
 
     const state = {
-      holdProgress: 1.0,
-      holding: false,
+      snappedTo: 'purple',
       hasEngaged: true,
       transitioning: false,
       dwellTimer: 0,
@@ -102,8 +99,7 @@ describe('transition', () => {
     const { updateTransition } = await import('../../src/ui/transition.js');
 
     const state = {
-      holdProgress: 0.0,
-      holding: false,
+      snappedTo: 'gold',
       hasEngaged: false,
       transitioning: false,
       dwellTimer: 0,
@@ -119,8 +115,7 @@ describe('transition', () => {
     const { updateTransition } = await import('../../src/ui/transition.js');
 
     const state = {
-      holdProgress: 1.0,
-      holding: false,
+      snappedTo: 'purple',
       hasEngaged: true,
       transitioning: true, // already transitioning
       dwellTimer: 0,
@@ -156,8 +151,7 @@ describe('transition', () => {
     const { dismissTransition } = await import('../../src/ui/transition.js');
 
     const state = {
-      holdProgress: 1.0,
-      holding: false,
+      snappedTo: 'purple',
       hasEngaged: true,
       transitioning: true,
       dwellTimer: 0.6,
@@ -173,8 +167,7 @@ describe('transition', () => {
     const { dismissTransition } = await import('../../src/ui/transition.js');
 
     const state = {
-      holdProgress: 1.0,
-      holding: false,
+      snappedTo: 'purple',
       hasEngaged: true,
       transitioning: true,
       dwellTimer: 0.6,
@@ -190,8 +183,7 @@ describe('transition', () => {
     const { dismissTransition } = await import('../../src/ui/transition.js');
 
     const state = {
-      holdProgress: 0.5,
-      holding: false,
+      snappedTo: null,
       hasEngaged: false,
       transitioning: false,
       dwellTimer: 0,

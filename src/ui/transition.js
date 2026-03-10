@@ -7,8 +7,8 @@ let navTimeoutId = null;
 export function updateTransition(state, dt) {
   if (state.transitioning) return;
 
-  const atPurple = state.holdProgress > 0.99 && !state.holding;
-  const atGold = state.holdProgress < 0.01 && !state.holding && state.hasEngaged;
+  const atPurple = state.snappedTo === 'purple';
+  const atGold = state.snappedTo === 'gold' && state.hasEngaged;
 
   if (atPurple || atGold) {
     state.dwellTimer += dt;

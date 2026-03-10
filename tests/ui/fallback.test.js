@@ -128,43 +128,39 @@ describe('fallback', () => {
   });
 
   /// Tests checklist items: [2]
-  it('unit_fallback_mousedown_hold', async () => {
+  it('unit_fallback_mousedown_drag', async () => {
     const { initFallback } = await import('../../src/ui/fallback.js');
     const { state } = await import('../../src/interaction/state.js');
 
     initFallback();
 
-    // mousedown → holding true
+    // mousedown → dragging true
     const mousedownHandlers = listeners['mousedown'] || [];
     expect(mousedownHandlers.length).toBeGreaterThan(0);
-    mousedownHandlers[0]({ preventDefault: vi.fn() });
-    expect(state.holding).toBe(true);
+    mousedownHandlers[0]({ clientX: 500, clientY: 300 });
+    expect(state.dragging).toBe(true);
 
-    // mouseup → holding false
+    // mouseup → dragging false
     const mouseupHandlers = listeners['mouseup'] || [];
     expect(mouseupHandlers.length).toBeGreaterThan(0);
     mouseupHandlers[0]({});
-    expect(state.holding).toBe(false);
+    expect(state.dragging).toBe(false);
   });
 
   /// Tests checklist items: [2]
-  it('unit_fallback_space_hold', async () => {
+  it('unit_fallback_escape_only_keyboard', async () => {
     const { initFallback } = await import('../../src/ui/fallback.js');
     const { state } = await import('../../src/interaction/state.js');
 
     initFallback();
 
-    // Space keydown → holding true
+    // Keyboard handler exists
     const keydownHandlers = listeners['keydown'] || [];
     expect(keydownHandlers.length).toBeGreaterThan(0);
-    keydownHandlers[0]({ key: ' ', preventDefault: vi.fn() });
-    expect(state.holding).toBe(true);
 
-    // Space keyup → holding false
-    const keyupHandlers = listeners['keyup'] || [];
-    expect(keyupHandlers.length).toBeGreaterThan(0);
-    keyupHandlers[0]({ key: ' ' });
-    expect(state.holding).toBe(false);
+    // Space does not set dragging (space bar is no longer an interaction)
+    keydownHandlers[0]({ key: ' ', preventDefault: vi.fn() });
+    expect(state.dragging).toBe(false);
   });
 
   /// Tests checklist items: [2]
@@ -187,7 +183,7 @@ describe('fallback', () => {
   });
 
   /// Tests checklist items: [2]
-  it('unit_fallback_touch_hold', async () => {
+  it('unit_fallback_touch_drag', async () => {
     const { initFallback } = await import('../../src/ui/fallback.js');
     const { state } = await import('../../src/interaction/state.js');
 
@@ -200,14 +196,14 @@ describe('fallback', () => {
       preventDefault: vi.fn(),
       touches: [{ clientX: 500, clientY: 300 }],
     });
-    expect(state.holding).toBe(true);
+    expect(state.dragging).toBe(true);
     expect(state.isTouchDevice).toBe(true);
 
     // touchend on container
     const touchendHandlers = listeners['touchend'] || [];
     expect(touchendHandlers.length).toBeGreaterThan(0);
     touchendHandlers[0]({});
-    expect(state.holding).toBe(false);
+    expect(state.dragging).toBe(false);
   });
 
   /// Tests checklist items: [2]

@@ -32,8 +32,8 @@ describe('module integration', () => {
     const cursor = await import('../../src/interaction/cursor.js');
     expect(typeof cursor.initCursor).toBe('function');
 
-    const holdMechanic = await import('../../src/interaction/holdMechanic.js');
-    expect(typeof holdMechanic.updateHoldProgress).toBe('function');
+    const dragOrbit = await import('../../src/interaction/dragOrbit.js');
+    expect(typeof dragOrbit.updateDragPhysics).toBe('function');
 
     const overlay = await import('../../src/ui/overlay.js');
     expect(typeof overlay.initOverlay).toBe('function');

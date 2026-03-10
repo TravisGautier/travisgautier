@@ -7,7 +7,7 @@ import { createPortal } from './scene/portal.js';
 import { createLighting } from './scene/lighting.js';
 import { initControls } from './interaction/controls.js';
 import { initCursor } from './interaction/cursor.js';
-import { updateHoldProgress } from './interaction/holdMechanic.js';
+import { updateDragPhysics } from './interaction/dragOrbit.js';
 import { createFPSMonitor, applyRuntimeDowngrade } from './interaction/fpsMonitor.js';
 import { initOverlay, showContextLostMessage } from './ui/overlay.js';
 import { updateTransition, dismissTransition } from './ui/transition.js';
@@ -61,7 +61,7 @@ async function init() {
     goldLight, purpleLight, groundGlow, pillarLight1, pillarLight2, hemiLight,
     skyMat, cloudSeaMat, cloudSea2,
     particles, particleSpeeds, particleMat,
-    updateHoldProgress, updateTransition, updateOverlay, updateCursor,
+    updateHoldProgress: updateDragPhysics, updateTransition, updateOverlay, updateCursor,
     getScrollTarget,
     sampleFPS,
     motionConfig,

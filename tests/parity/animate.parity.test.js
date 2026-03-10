@@ -8,12 +8,12 @@ const src = fs.readFileSync(path.join(projectRoot, 'src', 'animate.js'), 'utf-8'
 describe('animate parity', () => {
   /// Tests checklist items: [8]
   it('parity_anim_target_angle', () => {
-    expect(src).toContain('GOLD_ANGLE + p * (PURPLE_ANGLE - GOLD_ANGLE)');
+    expect(src).toContain('shortestAngularDiff(state.targetAngle, state.currentAngle)');
   });
 
   /// Tests checklist items: [3, 4] — Feature 2.5
   it('parity_anim_angle_lerp', () => {
-    expect(src).toContain('state.currentAngle) * dampFactor(DAMP_ANGLE_BASE, dt)');
+    expect(src).toContain('angleDiff * dampFactor(DAMP_ANGLE_BASE, dt)');
   });
 
   /// Tests checklist items: [3, 4] — Feature 2.5
@@ -28,10 +28,10 @@ describe('animate parity', () => {
 
   /// Tests checklist items: [8]
   it('parity_anim_orbit_params', () => {
-    expect(src).toContain('state.mouse.nx * 0.12');
+    expect(src).toContain('state.currentAngle');
     expect(src).toContain('state.scroll * 1.2');
     expect(src).toContain('state.scroll * 0.4');
-    expect(src).toContain('state.mouse.ny * 0.25');
+    expect(src).toContain('state.currentTilt * 2.0');
   });
 
   /// Tests checklist items: [3, 4] — Feature 2.5
