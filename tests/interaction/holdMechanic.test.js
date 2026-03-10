@@ -29,22 +29,15 @@ describe('holdMechanic', () => {
   });
 
   /// Tests checklist items: [8]
-  it('unit_holdMechanic_snap', () => {
-    // On release past halfway, snaps toward 1 at 2.5/sec
+  it('unit_holdMechanic_no_snap_on_release', () => {
+    // On release, holdProgress stays where it is (no snapping)
     const stateAbove = { holding: false, reversing: false, holdProgress: 0.7 };
     updateHoldProgress(stateAbove, 0.1);
-    // 0.7 + 0.1 * 2.5 = 0.95
-    expect(stateAbove.holdProgress).toBeCloseTo(0.95, 5);
+    expect(stateAbove.holdProgress).toBeCloseTo(0.7, 5);
 
-    // On release below halfway, snaps toward 0 at 2.5/sec
     const stateBelow = { holding: false, reversing: false, holdProgress: 0.3 };
     updateHoldProgress(stateBelow, 0.1);
-    // 0.3 - 0.1 * 2.5 = 0.05
-    expect(stateBelow.holdProgress).toBeCloseTo(0.05, 5);
-
-    // Clamped to [0, 1]
-    expect(stateAbove.holdProgress).toBeLessThanOrEqual(1);
-    expect(stateBelow.holdProgress).toBeGreaterThanOrEqual(0);
+    expect(stateBelow.holdProgress).toBeCloseTo(0.3, 5);
   });
 
   /// Tests checklist items: [8]
@@ -95,20 +88,17 @@ describe('holdMechanic', () => {
     state.holding = false;
     state.reversing = false;
     updateHoldProgress(state, 0.5);
-    // holdProgress snaps toward 1 (already there), hasEngaged stays true
+    // holdProgress stays put on release, hasEngaged stays true
     expect(state.hasEngaged).toBe(true);
   });
 
   /// Tests checklist items: [3] — Feature 7.2
   it('unit_holdMechanic_boundary_exactly_half', () => {
-    // At exactly 0.5, condition is > 0.5 (strict), so else branch fires
-    // and snaps toward 0 (gold side)
+    // At exactly 0.5, on release holdProgress stays put
     const state = { holding: false, reversing: false, holdProgress: 0.5 };
 
     updateHoldProgress(state, 0.1);
 
-    // 0.5 - 0.1 * 2.5 = 0.25 (snaps toward gold)
-    expect(state.holdProgress).toBeCloseTo(0.25, 5);
-    expect(state.holdProgress).toBeGreaterThanOrEqual(0);
+    expect(state.holdProgress).toBeCloseTo(0.5, 5);
   });
 });

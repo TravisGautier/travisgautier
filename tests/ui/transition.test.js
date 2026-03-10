@@ -22,7 +22,6 @@ describe('transition', () => {
         return null;
       }),
     });
-    vi.stubGlobal('setTimeout', vi.fn((cb) => cb));
   });
 
   afterEach(() => {
@@ -46,13 +45,11 @@ describe('transition', () => {
       dwellTimer: 0,
     };
 
-    // First call: 0.3s of dwell time — not enough to trigger (threshold is 0.5s)
     updateTransition(state, 0.3);
-    expect(state.transitioning).toBe(false);
+    expect(state.dwellTimer).toBeCloseTo(0.3, 5);
 
-    // Second call: another 0.3s (0.6s total) — should now trigger
     updateTransition(state, 0.3);
-    expect(state.transitioning).toBe(true);
+    expect(state.dwellTimer).toBeCloseTo(0.6, 5);
   });
 
   /// Tests checklist items: [4] — Feature 4.2
@@ -69,21 +66,20 @@ describe('transition', () => {
 
     // Accumulate some dwell time
     updateTransition(state, 0.2);
-    expect(state.transitioning).toBe(false);
+    expect(state.dwellTimer).toBeCloseTo(0.2, 5);
 
-    // Move holdProgress away from endpoint
+    // Move holdProgress away from endpoint — dwell resets
     state.holdProgress = 0.8;
     updateTransition(state, 0.1);
-    expect(state.transitioning).toBe(false);
-
-    // Return to endpoint — should need full dwell time again
-    state.holdProgress = 1.0;
-    updateTransition(state, 0.3);
-    expect(state.transitioning).toBe(false); // only 0.3s, not 0.5s
+    expect(state.dwellTimer).toBe(0);
   });
 
   /// Tests checklist items: [4] — Feature 4.2
-  it('unit_transition_triggers_purple', async () => {
+  it('unit_transition_no_navigation', async () => {
+    const mockLocation = { href: '' };
+    vi.stubGlobal('window', { location: mockLocation });
+    vi.stubGlobal('setTimeout', vi.fn());
+
     const { updateTransition } = await import('../../src/ui/transition.js');
 
     const state = {
@@ -94,33 +90,10 @@ describe('transition', () => {
       dwellTimer: 0,
     };
 
-    // Accumulate enough dwell time
-    updateTransition(state, 0.3);
-    updateTransition(state, 0.3);
-
-    expect(state.transitioning).toBe(true);
-    expect(transitionB.classList.add).toHaveBeenCalledWith('active');
-    expect(transitionA.classList.add).not.toHaveBeenCalledWith('active');
-  });
-
-  /// Tests checklist items: [4] — Feature 4.2
-  it('unit_transition_triggers_gold', async () => {
-    const { updateTransition } = await import('../../src/ui/transition.js');
-
-    const state = {
-      holdProgress: 0.0,
-      holding: false,
-      hasEngaged: true,
-      transitioning: false,
-      dwellTimer: 0,
-    };
-
-    // Accumulate enough dwell time
-    updateTransition(state, 0.3);
-    updateTransition(state, 0.3);
-
-    expect(state.transitioning).toBe(true);
-    expect(transitionA.classList.add).toHaveBeenCalledWith('active');
+    // Even with extended dwell, navigation should never trigger
+    updateTransition(state, 5.0);
+    expect(state.transitioning).toBe(false);
+    expect(mockLocation.href).toBe('');
     expect(transitionB.classList.add).not.toHaveBeenCalledWith('active');
   });
 
@@ -136,13 +109,9 @@ describe('transition', () => {
       dwellTimer: 0,
     };
 
-    // Even with plenty of dwell time, should not trigger
     updateTransition(state, 1.0);
-    updateTransition(state, 1.0);
-
+    expect(state.dwellTimer).toBe(0);
     expect(state.transitioning).toBe(false);
-    expect(transitionA.classList.add).not.toHaveBeenCalledWith('active');
-    expect(transitionB.classList.add).not.toHaveBeenCalledWith('active');
   });
 
   /// Tests checklist items: [4] — Feature 4.2
@@ -159,60 +128,9 @@ describe('transition', () => {
 
     updateTransition(state, 1.0);
 
-    // Should not add .active again when already transitioning
+    // Should bail out early when already transitioning
     expect(transitionB.classList.add).not.toHaveBeenCalledWith('active');
     expect(transitionA.classList.add).not.toHaveBeenCalledWith('active');
-  });
-
-  // ============================================================
-  // Integration tests
-  // ============================================================
-
-  /// Tests checklist items: [4] — Feature 4.2
-  it('int_transition_dom_active', async () => {
-    const { updateTransition } = await import('../../src/ui/transition.js');
-
-    // Test purple side
-    const statePurple = {
-      holdProgress: 1.0,
-      holding: false,
-      hasEngaged: true,
-      transitioning: false,
-      dwellTimer: 0,
-    };
-
-    updateTransition(statePurple, 0.6);
-    expect(transitionB.classList.add).toHaveBeenCalledWith('active');
-    expect(transitionB.classList.add).toHaveBeenCalledTimes(1);
-    expect(transitionA.classList.add).not.toHaveBeenCalledWith('active');
-  });
-
-  /// Tests checklist items: [4] — Feature 4.2
-  it('int_transition_navigation', async () => {
-    const mockLocation = { href: '' };
-    vi.stubGlobal('window', { location: mockLocation });
-
-    const mockSetTimeout = vi.fn((cb) => { cb(); return 1; });
-    vi.stubGlobal('setTimeout', mockSetTimeout);
-
-    const { updateTransition } = await import('../../src/ui/transition.js');
-    const { VENTURES, TRANSITION_NAV_DELAY } = await import('../../src/config/constants.js');
-
-    const state = {
-      holdProgress: 1.0,
-      holding: false,
-      hasEngaged: true,
-      transitioning: false,
-      dwellTimer: 0,
-    };
-
-    // Trigger purple transition
-    updateTransition(state, 0.6);
-
-    expect(mockSetTimeout).toHaveBeenCalled();
-    const delay = mockSetTimeout.mock.calls[0][1];
-    expect(delay).toBe(TRANSITION_NAV_DELAY);
-    expect(mockLocation.href).toBe(VENTURES.purple.url);
   });
 
   // ============================================================
@@ -282,34 +200,6 @@ describe('transition', () => {
     dismissTransition(state);
     expect(transitionA.classList.remove).not.toHaveBeenCalled();
     expect(transitionB.classList.remove).not.toHaveBeenCalled();
-  });
-
-  /// Tests checklist items: [4] — Feature 4.4
-  it('unit_dismissTransition_cancels_timeout', async () => {
-    const mockClearTimeout = vi.fn();
-    vi.stubGlobal('clearTimeout', mockClearTimeout);
-    const mockSetTimeout = vi.fn(() => 42);
-    vi.stubGlobal('setTimeout', mockSetTimeout);
-
-    const { updateTransition, dismissTransition } = await import('../../src/ui/transition.js');
-
-    const state = {
-      holdProgress: 1.0,
-      holding: false,
-      hasEngaged: true,
-      transitioning: false,
-      dwellTimer: 0,
-    };
-
-    // Trigger transition to set the timeout
-    updateTransition(state, 0.6);
-    expect(state.transitioning).toBe(true);
-    expect(mockSetTimeout).toHaveBeenCalled();
-
-    // Dismiss should clear the timeout
-    dismissTransition(state);
-    expect(mockClearTimeout).toHaveBeenCalledWith(42);
-    expect(state.transitioning).toBe(false);
   });
 
   /// Tests checklist items: [4] — Feature 4.4

@@ -17,21 +17,7 @@ export function updateTransition(state, dt) {
     return;
   }
 
-  if (state.dwellTimer >= TRANSITION_DWELL_TIME) {
-    state.transitioning = true;
-
-    if (atPurple) {
-      if (transitionB) transitionB.classList.add('active');
-      navTimeoutId = setTimeout(() => {
-        window.location.href = VENTURES.purple.url;
-      }, TRANSITION_NAV_DELAY);
-    } else {
-      if (transitionA) transitionA.classList.add('active');
-      navTimeoutId = setTimeout(() => {
-        window.location.href = VENTURES.gold.url;
-      }, TRANSITION_NAV_DELAY);
-    }
-  }
+  // Navigation disabled — camera stays where user leaves it
 }
 
 export function dismissTransition(state) {
