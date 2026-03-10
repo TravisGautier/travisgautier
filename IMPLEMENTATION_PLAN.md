@@ -933,7 +933,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 - [x] 9.5. Deploy to Cloudflare Pages
 
 ### Phase 10 — Visual Polish
-- [ ] 10.1. Polish particle + fog + light animations
+- [x] 10.1. Polish particle + fog + light animations
 - [ ] 10.2. Polish loading-to-scene crossfade
 
 ---
