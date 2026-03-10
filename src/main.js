@@ -66,6 +66,9 @@ async function init() {
     sampleFPS,
     motionConfig,
   });
+
+  renderer.render(scene, camera);
+  hideLoading();
 }
 
 if (typeof document !== 'undefined') {

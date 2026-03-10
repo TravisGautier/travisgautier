@@ -33,6 +33,8 @@ export async function loadAssets(determineQuality, timeoutMs = 8000) {
   return config;
 }
 
+let settled = false;
+
 export function hideLoading() {
   if (typeof document === 'undefined') {
     return Promise.resolve();
@@ -42,16 +44,22 @@ export function hideLoading() {
 
   document.body.classList.add('scene-ready');
 
-  if (!el) {
+  if (!el || settled) {
     return Promise.resolve();
   }
 
   el.style.opacity = '0';
+  settled = true;
 
   return new Promise((resolve) => {
-    el.addEventListener('transitionend', () => {
+    let removed = false;
+    const done = () => {
+      if (removed) return;
+      removed = true;
       el.remove();
       resolve();
-    });
+    };
+    el.addEventListener('transitionend', done);
+    setTimeout(done, 3000);
   });
 }
