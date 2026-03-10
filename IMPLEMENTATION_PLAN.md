@@ -934,7 +934,7 @@ Polish the loading-to-scene transition. Ensure the crossfade feels luxury-smooth
 
 ### Phase 10 — Visual Polish
 - [x] 10.1. Polish particle + fog + light animations
-- [ ] 10.2. Polish loading-to-scene crossfade
+- [x] 10.2. Polish loading-to-scene crossfade
 
 ---
 
